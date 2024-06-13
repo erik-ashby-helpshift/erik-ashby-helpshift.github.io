@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+
+
+<body>
+
+<script>
+  (function () {
+    var PLATFORM_ID = "generic-demo_platform_20230706111407009-4263d52991d749b",
+        DOMAIN = "generic-demo",
+        APP_ID = "3",
+        WIDGET_TYPE ="helpcenter_and_webchat";
+
+    window.helpshiftWidgetConfig = {
+      platformId: PLATFORM_ID,
+      domain: DOMAIN,
+      appId: APP_ID,
+      widgetType: WIDGET_TYPE
+    };
+  }) ();
+
+  !function(t,e,n){if("function"!=typeof window.HelpshiftWidget){var i=function(){i.q.push(arguments)};i.q=[],window.HelpshiftWidget=i;var a,o=t.getElementsByTagName("script")[0];if(!t.getElementById(e)){(a=t.createElement("script")).async=!0,a.id=e,a.src="https://hs-widget.helpshift.com/init.js";var f=function(){window.HelpshiftWidget("init")};window.attachEvent?(a.attachEvent("onload",f),"function"==typeof n&&a.attachEvent("onerror",n)):(a.addEventListener("load",f,!1),"function"==typeof n&&a.addEventListener("error",n)),o.parentNode.insertBefore(a,o)}}else window.HelpshiftWidget("update")}(document,"hs-widget");
+</script>
+
+</body>
+</html>
