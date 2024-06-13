@@ -10,20 +10,23 @@
 
 <body>
 
-  <script>
-(function () {
-    var PLATFORM_ID = "gamingdemo_platform_20210729170103933-89cddd56d50e750",
-    DOMAIN = "gamingdemo",
-    LANGUAGE = "en";
+<script>
+  (function () {
+    var PLATFORM_ID = "generic-demo_platform_20230706111407009-4263d52991d749b",
+        DOMAIN = "generic-demo",
+        APP_ID = "3",
+        WIDGET_TYPE ="helpcenter_and_webchat";
 
-    window.helpshiftConfig = {
+    window.helpshiftWidgetConfig = {
       platformId: PLATFORM_ID,
       domain: DOMAIN,
-      language: LANGUAGE
+      appId: APP_ID,
+      widgetType: WIDGET_TYPE
     };
   }) ();
 
-  !function(t,e){if("function"!=typeof window.Helpshift){var n=function(){n.q.push(arguments)};n.q=[],window.Helpshift=n;var i,a=t.getElementsByTagName("script")[0];if(t.getElementById(e))return;i=t.createElement("script"),i.async=!0,i.id=e,i.src="https://webchat.helpshift.com/latest/webChat.js";var o=function(){window.Helpshift("init")};window.attachEvent?i.attachEvent("onload",o):i.addEventListener("load",o,!1),a.parentNode.insertBefore(i,a)}else window.Helpshift("update")}(document,"hs-chat");
+  !function(t,e,n){if("function"!=typeof window.HelpshiftWidget){var i=function(){i.q.push(arguments)};i.q=[],window.HelpshiftWidget=i;var a,o=t.getElementsByTagName("script")[0];if(!t.getElementById(e)){(a=t.createElement("script")).async=!0,a.id=e,a.src="https://hs-widget.helpshift.com/init.js";var f=function(){window.HelpshiftWidget("init")};window.attachEvent?(a.attachEvent("onload",f),"function"==typeof n&&a.attachEvent("onerror",n)):(a.addEventListener("load",f,!1),"function"==typeof n&&a.addEventListener("error",n)),o.parentNode.insertBefore(a,o)}}else window.HelpshiftWidget("update")}(document,"hs-widget");
 </script>
+
 </body>
 </html>
