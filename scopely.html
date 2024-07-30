@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -8,13 +7,15 @@
 </head>
 
 
-<body>
+<body style="background-color:#021035;">
 
 <script>
   (function () {
-    var PLATFORM_ID = "generic-demo_platform_20230706111407009-4263d52991d749b",
-        DOMAIN = "generic-demo",
-        APP_ID = "3",
+    var PLATFORM_ID = "ashbys_platform_20210525002032362-e6b600a154a87ab",
+        DOMAIN = "ashbys",
+        APP_ID = "52",
+	      PLAYER_NAME ="Jim Ashby",
+        PLAYER_EMAIL ="erik@ashbys.net"
         WIDGET_TYPE ="helpcenter_and_webchat";
 
     window.helpshiftWidgetConfig = {
@@ -22,11 +23,21 @@
       domain: DOMAIN,
       appId: APP_ID,
       widgetType: WIDGET_TYPE,
-      language: "fr"
+      userName: PLAYER_NAME,
+      userEmail: PLAYER_EMAIL,
+      language: "En"
     };
+      /* Widget Options Start */
+    helpshiftWidgetConfig.widgetOptions = {
+    // All widget specific options go here.
+        showLauncher: true
+    };
+   
+     
   }) ();
 
   !function(t,e,n){if("function"!=typeof window.HelpshiftWidget){var i=function(){i.q.push(arguments)};i.q=[],window.HelpshiftWidget=i;var a,o=t.getElementsByTagName("script")[0];if(!t.getElementById(e)){(a=t.createElement("script")).async=!0,a.id=e,a.src="https://hs-widget.helpshift.com/init.js";var f=function(){window.HelpshiftWidget("init")};window.attachEvent?(a.attachEvent("onload",f),"function"==typeof n&&a.attachEvent("onerror",n)):(a.addEventListener("load",f,!1),"function"==typeof n&&a.addEventListener("error",n)),o.parentNode.insertBefore(a,o)}}else window.HelpshiftWidget("update")}(document,"hs-widget");
+  HelpshiftWidget("open");
 </script>
 
 </body>
