@@ -2,8 +2,6 @@
 <html>
 <head>
     <title>BrandX Game Dashboard</title>
-    <!-- Include Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-ZxfZHQVQtVtOQhbn/S6CQ3YhcNwBEeVBJCzlvJtbnk5sOZ0XGriwruqU5th1x35S" crossorigin="anonymous">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -52,29 +50,16 @@
         /* Account Icon */
         .account-icon {
             position: absolute;
-            right: 60px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 24px;
-            color: #333;
-            text-decoration: none;
-            margin-right: 20px;
-        }
-        .account-icon:hover {
-            color: #f2f2f2;
-        }
-        /* Settings Icon */
-        .settings-icon {
-            position: absolute;
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 24px;
-            color: #333;
-            text-decoration: none;
+            width: 24px;
+            height: 24px;
+            fill: #333;
+            cursor: pointer;
         }
-        .settings-icon:hover {
-            color: #000;
+        .account-icon:hover {
+            fill: #000;
         }
         /* Graph Section */
         .graph-section {
@@ -82,41 +67,39 @@
             text-align: center;
         }
         .graph-container {
+            max-width: 75%;
             margin: 0 auto;
-            width: 75%; /* % of the page width */
+            height: 500px;
+        }
+        #engagementChart {
+            width: 100% !important;
+            height: 100% !important;
         }
         /* KPI Cards */
         .kpi-cards {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
-            padding: 20px;
+            margin: 20px 0;
         }
         .kpi-card {
-            background-color: #f4f4f4;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 5px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 0 10px;
             width: 200px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .kpi-card h3 {
-            margin: 10px 0;
+            margin: 0;
             font-size: 18px;
         }
-        .kpi-value {
+        .kpi-card p {
+            margin: 5px 0;
             font-size: 24px;
             font-weight: bold;
         }
-        .kpi-change {
+        .kpi-card .change {
             font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .kpi-change i {
-            margin-right: 5px;
         }
         .increase {
             color: green;
@@ -180,19 +163,6 @@
             bottom: 0;
             width: 100%;
         }
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .graph-container {
-                width: 90%;
-            }
-            .kpi-cards {
-                flex-direction: column;
-                align-items: center;
-            }
-            .kpi-card {
-                width: 80%;
-            }
-        }
     </style>
 </head>
 <body>
@@ -211,13 +181,10 @@
         <div class="header">
             <h1>BrandX Game Dashboard</h1>
             <!-- Account Icon -->
-            <a href="#" class="account-icon" title="Account Settings">
-                <i class="fas fa-user"></i>
-            </a>
-            <!-- Settings Icon -->
-            <a href="#" class="settings-icon" title="Logout">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
+            <svg class="account-icon" viewBox="0 0 64 64" onclick="openAccountSettings()">
+                <circle cx="32" cy="20" r="16"/>
+                <path d="M2 62c0-16.568 13.432-30 30-30s30 13.432 30 30H2z"/>
+            </svg>
         </div>
 
         <!-- Graph Section -->
@@ -232,24 +199,18 @@
         <div class="kpi-cards">
             <div class="kpi-card">
                 <h3>MAU</h3>
-                <div class="kpi-value">1,200,000</div>
-                <div class="kpi-change increase">
-                    <i class="fas fa-arrow-up"></i>4.5% Increase
-                </div>
+                <p>1,200,000</p>
+                <div class="change increase">4.5% Increase</div>
             </div>
             <div class="kpi-card">
                 <h3>Avg Spend</h3>
-                <div class="kpi-value">$0.029</div>
-                <div class="kpi-change increase">
-                    <i class="fas fa-arrow-up"></i>2.3% Increase
-                </div>
+                <p>$0.029</p>
+                <div class="change increase">2.3% Increase</div>
             </div>
             <div class="kpi-card">
                 <h3>NPS</h3>
-                <div class="kpi-value">75</div>
-                <div class="kpi-change decrease">
-                    <i class="fas fa-arrow-down"></i>4% Decrease
-                </div>
+                <p>75</p>
+                <div class="change decrease">4% Decrease</div>
             </div>
         </div>
 
@@ -317,6 +278,11 @@
         // Close Modal
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = "none";
+        }
+
+        // Open Account Settings (Placeholder Function)
+        function openAccountSettings() {
+            alert("Account settings page would open.");
         }
 
         // Close Modal when clicking outside of modal content
@@ -407,7 +373,6 @@
                 if (Math.random() < 0.1) {
                     baseValue -= Math.floor(Math.random() * maxIncrease * 0.5);
                 }
-                baseValue = Math.min(baseValue, 1200000); // Cap at 1,200,000
                 data.push(Math.max(baseValue, 900000)); // Ensure the value doesn't go below 900,000
             }
             return data;
@@ -416,3 +381,4 @@
 
 </body>
 </html>
+
