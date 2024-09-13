@@ -367,11 +367,11 @@
             var maxIncrease = 50000;
             for (var i = 0; i < 30; i++) {
                 // Simulate daily engagement with randomness
-                var dailyIncrease = Math.floor(Math.random() * maxIncrease * 0.2) + (maxIncrease * 0.8);
+                var dailyIncrease = Math.floor(Math.random() * maxIncrease * 0.2) + (maxIncrease);
                 baseValue += dailyIncrease;
                 // Introduce occasional drops
                 if (Math.random() < 0.1) {
-                    baseValue -= Math.floor(Math.random() * maxIncrease * 0.5);
+                    baseValue -= Math.floor(Math.random() * maxIncrease * 2);
                 }
                 data.push(Math.max(baseValue, 900000)); // Ensure the value doesn't go below 900,000
             }
