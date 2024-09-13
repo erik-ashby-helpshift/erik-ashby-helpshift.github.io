@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omni Portal</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .container { display: flex; flex-direction: column; height: 100vh; }
+        .header { background-color: #f0f0f0; padding: 1em; text-align: center; display: flex; justify-content: space-between; }
+        .navigation { width: 200px; background-color: #f4f4f4; padding: 1em; }
+        .content { flex-grow: 1; display: flex; padding: 1em; }
+        .sidebar { flex-shrink: 0; }
+        .main-content { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        #graph-container { width: 70%; height: 300px; background-color: #337ab7; display: flex; justify-content: center; align-items: center; color: white; }
+        a { text-decoration: none; color: #337ab7; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>Omni Portal</div>
+            <div>(Account)</div>
+        </div>
+        <div class="content">
+            <div class="sidebar navigation">
+                <div><a href="#">Home</a></div>
+            </div>
+            <div class="main-content">
+                <div id="graph-container">
+                    <canvas id="graph"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('graph').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line', 
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                datasets: [{
+                    label: 'Services Usage',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                }]
+            },
+            options: {
+                responsive: true,
+            }
+        });
+    </script>
+
+</body>
+</html>
