@@ -1,40 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Service Portal Demo</title>
+    <title>BrandX Game Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            display: flex;
         }
-        /* Navigation Bar */
+        /* Right-side Navigation Bar */
         .navbar {
             background-color: #333;
-            overflow: hidden;
+            width: 200px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100%;
+            overflow-x: hidden;
+            padding-top: 20px;
         }
         .navbar a {
-            float: left;
-            display: block;
-            color: #f2f2f2;
-            text-align: center;
-            padding: 14px 16px;
+            padding: 10px 15px;
             text-decoration: none;
+            font-size: 18px;
+            color: #f2f2f2;
+            display: block;
         }
         .navbar a:hover {
-            background-color: #ddd;
-            color: black;
+            background-color: #575757;
+            color: white;
         }
         /* Main Content */
-        .content {
+        .main-content {
+            flex: 1;
+            margin-right: 200px; /* Width of the navbar */
+        }
+        .header {
+            background-color: #f4f4f4;
             padding: 20px;
+            text-align: center;
+        }
+        /* Graph Section */
+        .graph-section {
+            padding: 20px;
+            text-align: center;
         }
         /* Service Cards */
+        .service-cards {
+            padding: 20px;
+        }
         .service-card {
             background-color: #f4f4f4;
             padding: 15px;
-            margin: 15px 0;
+            margin: 15px auto;
             border-radius: 5px;
+            width: 80%;
         }
         .service-card h3 {
             margin-top: 0;
@@ -53,9 +74,9 @@
         }
         .modal-content {
             background-color: #fff;
-            margin: 15% auto;
+            margin: 10% auto;
             padding: 20px;
-            width: 80%;
+            width: 60%;
             border-radius: 5px;
         }
         /* Close Button */
@@ -77,40 +98,60 @@
             color: #f2f2f2;
             padding: 10px 0;
             text-align: center;
+            position: relative;
+            bottom: 0;
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
-    <!-- Navigation Bar -->
+    <!-- Right-side Navigation Bar -->
     <div class="navbar">
         <a href="#home">Home</a>
+        <a href="#graph">Engagement</a>
         <a href="#services">Services</a>
         <a href="#contact">Contact</a>
     </div>
 
     <!-- Main Content -->
-    <div class="content">
-        <h1>Welcome to Our Service Portal</h1>
-        <p>Explore our range of services designed to meet your needs.</p>
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>BrandX Game Dashboard</h1>
+        </div>
+
+        <!-- Graph Section -->
+        <div id="graph" class="graph-section">
+            <h2>Engagement Over the Past 30 Days</h2>
+            <!-- Placeholder for Graph -->
+            <canvas id="engagementChart" width="800" height="400"></canvas>
+        </div>
 
         <!-- Service Cards -->
-        <div class="service-card">
-            <h3>Service One</h3>
-            <p>Brief description of Service One.</p>
-            <button onclick="openModal('modal1')">Learn More</button>
+        <div id="services" class="service-cards">
+            <div class="service-card">
+                <h3>Service One</h3>
+                <p>Brief description of Service One.</p>
+                <button onclick="openModal('modal1')">Learn More</button>
+            </div>
+
+            <div class="service-card">
+                <h3>Service Two</h3>
+                <p>Brief description of Service Two.</p>
+                <button onclick="openModal('modal2')">Learn More</button>
+            </div>
+
+            <div class="service-card">
+                <h3>Service Three</h3>
+                <p>Brief description of Service Three.</p>
+                <button onclick="openModal('modal3')">Learn More</button>
+            </div>
         </div>
 
-        <div class="service-card">
-            <h3>Service Two</h3>
-            <p>Brief description of Service Two.</p>
-            <button onclick="openModal('modal2')">Learn More</button>
-        </div>
-
-        <div class="service-card">
-            <h3>Service Three</h3>
-            <p>Brief description of Service Three.</p>
-            <button onclick="openModal('modal3')">Learn More</button>
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2024 BrandX. All rights reserved.</p>
         </div>
     </div>
 
@@ -139,11 +180,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <div class="footer">
-        <p>&copy; 2024 Your Company Name. All rights reserved.</p>
-    </div>
-
     <!-- JavaScript -->
     <script>
         // Open Modal
@@ -165,7 +201,72 @@
                 }
             }
         }
+
+        // Generate Engagement Graph
+        var ctx = document.getElementById('engagementChart').getContext('2d');
+        var engagementChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: generateLast30Days(),
+                datasets: [{
+                    label: 'User Engagement',
+                    data: generateIncreasingData(30, 50, 200),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Engagement Level'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Helper functions to generate dates and data
+        function generateLast30Days() {
+            var dates = [];
+            var today = new Date();
+            for (var i = 29; i >= 0; i--) {
+                var date = new Date();
+                date.setDate(today.getDate() - i);
+                dates.push((date.getMonth()+1) + '/' + date.getDate());
+            }
+            return dates;
+        }
+
+        function generateIncreasingData(numPoints, min, max) {
+            var data = [];
+            var step = (max - min) / numPoints;
+            var value = min;
+            for (var i = 0; i < numPoints; i++) {
+                value += Math.random() * step;
+                data.push(value);
+            }
+            return data;
+        }
     </script>
+
+    <!-- Include Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>
+
 
 </body>
 </html>
