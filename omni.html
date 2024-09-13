@@ -52,6 +52,20 @@
         /* Account Icon */
         .account-icon {
             position: absolute;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #333;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+        .account-icon:hover {
+            color: #000;
+        }
+        /* Settings Icon */
+        .settings-icon {
+            position: absolute;
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
@@ -59,13 +73,56 @@
             color: #333;
             text-decoration: none;
         }
-        .account-icon:hover {
+        .settings-icon:hover {
             color: #000;
         }
         /* Graph Section */
         .graph-section {
             padding: 20px;
             text-align: center;
+        }
+        .graph-container {
+            margin: 0 auto;
+            width: 50%; /* Make the graph half the size of the page */
+        }
+        /* KPI Cards */
+        .kpi-cards {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        .kpi-card {
+            background-color: #f4f4f4;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 5px;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .kpi-card h3 {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .kpi-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .kpi-change {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .kpi-change i {
+            margin-right: 5px;
+        }
+        .increase {
+            color: green;
+        }
+        .decrease {
+            color: red;
         }
         /* Service Cards */
         .service-cards {
@@ -123,6 +180,19 @@
             bottom: 0;
             width: 100%;
         }
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .graph-container {
+                width: 90%;
+            }
+            .kpi-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+            .kpi-card {
+                width: 80%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -140,16 +210,47 @@
         <!-- Header -->
         <div class="header">
             <h1>BrandX Game Dashboard</h1>
-            <a href="#" class="account-icon" title="Logout">
-                <i class="fas fa-user-circle"></i>
+            <!-- Account Icon -->
+            <a href="#" class="account-icon" title="Account Settings">
+                <i class="fas fa-user"></i>
+            </a>
+            <!-- Settings Icon -->
+            <a href="#" class="settings-icon" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
             </a>
         </div>
 
         <!-- Graph Section -->
         <div id="graph" class="graph-section">
             <h2>Engagement Over the Past 30 Days</h2>
-            <!-- Placeholder for Graph -->
-            <canvas id="engagementChart" width="800" height="400"></canvas>
+            <div class="graph-container">
+                <canvas id="engagementChart"></canvas>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-cards">
+            <div class="kpi-card">
+                <h3>MAU</h3>
+                <div class="kpi-value">1,200,000</div>
+                <div class="kpi-change increase">
+                    <i class="fas fa-arrow-up"></i>4.5% Increase
+                </div>
+            </div>
+            <div class="kpi-card">
+                <h3>Avg Spend</h3>
+                <div class="kpi-value">$0.029</div>
+                <div class="kpi-change increase">
+                    <i class="fas fa-arrow-up"></i>2.3% Increase
+                </div>
+            </div>
+            <div class="kpi-card">
+                <h3>NPS</h3>
+                <div class="kpi-value">75</div>
+                <div class="kpi-change decrease">
+                    <i class="fas fa-arrow-down"></i>4% Decrease
+                </div>
+            </div>
         </div>
 
         <!-- Service Cards -->
@@ -236,7 +337,7 @@
                 labels: generateLast30Days(),
                 datasets: [{
                     label: 'User Engagement',
-                    data: generateRealisticData(30, 1000000, 1200000),
+                    data: generateRealisticData(),
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2,
@@ -247,6 +348,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         title: {
@@ -255,6 +357,7 @@
                         }
                     },
                     y: {
+                        beginAtZero: false,
                         min: 900000,
                         title: {
                             display: true,
@@ -292,18 +395,21 @@
             return dates;
         }
 
-        function generateRealisticData(numPoints, startValue, endValue) {
+        function generateRealisticData() {
             var data = [];
-            var value = startValue;
-            for (var i = 0; i < numPoints; i++) {
-                // Simulate realistic fluctuations
-                var change = (Math.random() * 20000) - 5000; // Random change between -5,000 and +15,000
-                value += change;
-                if (value < 900000) value = 900000; // Ensure value doesn't drop below 900,000
-                data.push(Math.round(value));
+            var baseValue = 1000000;
+            var maxIncrease = 50000;
+            for (var i = 0; i < 30; i++) {
+                // Simulate daily engagement with randomness
+                var dailyIncrease = Math.floor(Math.random() * maxIncrease * 0.2) + (maxIncrease * 0.8);
+                baseValue += dailyIncrease;
+                // Introduce occasional drops
+                if (Math.random() < 0.1) {
+                    baseValue -= Math.floor(Math.random() * maxIncrease * 0.5);
+                }
+                baseValue = Math.min(baseValue, 1200000); // Cap at 1,200,000
+                data.push(Math.max(baseValue, 900000)); // Ensure the value doesn't go below 900,000
             }
-            // Adjust the last value to end at endValue
-            data[numPoints - 1] = endValue;
             return data;
         }
     </script>
