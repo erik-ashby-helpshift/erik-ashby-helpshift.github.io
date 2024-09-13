@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>BrandX Game Dashboard</title>
+    <!-- Include Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-ZxfZHQVQtVtOQhbn/S6CQ3YhcNwBEeVBJCzlvJtbnk5sOZ0XGriwruqU5th1x35S" crossorigin="anonymous">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -9,12 +11,12 @@
             padding: 0;
             display: flex;
         }
-        /* Right-side Navigation Bar */
+        /* Left-side Navigation Bar */
         .navbar {
             background-color: #333;
             width: 200px;
             position: fixed;
-            right: 0;
+            left: 0;
             top: 0;
             height: 100%;
             overflow-x: hidden;
@@ -34,12 +36,31 @@
         /* Main Content */
         .main-content {
             flex: 1;
-            margin-right: 200px; /* Width of the navbar */
+            margin-left: 200px; /* Width of the navbar */
         }
+        /* Header */
         .header {
             background-color: #f4f4f4;
-            padding: 20px;
+            padding: 10px;
             text-align: center;
+            position: relative;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        /* Account Icon */
+        .account-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #333;
+            text-decoration: none;
+        }
+        .account-icon:hover {
+            color: #000;
         }
         /* Graph Section */
         .graph-section {
@@ -106,7 +127,7 @@
 </head>
 <body>
 
-    <!-- Right-side Navigation Bar -->
+    <!-- Left-side Navigation Bar -->
     <div class="navbar">
         <a href="#home">Home</a>
         <a href="#graph">Engagement</a>
@@ -119,6 +140,9 @@
         <!-- Header -->
         <div class="header">
             <h1>BrandX Game Dashboard</h1>
+            <a href="#" class="account-icon" title="Logout">
+                <i class="fas fa-user-circle"></i>
+            </a>
         </div>
 
         <!-- Graph Section -->
@@ -181,6 +205,7 @@
     </div>
 
     <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Open Modal
         function openModal(modalId) {
@@ -210,7 +235,7 @@
                 labels: generateLast30Days(),
                 datasets: [{
                     label: 'User Engagement',
-                    data: generateIncreasingData(30, 50, 200),
+                    data: generateIncreasingData(30, 1000000, 1200000),
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2,
@@ -231,6 +256,21 @@
                         title: {
                             display: true,
                             text: 'Engagement Level'
+                        },
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let value = context.parsed.y;
+                                return 'Engagement: ' + value.toLocaleString();
+                            }
                         }
                     }
                 }
@@ -249,25 +289,16 @@
             return dates;
         }
 
-        function generateIncreasingData(numPoints, min, max) {
+        function generateIncreasingData(numPoints, startValue, endValue) {
             var data = [];
-            var step = (max - min) / numPoints;
-            var value = min;
+            var step = (endValue - startValue) / (numPoints - 1);
             for (var i = 0; i < numPoints; i++) {
-                value += Math.random() * step;
-                data.push(value);
+                var value = startValue + step * i + (Math.random() - 0.5) * step * 0.2;
+                data.push(Math.round(value));
             }
             return data;
         }
     </script>
 
-    <!-- Include Chart.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </body>
 </html>
-
-
-</body>
-</html>
-
