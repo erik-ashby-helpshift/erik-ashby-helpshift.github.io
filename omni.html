@@ -377,7 +377,7 @@
             for (var i = 0; i < totalDays; i++) {
                 if (i < firstPhaseDays) {
                     // Slow growth in first phase
-                    currentValue += firstPhaseIncrement + Math.random() * firstPhaseIncrement * 0.1;
+                    currentValue += firstPhaseIncrement + Math.random() * firstPhaseIncrement * 0.2;
                 } else {
                     // Accelerated growth in second phase
                     currentValue += secondPhaseIncrement + Math.random() * secondPhaseIncrement * 0.1;
