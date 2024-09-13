@@ -189,7 +189,7 @@
 
         <!-- Graph Section -->
         <div id="graph" class="graph-section">
-            <h2>Engagement Over the Past 30 Days</h2>
+            <h2>Engagement Over the Past 29 Days</h2>
             <div class="graph-container">
                 <canvas id="engagementChart"></canvas>
             </div>
@@ -295,15 +295,50 @@
             }
         }
 
+        // Engagement Data Points Provided
+        function getProvidedData() {
+            return [
+                1001086.318,
+                1009080.837,
+                1017334.908,
+                1022723.036,
+                1031393.484,
+                1047994.699,
+                1088740.69,
+                1092496.333,
+                1133695.818,
+                1161414.927,
+                1209807.997,
+                1403898.077,
+                1383749.465,
+                1371555.568,
+                1361353.589,
+                1336819.857,
+                1341122.241,
+                1349317.36,
+                1351423.123,
+                1373708.875,
+                1421313.427,
+                1439066.966,
+                1403445.372,
+                1379312.495,
+                1378744.689,
+                1388661.054,
+                1436716.994,
+                1497311.932,
+                1561888.727
+            ];
+        }
+
         // Generate Engagement Graph
         var ctx = document.getElementById('engagementChart').getContext('2d');
         var engagementChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: generateLast30Days(),
+                labels: generateLastNDays(29),
                 datasets: [{
                     label: 'User Engagement',
-                    data: generateCurvedData(),
+                    data: getProvidedData(),
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2,
@@ -325,6 +360,7 @@
                     y: {
                         beginAtZero: false,
                         min: 900000,
+                        suggestedMax: 1600000,
                         title: {
                             display: true,
                             text: 'Engagement Level'
@@ -350,45 +386,20 @@
         });
 
         // Helper functions to generate dates and data
-        function generateLast30Days() {
+        function generateLastNDays(n) {
             var dates = [];
             var today = new Date();
-            for (var i = 29; i >= 0; i--) {
+            for (var i = n - 1; i >= 0; i--) {
                 var date = new Date();
                 date.setDate(today.getDate() - i);
                 dates.push((date.getMonth()+1) + '/' + date.getDate());
             }
             return dates;
         }
-
-        function generateCurvedData() {
-            var data = [];
-            var totalDays = 30;
-            var startValue = 1000000;
-            var endValue = 1200000;
-            var firstPhaseDays = 20;
-            var secondPhaseDays = totalDays - firstPhaseDays;
-
-            // Calculate increments
-            var firstPhaseIncrement = (endValue * 0.1 - startValue) / firstPhaseDays; // 10% growth over first 20 days
-            var secondPhaseIncrement = (endValue - (startValue + firstPhaseIncrement * firstPhaseDays)) / secondPhaseDays; // 90% growth over last 10 days
-
-            var currentValue = startValue;
-            for (var i = 0; i < totalDays; i++) {
-                if (i < firstPhaseDays) {
-                    // Slow growth in first phase
-                    currentValue += firstPhaseIncrement + Math.random() * firstPhaseIncrement * 0.2;
-                } else {
-                    // Accelerated growth in second phase
-                    currentValue += secondPhaseIncrement + Math.random() * secondPhaseIncrement * 0.1;
-                }
-                data.push(Math.round(currentValue));
-            }
-            return data;
-        }
     </script>
 
 </body>
 </html>
+
 
 
