@@ -303,7 +303,7 @@
                 labels: generateLast30Days(),
                 datasets: [{
                     label: 'User Engagement',
-                    data: generateRealisticData(),
+                    data: generateCurvedData(),
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2,
@@ -361,19 +361,28 @@
             return dates;
         }
 
-        function generateRealisticData() {
+        function generateCurvedData() {
             var data = [];
-            var baseValue = 1000000;
-            var maxIncrease = 50000;
-            for (var i = 0; i < 30; i++) {
-                // Simulate daily engagement with randomness
-                var dailyIncrease = Math.floor(Math.random() * maxIncrease * 0.2) + (maxIncrease);
-                baseValue += dailyIncrease;
-                // Introduce occasional drops
-                if (Math.random() < 0.1) {
-                    baseValue -= Math.floor(Math.random() * maxIncrease * 2);
+            var totalDays = 30;
+            var startValue = 1000000;
+            var endValue = 1200000;
+            var firstPhaseDays = 20;
+            var secondPhaseDays = totalDays - firstPhaseDays;
+
+            // Calculate increments
+            var firstPhaseIncrement = (endValue * 0.1 - startValue) / firstPhaseDays; // 10% growth over first 20 days
+            var secondPhaseIncrement = (endValue - (startValue + firstPhaseIncrement * firstPhaseDays)) / secondPhaseDays; // 90% growth over last 10 days
+
+            var currentValue = startValue;
+            for (var i = 0; i < totalDays; i++) {
+                if (i < firstPhaseDays) {
+                    // Slow growth in first phase
+                    currentValue += firstPhaseIncrement + Math.random() * firstPhaseIncrement * 0.1;
+                } else {
+                    // Accelerated growth in second phase
+                    currentValue += secondPhaseIncrement + Math.random() * secondPhaseIncrement * 0.1;
                 }
-                data.push(Math.max(baseValue, 900000)); // Ensure the value doesn't go below 900,000
+                data.push(Math.round(currentValue));
             }
             return data;
         }
@@ -381,4 +390,5 @@
 
 </body>
 </html>
+
 
