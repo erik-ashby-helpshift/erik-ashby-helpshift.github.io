@@ -18,7 +18,7 @@
             padding: 0px 0;
             text-align: center;
             width: 100%;
-            height: 40px;
+            height: 100px;
             position: fixed;
             top: 0;
             z-index: 1000; /* Ensure header appears above content */
@@ -27,7 +27,7 @@
             position: fixed;
             top: 100px; /* Adjusted to fit below the header */
             left: 0;
-            height: calc(100% - 40px);
+            height: calc(100% - 100px);
             width: 220px;
             background-color: #444;
             display: flex;
@@ -55,8 +55,9 @@
         }
         .content {
             margin-left: 240px;
-            margin-top: 500px; /* Margin increased to ensure content is not cut off */
+            margin-top: 100px; /* Margin increased to ensure content is not cut off */
             width: calc(100% - 240px);
+            hight: calc(100% - 100px);
             padding: 20px;
             text-align: center;
         }
@@ -99,7 +100,7 @@
 <body>
 
 <div class="header">
-    <h1>BrandX Game Dashboard</h1>
+    <h2>Omni - Game Dashboard</h2>
     <img src="https://via.placeholder.com/24x24?text=User" alt="User Icon" class="account-icon" id="accountIcon">
     <div id="accountPopup" class="account-popup">
         Account features have not yet been added.
