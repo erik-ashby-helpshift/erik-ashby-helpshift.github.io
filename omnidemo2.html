@@ -20,12 +20,13 @@
             width: 100%;
             position: fixed;
             top: 0;
+            z-index: 1000; /* Ensure header appears above content */
         }
         .nav {
             position: fixed;
-            top: 0;
+            top: 40px; /* Adjusted to fit below the header */
             left: 0;
-            height: 100%;
+            height: calc(100% - 40px);
             width: 220px;
             background-color: #444;
             display: flex;
@@ -53,7 +54,7 @@
         }
         .content {
             margin-left: 240px;
-            margin-top: 60px;
+            margin-top: 50px; /* Margin increased to ensure content is not cut off */
             width: calc(100% - 240px);
             padding: 20px;
             text-align: center;
@@ -89,7 +90,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             padding: 10px;
-            z-index: 1000;
+            z-index: 1001; /* Ensure popup appears above header */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
