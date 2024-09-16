@@ -3,38 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Services Portal</title>
+    <title>BrandX Game Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .header {
             background-color: #333;
             color: #fff;
             padding: 10px 0;
             text-align: center;
+            width: 100%;
         }
         .nav {
+            position: fixed;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
             background-color: #444;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         .nav a {
-            float: left;
             display: block;
             color: white;
             text-align: center;
             padding: 14px 20px;
             text-decoration: none;
+            border-bottom: 1px solid #555;
         }
         .nav a:hover {
             background-color: #ddd;
             color: black;
         }
         .content {
+            width: 80%;
+            margin-top: 20px;
             padding: 20px;
+            text-align: center;
         }
         .card {
             background-color: #fff;
@@ -43,12 +55,21 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        #chart {
+            width: 100%;
+            height: 400px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
 <div class="header">
-    <h1>Services Portal</h1>
+    <h1>BrandX Game Dashboard</h1>
 </div>
 
 <div class="nav">
@@ -58,6 +79,9 @@
 </div>
 
 <div id="home" class="content">
+    <div id="chart">
+        <canvas id="engagementChart"></canvas>
+    </div>
     <h2>Welcome to Our Services Portal</h2>
     <p>This is a demo of a new services portal for our business idea.</p>
 </div>
@@ -91,7 +115,61 @@
         // Show the selected section
         document.getElementById(sectionId).style.display = 'block';
     }
+
+    // Chart.js script to create the engagement graph
+    const ctx = document.getElementById('engagementChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+            datasets: [{
+                label: 'Engagement',
+                data: [
+                    1001086.318,
+                    1009080.837,
+                    1017334.908,
+                    1022723.036,
+                    1031393.484,
+                    1047994.699,
+                    1088740.69,
+                    1092496.333,
+                    1133695.818,
+                    1161414.927,
+                    1209807.997,
+                    1403898.077,
+                    1383749.465,
+                    1371555.568,
+                    1361353.589,
+                    1336819.857,
+                    1341122.241,
+                    1349317.36,
+                    1351423.123,
+                    1373708.875,
+                    1421313.427,
+                    1439066.966,
+                    1403445.372,
+                    1379312.495,
+                    1378744.689,
+                    1388661.054,
+                    1436716.994,
+                    1497311.932,
+                    1561888.727
+                ],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 </script>
 
 </body>
 </html>
+
