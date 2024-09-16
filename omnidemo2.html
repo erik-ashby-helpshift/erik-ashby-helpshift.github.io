@@ -11,8 +11,6 @@
             padding: 0;
             background-color: #f4f4f9;
             display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .header {
             background-color: #333;
@@ -20,12 +18,15 @@
             padding: 10px 0;
             text-align: center;
             width: 100%;
+            position: fixed;
+            top: 0;
         }
         .nav {
             position: fixed;
-            top: 50%;
-            right: 0;
-            transform: translateY(-50%);
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 200px;
             background-color: #444;
             display: flex;
             flex-direction: column;
@@ -33,7 +34,7 @@
         .nav a {
             display: block;
             color: white;
-            text-align: center;
+            text-align: left;
             padding: 14px 20px;
             text-decoration: none;
             border-bottom: 1px solid #555;
@@ -42,9 +43,14 @@
             background-color: #ddd;
             color: black;
         }
+        .service-submenu {
+            display: none;
+            margin-left: 20px;
+        }
         .content {
-            width: 80%;
-            margin-top: 20px;
+            margin-left: 220px;
+            margin-top: 60px;
+            width: calc(100% - 220px);
             padding: 20px;
             text-align: center;
         }
@@ -63,6 +69,24 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
+        .account-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        .account-popup {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1000;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -70,12 +94,27 @@
 
 <div class="header">
     <h1>BrandX Game Dashboard</h1>
+    <img src="https://via.placeholder.com/24x24?text=User" alt="User Icon" class="account-icon" id="accountIcon">
+    <div id="accountPopup" class="account-popup">
+        Account features have not yet been added.
+    </div>
 </div>
 
 <div class="nav">
-    <a href="#home" onclick="showContent('home')">Home</a>
-    <a href="#services" onclick="showContent('services')">Services</a>
-    <a href="#contact" onclick="showContent('contact')">Contact</a>
+    <a href="#home" onclick="showContent('home')">My Dashboard</a>
+    <a href="#game-central" onclick="showContent('game-central')">Game Central</a>
+    <a href="#developer-central" onclick="showContent('developer-central')">Developer Central</a>
+    <a href="#qa-central" onclick="showContent('qa-central')">QA Central</a>
+    <a href="#support-central" onclick="showContent('support-central')">Support Central</a>
+    <a href="#vip" onclick="showContent('vip')">VIP</a>
+    <a href="#trust-and-safety" onclick="showContent('trust-and-safety')">Trust and Safety</a>
+    <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)">Service Dashboards</a>
+    <div class="service-submenu">
+        <a href="#helpshift" onclick="showContent('helpshift')">Helpshift</a>
+        <a href="#language-ai" onclick="showContent('language-ai')">Language AI</a>
+        <a href="#mighty-build" onclick="showContent('mighty-build')">Mighty Build</a>
+        <a href="#xcontent-management" onclick="showContent('xcontent-management')">Xcontent Management</a>
+    </div>
 </div>
 
 <div id="home" class="content">
@@ -86,26 +125,54 @@
     <p>This is a demo of a new services portal for our business idea.</p>
 </div>
 
-<div id="services" class="content" style="display:none;">
-    <h2>Our Services</h2>
-    <div class="card">
-        <h3>Service 1</h3>
-        <p>Description of Service 1.</p>
-    </div>
-    <div class="card">
-        <h3>Service 2</h3>
-        <p>Description of Service 2.</p>
-    </div>
-    <div class="card">
-        <h3>Service 3</h3>
-        <p>Description of Service 3.</p>
-    </div>
+<div id="game-central" class="content" style="display:none;">
+    <h2>Game Central</h2>
+    <p>Game Central features.</p>
 </div>
 
-<div id="contact" class="content" style="display:none;">
-    <h2>Contact Us</h2>
-    <p>Email: contact@example.com</p>
-    <p>Phone: 123-456-7890</p>
+<div id="developer-central" class="content" style="display:none;">
+    <h2>Developer Central</h2>
+    <p>Developer Central features.</p>
+</div>
+
+<div id="qa-central" class="content" style="display:none;">
+    <h2>QA Central</h2>
+    <p>QA Central features.</p>
+</div>
+
+<div id="support-central" class="content" style="display:none;">
+    <h2>Support Central</h2>
+    <p>Support Central features.</p>
+</div>
+
+<div id="vip" class="content" style="display:none;">
+    <h2>VIP</h2>
+    <p>VIP features.</p>
+</div>
+
+<div id="trust-and-safety" class="content" style="display:none;">
+    <h2>Trust and Safety</h2>
+    <p>Trust and Safety features.</p>
+</div>
+
+<div id="helpshift" class="content" style="display:none;">
+    <h2>Helpshift</h2>
+    <p>Helpshift features.</p>
+</div>
+
+<div id="language-ai" class="content" style="display:none;">
+    <h2>Language AI</h2>
+    <p>Language AI features.</p>
+</div>
+
+<div id="mighty-build" class="content" style="display:none;">
+    <h2>Mighty Build</h2>
+    <p>Mighty Build features.</p>
+</div>
+
+<div id="xcontent-management" class="content" style="display:none;">
+    <h2>Xcontent Management</h2>
+    <p>Xcontent Management features.</p>
 </div>
 
 <script>
@@ -168,8 +235,32 @@
             }
         }
     });
+
+    // JavaScript to show the account popup
+    const accountIcon = document.getElementById('accountIcon');
+    const accountPopup = document.getElementById('accountPopup');
+
+    accountIcon.addEventListener('click', () => {
+        accountPopup.style.display = 'block';
+        setTimeout(() => {
+            accountPopup.style.display = 'none';
+        }, 2000);
+    });
+
+    // JavaScript to toggle the Service Dashboards submenu
+    function toggleSubMenu(event) {
+        event.preventDefault();
+        const subMenu = document.querySelector('.service-submenu');
+        if (subMenu.style.display === 'none' || subMenu.style.display === '') {
+            subMenu.style.display = 'block';
+        } else {
+            subMenu.style.display = 'none';
+        }
+    }
 </script>
 
 </body>
+</html>
+
 </html>
 
