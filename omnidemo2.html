@@ -26,18 +26,22 @@
             top: 0;
             left: 0;
             height: 100%;
-            width: 200px;
+            width: 220px;
             background-color: #444;
             display: flex;
             flex-direction: column;
         }
         .nav a {
-            display: block;
+            display: flex;
+            align-items: center;
             color: white;
             text-align: left;
             padding: 14px 20px;
             text-decoration: none;
             border-bottom: 1px solid #555;
+        }
+        .nav a img {
+            margin-right: 10px;
         }
         .nav a:hover {
             background-color: #ddd;
@@ -48,9 +52,9 @@
             margin-left: 20px;
         }
         .content {
-            margin-left: 220px;
+            margin-left: 240px;
             margin-top: 60px;
-            width: calc(100% - 220px);
+            width: calc(100% - 240px);
             padding: 20px;
             text-align: center;
         }
@@ -101,19 +105,19 @@
 </div>
 
 <div class="nav">
-    <a href="#home" onclick="showContent('home')">My Dashboard</a>
-    <a href="#game-central" onclick="showContent('game-central')">Game Central</a>
-    <a href="#developer-central" onclick="showContent('developer-central')">Developer Central</a>
-    <a href="#qa-central" onclick="showContent('qa-central')">QA Central</a>
-    <a href="#support-central" onclick="showContent('support-central')">Support Central</a>
-    <a href="#vip" onclick="showContent('vip')">VIP</a>
-    <a href="#trust-and-safety" onclick="showContent('trust-and-safety')">Trust and Safety</a>
-    <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)">Service Dashboards</a>
+    <a href="#home" onclick="showContent('home')"><img src="https://via.placeholder.com/16x16?text=D" alt="Dashboard Icon"> My Dashboard</a>
+    <a href="#game-central" onclick="showContent('game-central')"><img src="https://via.placeholder.com/16x16?text=G" alt="Game Icon"> Game Central</a>
+    <a href="#developer-central" onclick="showContent('developer-central')"><img src="https://via.placeholder.com/16x16?text=D" alt="Developer Icon"> Developer Central</a>
+    <a href="#qa-central" onclick="showContent('qa-central')"><img src="https://via.placeholder.com/16x16?text=Q" alt="QA Icon"> QA Central</a>
+    <a href="#support-central" onclick="showContent('support-central')"><img src="https://via.placeholder.com/16x16?text=S" alt="Support Icon"> Support Central</a>
+    <a href="#vip" onclick="showContent('vip')"><img src="https://via.placeholder.com/16x16?text=V" alt="VIP Icon"> VIP</a>
+    <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><img src="https://via.placeholder.com/16x16?text=T" alt="Safety Icon"> Trust and Safety</a>
+    <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><img src="https://via.placeholder.com/16x16?text=S" alt="Services Icon"> Service Dashboards</a>
     <div class="service-submenu">
-        <a href="#helpshift" onclick="showContent('helpshift')">Helpshift</a>
-        <a href="#language-ai" onclick="showContent('language-ai')">Language AI</a>
-        <a href="#mighty-build" onclick="showContent('mighty-build')">Mighty Build</a>
-        <a href="#xcontent-management" onclick="showContent('xcontent-management')">Xcontent Management</a>
+        <a href="#helpshift" onclick="showContent('helpshift')"><img src="https://via.placeholder.com/16x16?text=H" alt="Helpshift Icon"> Helpshift</a>
+        <a href="#language-ai" onclick="showContent('language-ai')"><img src="https://via.placeholder.com/16x16?text=L" alt="Language AI Icon"> Language AI</a>
+        <a href="#mighty-build" onclick="showContent('mighty-build')"><img src="https://via.placeholder.com/16x16?text=M" alt="Mighty Build Icon"> Mighty Build</a>
+        <a href="#xcontent-management" onclick="showContent('xcontent-management')"><img src="https://via.placeholder.com/16x16?text=X" alt="Xcontent Icon"> Xcontent Management</a>
     </div>
 </div>
 
@@ -261,6 +265,3 @@
 
 </body>
 </html>
-
-</html>
-
