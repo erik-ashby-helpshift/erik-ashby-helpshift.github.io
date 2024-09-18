@@ -42,6 +42,11 @@
             text-decoration: none;
             border-bottom: 1px solid #555;
         }
+        .nav a.active {
+            background-color: #666;
+            color: white;
+        }
+        
         .nav a img {
             margin-right: 10px;
         }
@@ -188,6 +193,9 @@
         document.querySelectorAll('.content').forEach(section => section.style.display = 'none');
         // Show the selected section
         document.getElementById(sectionId).style.display = 'block';
+        document.querySelectorAll('.nav a').forEach(link => link.classList.remove('active'));
+        document.querySelector(`.nav a[href='#${sectionId}']`).classList.add('active');
+
     }
 
     // Chart.js script to create the engagement graph
