@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrandX Game Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+        }
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 0px 0;
+            text-align: center;
+            width: 100%;
+            height: 100px;
+            position: fixed;
+            top: 0;
+            z-index: 1000; /* Ensure header appears above content */
+        }
+        .nav {
+            position: fixed;
+            top: 100px; /* Adjusted to fit below the header */
+            left: 0;
+            height: calc(100% - 100px);
+            width: 220px;
+            background-color: #444;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav a {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-align: left;
+            padding: 14px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid #555;
+        }
+        .nav a img {
+            margin-right: 10px;
+        }
+        .nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .service-submenu {
+            display: none;
+            margin-left: 20px;
+        }
+        .content {
+            margin-left: 240px;
+            margin-top: 100px; /* Margin increased to ensure content is not cut off */
+            width: calc(100% - 240px);
+            hight: calc(100% - 100px);
+            padding: 20px;
+            text-align: center;
+        }
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #chart {
+            width: 100%;
+            height: 400px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .account-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        .account-popup {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 1001; /* Ensure popup appears above header */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="header">
+    <h2>Omni - Game Dashboard</h2>
+    <img src="https://via.placeholder.com/24x24?text=User" alt="User Icon" class="account-icon" id="accountIcon">
+    <div id="accountPopup" class="account-popup">
+        Account features have not yet been added.
+    </div>
+</div>
+
+<div class="nav">
+    <a href="#home" onclick="showContent('home')"><img src="https://via.placeholder.com/16x16?text=D" alt="Dashboard Icon"> My Dashboard</a>
+    <a href="#game-central" onclick="showContent('game-central')"><img src="https://via.placeholder.com/16x16?text=G" alt="Game Icon"> Game Central</a>
+    <a href="#developer-central" onclick="showContent('developer-central')"><img src="https://via.placeholder.com/16x16?text=D" alt="Developer Icon"> Developer Central</a>
+    <a href="#qa-central" onclick="showContent('qa-central')"><img src="https://via.placeholder.com/16x16?text=Q" alt="QA Icon"> QA Central</a>
+    <a href="#support-central" onclick="showContent('support-central')"><img src="https://via.placeholder.com/16x16?text=S" alt="Support Icon"> Support Central</a>
+    <a href="#vip" onclick="showContent('vip')"><img src="https://via.placeholder.com/16x16?text=V" alt="VIP Icon"> VIP</a>
+    <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><img src="https://via.placeholder.com/16x16?text=T" alt="Safety Icon"> Trust and Safety</a>
+    <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><img src="https://via.placeholder.com/16x16?text=S" alt="Services Icon"> Service Dashboards</a>
+    <div class="service-submenu">
+        <a href="#helpshift" onclick="showContent('helpshift')"><img src="https://via.placeholder.com/16x16?text=H" alt="Helpshift Icon"> Helpshift</a>
+        <a href="#language-ai" onclick="showContent('language-ai')"><img src="https://via.placeholder.com/16x16?text=L" alt="Language AI Icon"> Language AI</a>
+        <a href="#mighty-build" onclick="showContent('mighty-build')"><img src="https://via.placeholder.com/16x16?text=M" alt="Mighty Build Icon"> Mighty Build</a>
+        <a href="#xcontent-management" onclick="showContent('xcontent-management')"><img src="https://via.placeholder.com/16x16?text=X" alt="Xcontent Icon"> Xcontent Management</a>
+    </div>
+</div>
+
+<div id="home" class="content">
+    <div id="chart">
+        <canvas id="engagementChart"></canvas>
+    </div>
+    <h2>Welcome to Our Services Portal</h2>
+    <p>This is a demo of a new services portal for our business idea.</p>
+</div>
+
+<div id="game-central" class="content" style="display:none;">
+    <h2>Game Central</h2>
+    <p>Game Central features.</p>
+</div>
+
+<div id="developer-central" class="content" style="display:none;">
+    <h2>Developer Central</h2>
+    <p>Developer Central features.</p>
+</div>
+
+<div id="qa-central" class="content" style="display:none;">
+    <h2>QA Central</h2>
+    <p>QA Central features.</p>
+</div>
+
+<div id="support-central" class="content" style="display:none;">
+    <h2>Support Central</h2>
+    <p>Support Central features.</p>
+</div>
+
+<div id="vip" class="content" style="display:none;">
+    <h2>VIP</h2>
+    <p>VIP features.</p>
+</div>
+
+<div id="trust-and-safety" class="content" style="display:none;">
+    <h2>Trust and Safety</h2>
+    <p>Trust and Safety features.</p>
+</div>
+
+<div id="helpshift" class="content" style="display:none;">
+    <h2>Helpshift</h2>
+    <p>Helpshift features.</p>
+</div>
+
+<div id="language-ai" class="content" style="display:none;">
+    <h2>Language AI</h2>
+    <p>Language AI features.</p>
+</div>
+
+<div id="mighty-build" class="content" style="display:none;">
+    <h2>Mighty Build</h2>
+    <p>Mighty Build features.</p>
+</div>
+
+<div id="xcontent-management" class="content" style="display:none;">
+    <h2>Xcontent Management</h2>
+    <p>Xcontent Management features.</p>
+</div>
+
+<script>
+    function showContent(sectionId) {
+        // Hide all sections
+        document.querySelectorAll('.content').forEach(section => section.style.display = 'none');
+        // Show the selected section
+        document.getElementById(sectionId).style.display = 'block';
+    }
+
+    // Chart.js script to create the engagement graph
+    const ctx = document.getElementById('engagementChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+            datasets: [{
+                label: 'Engagement',
+                data: [
+                    1001086.318,
+                    1009080.837,
+                    1017334.908,
+                    1022723.036,
+                    1031393.484,
+                    1047994.699,
+                    1088740.69,
+                    1092496.333,
+                    1133695.818,
+                    1161414.927,
+                    1209807.997,
+                    1403898.077,
+                    1383749.465,
+                    1371555.568,
+                    1361353.589,
+                    1336819.857,
+                    1341122.241,
+                    1349317.36,
+                    1351423.123,
+                    1373708.875,
+                    1421313.427,
+                    1439066.966,
+                    1403445.372,
+                    1379312.495,
+                    1378744.689,
+                    1388661.054,
+                    1436716.994,
+                    1497311.932,
+                    1561888.727
+                ],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // JavaScript to show the account popup
+    const accountIcon = document.getElementById('accountIcon');
+    const accountPopup = document.getElementById('accountPopup');
+
+    accountIcon.addEventListener('click', () => {
+        accountPopup.style.display = 'block';
+        setTimeout(() => {
+            accountPopup.style.display = 'none';
+        }, 2000);
+    });
+
+    // JavaScript to toggle the Service Dashboards submenu
+    function toggleSubMenu(event) {
+        event.preventDefault();
+        const subMenu = document.querySelector('.service-submenu');
+        if (subMenu.style.display === 'none' || subMenu.style.display === '') {
+            subMenu.style.display = 'block';
+        } else {
+            subMenu.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
