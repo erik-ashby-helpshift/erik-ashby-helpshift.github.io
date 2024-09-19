@@ -114,7 +114,7 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         #chart {
-            width: 100%;
+            width: 50%;
             height: 250px;
             background-color: #fff;
             border: 1px solid #ddd;
@@ -230,7 +230,7 @@
         </div>
     </div>
     <div id="chart">
-        <canvas id="engagementChart" width="800"></canvas>
+        <canvas id="engagementChart"></canvas>
     </div>
     <div class="kpi-container">
         <!-- KPI Cards Below the Chart -->
@@ -367,10 +367,10 @@
             plugins: {
                 title: {
                     display: true,
-                    text: 'Daily Engagement'
+                    text: 'Daily Active Users (DAU) Engagement',
                 },
                 legend: {
-                    display: true,
+                    display: false,
                     position: 'right'
                 }
             },
