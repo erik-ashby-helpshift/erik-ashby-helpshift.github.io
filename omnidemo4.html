@@ -124,7 +124,7 @@
             margin-bottom: 20px;
         }
 
-        #engagementChart, #apdexChart {
+        #engagementChart, #apdexChart, #globalPerformanceChart {
             width: 45%; /* Adjust width to fit both charts side by side */
             border: 1px solid #ddd;
             height: 100%;
@@ -458,45 +458,45 @@ new Chart(ctxApdex, {
     }
 
      // New Chart.js script for Global Performance Index graph
-    const ctxGlobalPerformance = document.getElementById('globalPerformanceChart').getContext('2d');
-    new Chart(ctxGlobalPerformance, {
-        type: 'line',
-        data: {
-            labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
-            datasets: [{
-                label: 'Global Performance Index',
-                data: [
-                    0.401, 0.395305243, 0.40054063, 0.399734873, 0.405535548,
-                    0.417798074, 0.426143185, 0.423829606, 0.417319637, 0.422926175,
-                    0.124440247, 0.115294153, 0.119641532, 0.127488484, 0.123876697,
-                    0.120046944, 0.113388879, 0.208682504, 0.360668991, 0.404543954,
-                    0.407053958, 0.417224459, 0.419949286, 0.433290559, 0.444754537,
-                    0.447895603, 0.448627004, 0.445075628, 0.444789241, 0.449954005,
-                    0.441916995
-                ],
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 2,
-                tension: 0.1
-            }]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Global Performance Index',
-                },
-                legend: {
-                    display: false,
-                    position: 'right'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+     const ctxGlobalPerformance = document.getElementById('globalPerformanceChart').getContext('2d');
+     new Chart(ctxGlobalPerformance, {
+         type: 'line',
+         data: {
+             labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+             datasets: [{
+                 label: 'Global Performance Index',
+                 data: [
+                     0.401, 0.407716913, 0.405793471, 0.405421826, 0.42055525,
+                     0.425479085, 0.439734529, 0.442635624, 0.442369602, 0.448121038,
+                     0.348690738, 0.354841415, 0.351993614, 0.352641928, 0.357171198,
+                     0.351347658, 0.404371094, 0.460726798, 0.609246483, 0.662503958,
+                     0.664996185, 0.677333877, 0.687507561, 0.690890228, 0.709502056,
+                     0.725457474, 0.733395146, 0.734372013, 0.728570768, 0.733767041,
+                     0.726429699
+                 ],
+                 borderColor: 'rgba(54, 162, 235, 1)',
+                 borderWidth: 2,
+                 tension: 0.1
+             }]
+         },
+         options: {
+             plugins: {
+                 title: {
+                     display: true,
+                     text: 'Global Performance Index',
+                 },
+                 legend: {
+                     display: false,
+                     position: 'right'
+                 }
+             },
+             scales: {
+                 y: {
+                     beginAtZero: true
+                 }
+             }
+         }
+     });
 </script>
 
 </body>
