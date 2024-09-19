@@ -458,46 +458,7 @@ new Chart(ctxApdex, {
         }
     }
 
-    const ctxApdex = document.getElementById('apdexChart').getContext('2d');
-    new Chart(ctxApdex, {
-        type: 'line',
-        data: {
-            labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
-            datasets: [{
-                label: 'APDex',
-                data: [
-                    0.901, 0.90281422, 0.902641668, 0.902152936, 0.910323441, 
-                    0.911465571, 0.921116609, 0.922228641, 0.916308139, 0.814884465, 
-                    0.619742953, 0.714187475, 0.858854476, 0.903273062, 0.898139841, 
-                    0.895264967, 0.899932656, 0.899469677, 0.904028465, 0.89995843, 
-                    0.900910865, 0.908017563, 0.919074102, 0.928432977, 0.94299457, 
-                    0.953004333, 0.955021932, 0.958237697, 0.960984597, 0.962336053
-                ],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 2,
-                tension: 0.1
-            }]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Application Performance Index (APDex)',
-                },
-                legend: {
-                    display: false,
-                    position: 'right'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // New Chart.js script for Global Performance Index graph
+     // New Chart.js script for Global Performance Index graph
     const ctxGlobalPerformance = document.getElementById('globalPerformanceChart').getContext('2d');
     new Chart(ctxGlobalPerformance, {
         type: 'line',
