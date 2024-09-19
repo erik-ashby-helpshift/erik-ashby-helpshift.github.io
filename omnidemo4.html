@@ -114,7 +114,9 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         #chart {
-            width: 50%;
+            display: flex;
+            justify-content: space-around; /* Ensure charts are side by side */
+            width: 100%;
             height: 250px;
             background-color: #fff;
             border: 1px solid #ddd;
@@ -122,9 +124,9 @@
             margin-bottom: 20px;
         }
 
-        #engagementChart {
-            width: 100%;
-            height: 400px; /* You can adjust the height as needed */
+        #engagementChart, #apdexChart {
+            width: 45%; /* Adjust width to fit both charts side by side */
+            height: 100%;
         }
 
         .kpi-container {
@@ -231,6 +233,7 @@
     </div>
     <div id="chart">
         <canvas id="engagementChart"></canvas>
+        <canvas id="apdexChart"></canvas> <!-- New canvas element for APDex chart -->
     </div>
     <div class="kpi-container">
         <!-- KPI Cards Below the Chart -->
@@ -381,6 +384,71 @@
             }
         }
     });
+
+// Chart.js script to create the APDex graph
+const ctxApdex = document.getElementById('apdexChart').getContext('2d');
+new Chart(ctxApdex, {
+    type: 'line',
+    data: {
+        labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+        datasets: [{
+            label: 'APDex',
+            data: [
+                0.901,
+                0.901951125,
+                0.893432847,
+                0.890047589,
+                0.899059388,
+                0.90131859,
+                0.904684178,
+                0.9095045,
+                0.909633268,
+                0.806060449,
+                0.609178523,
+                0.708536304,
+                0.811516661,
+                0.908674692,
+                0.906920508,
+                0.909957669,
+                0.904470465,
+                0.901957137,
+                0.899958291,
+                0.900133283,
+                0.906682448,
+                0.923205372,
+                0.928155175,
+                0.9365661,
+                0.952810909,
+                0.958723915,
+                0.960560706,
+                0.956848212,
+                0.960681928,
+                0.954829019,
+                0.961084178
+            ],
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2,
+            tension: 0.1
+        }]
+    },
+    options: {
+        plugins: {
+            title: {
+                display: true,
+                text: 'Application Performance Index (APDex)',
+            },
+            legend: {
+                display: false,
+                position: 'right'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
 
     // JavaScript to show the account dialog
     const accountIcon = document.getElementById('accountIcon');
