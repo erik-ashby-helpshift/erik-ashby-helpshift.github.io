@@ -99,6 +99,19 @@
             padding: 10px;
             z-index: 1001; /* Ensure popup appears above header */
         }
+        .account-dialog {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+            z-index: 1001; /* Ensure dialog appears above header */
+        }
+        
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -261,14 +274,22 @@
 
     // JavaScript to show the account popup
     const accountIcon = document.getElementById('accountIcon');
-    const accountPopup = document.getElementById('accountPopup');
-
+    const accountDialog = document.getElementById('accountDialog');
+    const billingDetailsLink = document.getElementById('billingDetails');
+    
     accountIcon.addEventListener('click', () => {
-        accountPopup.style.display = 'block';
+        accountDialog.style.display = 'block';
         setTimeout(() => {
-            accountPopup.style.display = 'none';
-        }, 2000);
+            accountDialog.style.display = 'none';
+        }, 5000); // Keeps the dialog open for 5 seconds
     });
+    
+    // Optional: Show billing details alert
+    billingDetailsLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        alert('Billing details are not yet implemented.');
+    });
+    
 
     // JavaScript to toggle the Service Dashboards submenu
     function toggleSubMenu(event) {
