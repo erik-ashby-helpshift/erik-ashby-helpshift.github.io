@@ -121,6 +121,48 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
+        .kpi-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+    
+        .kpi-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            width: 22%;
+        }
+    
+        .kpi-card i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+    
+        .kpi-card p {
+            margin: 0;
+            font-size: 16px;
+            color: #666;
+        }
+    
+        .kpi-card h3 {
+            margin: 10px 0 0;
+            font-size: 24px;
+        }
+    
+        .kpi-card.positive {
+            border-left: 5px solid green;
+        }
+    
+        .kpi-card.negative {
+            border-left: 5px solid red;
+        }
+    
+        .kpi-card.neutral {
+            border-left: 5px solid gray;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -140,7 +182,7 @@
 </div>
 
 <div class="nav">
-    <a href="#home" onclick="showContent('home')"><i class="fas fa-tachometer-alt"></i> My Dashboard</a>
+    <a href="#home" onclick="showContent('home')"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
     <a href="#game-central" onclick="showContent('game-central')"><i class="fas fa-gamepad"></i> Game Central</a>
     <a href="#developer-central" onclick="showContent('developer-central')"><i class="fas fa-code"></i> Developer Central</a>
     <a href="#qa-central" onclick="showContent('qa-central')"><i class="fas fa-check-circle"></i> QA Central</a>
@@ -158,10 +200,74 @@
 
 <div id="home" class="content">
     <h2>Welcome to Our Services Portal</h2>
+    <div class="kpi-container">
+        <!-- KPI Cards Above the Chart -->
+        <div class="kpi-card positive">
+            <i class="fas fa-gamepad"></i>
+            <p>Games</p>
+            <h3>4</h3>
+        </div>
+        <div class="kpi-card positive">
+            <i class="fas fa-users"></i>
+            <p>MAU</p>
+            <h3>1.65M</h3>
+        </div>
+        <div class="kpi-card positive">
+            <i class="fas fa-user-friends"></i>
+            <p>DAU</p>
+            <h3>1.43M</h3>
+        </div>
+        <div class="kpi-card negative">
+            <i class="fas fa-chart-line"></i>
+            <p>Daily Sessions</p>
+            <h3>2.64M</h3>
+        </div>
+    </div>
     <div id="chart">
         <canvas id="engagementChart"></canvas>
     </div>
+    <div class="kpi-container">
+        <!-- KPI Cards Below the Chart -->
+        <div class="kpi-card positive">
+            <i class="fas fa-smile"></i>
+            <p>APDex</p>
+            <h3>0.92</h3>
+        </div>
+        <div class="kpi-card positive">
+            <i class="fas fa-bug"></i>
+            <p>Crash Sessions</p>
+            <h3>0.12%</h3>
+        </div>
+        <div class="kpi-card negative">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Issue Free Sessions</p>
+            <h3>98.3%</h3>
+        </div>
+        <div class="kpi-card negative">
+            <i class="fas fa-bug"></i>
+            <p>Active User Reported Bugs</p>
+            <h3>75</h3>
+        </div>
+    </div>
     <p>This is a demo of a new services portal for our business idea.</p>
+    <p>Our portal offers a comprehensive suite of tools and services designed to enhance your gaming experience. From game development to player support, we have everything you need to succeed.</p>
+    <h3>Key Features:</h3>
+    <ul>
+        <li>Real-time analytics and reporting</li>
+        <li>Integrated game development tools</li>
+        <li>Robust player support and engagement</li>
+        <li>Advanced AI and language processing</li>
+        <li>Secure and scalable infrastructure</li>
+    </ul>
+    <h3>Benefits:</h3>
+    <ul>
+        <li>Improve player retention and satisfaction</li>
+        <li>Streamline development processes</li>
+        <li>Enhance support efficiency</li>
+        <li>Leverage cutting-edge technology</li>
+        <li>Ensure data security and compliance</li>
+    </ul>
+    <p>Explore our portal to discover how we can help you achieve your goals. If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
 </div>
 
 <div id="game-central" class="content" style="display:none;">
