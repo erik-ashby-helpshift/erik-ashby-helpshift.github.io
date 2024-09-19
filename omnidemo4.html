@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BrandX Game Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -46,9 +47,8 @@
             background-color: #666;
             color: white;
         }
-        
-        .nav a img {
-            margin-right: 10px;
+        .nav a i {
+            margin-right: 10px; /* Adjust spacing between icon and text */
         }
         .nav a:hover {
             background-color: #ddd;
@@ -62,7 +62,7 @@
             margin-left: 240px;
             margin-top: 60px; /* Margin increased to ensure content is not cut off */
             width: calc(100% - 240px);
-            hight: calc(100% - 60px);
+            height: calc(100% - 60px);
             padding: 20px;
             text-align: center;
         }
@@ -113,19 +113,19 @@
 </div>
 
 <div class="nav">
-    <a href="#home" onclick="showContent('home')"><img src="https://via.placeholder.com/16x16?text=D" alt="Dashboard Icon"> My Dashboard</a>
-    <a href="#game-central" onclick="showContent('game-central')"><img src="https://via.placeholder.com/16x16?text=G" alt="Game Icon"> Game Central</a>
-    <a href="#developer-central" onclick="showContent('developer-central')"><img src="https://via.placeholder.com/16x16?text=D" alt="Developer Icon"> Developer Central</a>
-    <a href="#qa-central" onclick="showContent('qa-central')"><img src="https://via.placeholder.com/16x16?text=Q" alt="QA Icon"> QA Central</a>
-    <a href="#support-central" onclick="showContent('support-central')"><img src="https://via.placeholder.com/16x16?text=S" alt="Support Icon"> Support Central</a>
-    <a href="#vip" onclick="showContent('vip')"><img src="https://via.placeholder.com/16x16?text=V" alt="VIP Icon"> VIP</a>
-    <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><img src="https://via.placeholder.com/16x16?text=T" alt="Safety Icon"> Trust and Safety</a>
-    <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><img src="https://via.placeholder.com/16x16?text=S" alt="Services Icon"> Service Dashboards</a>
+    <a href="#home" onclick="showContent('home')"><i class="fas fa-tachometer-alt"></i> My Dashboard</a>
+    <a href="#game-central" onclick="showContent('game-central')"><i class="fas fa-gamepad"></i> Game Central</a>
+    <a href="#developer-central" onclick="showContent('developer-central')"><i class="fas fa-code"></i> Developer Central</a>
+    <a href="#qa-central" onclick="showContent('qa-central')"><i class="fas fa-check-circle"></i> QA Central</a>
+    <a href="#support-central" onclick="showContent('support-central')"><i class="fas fa-life-ring"></i> Support Central</a>
+    <a href="#vip" onclick="showContent('vip')"><i class="fas fa-star"></i> VIP</a>
+    <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><i class="fas fa-shield-alt"></i> Trust and Safety</a>
+    <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><i class="fas fa-cogs"></i> Service Dashboards</a>
     <div class="service-submenu">
-        <a href="#helpshift" onclick="showContent('helpshift')"><img src="https://via.placeholder.com/16x16?text=H" alt="Helpshift Icon"> Helpshift</a>
-        <a href="#language-ai" onclick="showContent('language-ai')"><img src="https://via.placeholder.com/16x16?text=L" alt="Language AI Icon"> Language AI</a>
-        <a href="#mighty-build" onclick="showContent('mighty-build')"><img src="https://via.placeholder.com/16x16?text=M" alt="Mighty Build Icon"> Mighty Build</a>
-        <a href="#xcontent-management" onclick="showContent('xcontent-management')"><img src="https://via.placeholder.com/16x16?text=X" alt="Xcontent Icon"> Xcontent Management</a>
+        <a href="#helpshift" onclick="showContent('helpshift')"><i class="fas fa-comments"></i> Helpshift</a>
+        <a href="#language-ai" onclick="showContent('language-ai')"><i class="fas fa-language"></i> Language AI</a>
+        <a href="#mighty-build" onclick="showContent('mighty-build')"><i class="fas fa-tools"></i> Mighty Build</a>
+        <a href="#xcontent-management" onclick="showContent('xcontent-management')"><i class="fas fa-file-alt"></i> Xcontent Management</a>
     </div>
 </div>
 
@@ -134,7 +134,6 @@
     <div id="chart">
         <canvas id="engagementChart"></canvas>
     </div>
-
     <p>This is a demo of a new services portal for our business idea.</p>
 </div>
 
@@ -196,7 +195,6 @@
         document.getElementById(sectionId).style.display = 'block';
         document.querySelectorAll('.nav a').forEach(link => link.classList.remove('active'));
         document.querySelector(`.nav a[href='#${sectionId}']`).classList.add('active');
-
     }
 
     // Chart.js script to create the engagement graph
@@ -277,3 +275,4 @@
 
 </body>
 </html>
+
