@@ -86,18 +86,7 @@
             top: 10px;
             right: 10px;
             cursor: pointer;
-        }
-        .account-popup {
-            display: none;
-            position: absolute;
-            top: 40px;
-            right: 10px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            padding: 10px;
-            z-index: 1001; /* Ensure popup appears above header */
+            font-size: 24px; /* Adjust icon size */
         }
         .account-dialog {
             display: none;
@@ -111,7 +100,6 @@
             padding: 15px;
             z-index: 1001; /* Ensure dialog appears above header */
         }
-        
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -120,9 +108,6 @@
 <div class="header">
     <h2>Omni - Game Dashboard</h2>
     <i class="fas fa-user account-icon" id="accountIcon"></i>
-    <div id="accountPopup" class="account-popup">
-        This is not yet implemented
-    </div>
     <div id="accountDialog" class="account-dialog">
         <h3>Account: Erik Ashby</h3>
         <p>Role: Super Admin</p>
@@ -156,8 +141,6 @@
     </div>
     <p>This is a demo of a new services portal for our business idea.</p>
 </div>
-
-
 
 <div id="game-central" class="content" style="display:none;">
     <h2>Game Central</h2>
@@ -272,24 +255,23 @@
         }
     });
 
-    // JavaScript to show the account popup
+    // JavaScript to show the account dialog
     const accountIcon = document.getElementById('accountIcon');
     const accountDialog = document.getElementById('accountDialog');
     const billingDetailsLink = document.getElementById('billingDetails');
-    
+
     accountIcon.addEventListener('click', () => {
         accountDialog.style.display = 'block';
         setTimeout(() => {
             accountDialog.style.display = 'none';
         }, 5000); // Keeps the dialog open for 5 seconds
     });
-    
+
     // Optional: Show billing details alert
     billingDetailsLink.addEventListener('click', (event) => {
         event.preventDefault();
         alert('Billing details are not yet implemented.');
     });
-    
 
     // JavaScript to toggle the Service Dashboards submenu
     function toggleSubMenu(event) {
@@ -305,4 +287,3 @@
 
 </body>
 </html>
-
