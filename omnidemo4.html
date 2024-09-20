@@ -190,7 +190,15 @@
             color: #ffcc00; /* Warning color */
             cursor: pointer;
         }
-        
+
+        .dropdown-container {
+            margin-bottom: 20px;
+        }
+    
+        #game-select {
+            padding: 5px;
+            font-size: 16px;
+        }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -291,6 +299,16 @@
 
 <div id="game-central" class="content" style="display:none;">
     <h2>Game Central</h2>
+    <!-- Dropdown for selecting games -->
+    <div class="dropdown-container">
+        <label for="game-select">Select Game:</label>
+        <select id="game-select">
+            <option value="all">All</option>
+            <option value="monopoly-go">Monopoly Go</option>
+            <option value="bingo-bash">Bingo Bash</option>
+            <option value="wwe-champions">WWE Champions</option>
+        </select>
+    </div>
     <div class="kpi-container">
         <!-- KPI Cards for Game Central -->
         <div class="kpi-card positive">
@@ -660,6 +678,11 @@ new Chart(ctxApdex, {
             }
          }
      });
+
+    document.getElementById('game-select').addEventListener('change', function() {
+        console.log('Selected game:', this.value);
+        // Future functionality to filter reports can be added here
+    });
 </script>
 
 </body>
