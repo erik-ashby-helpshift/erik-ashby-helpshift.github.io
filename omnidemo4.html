@@ -132,6 +132,17 @@
             margin-bottom: 20px;
         }
 
+        #large_chart {
+            display: flex;
+            justify-content: space-around; /* Ensure charts are side by side */
+            width: 100%;
+            height: 250px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
         #engagementChart, #apdexChart, #globalPerformanceChart, #customer_feedback_chart {
             width: 45%; /* Adjust width to fit both charts side by side */
             border: 1px solid #ddd;
@@ -370,7 +381,7 @@
             <h3>14.45%</h3>
         </div>
     </div>
-    <div id="chart">
+    <div id="large_chart">
         <canvas id="efigs_engagement_index"></canvas>
         <canvas id="ckj_engagement_index"></canvas>
     </div>
