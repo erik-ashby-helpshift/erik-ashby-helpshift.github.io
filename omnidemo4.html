@@ -418,6 +418,10 @@
                 },
                 y: {
                     beginAtZero: true
+                },
+                animation: {
+                    duration: 1000, // Animation duration in milliseconds
+                    easing: 'easeOutBounce' // Easing function for the animation
                 }
             }
         }
@@ -471,6 +475,10 @@ new Chart(ctxApdex, {
             },
             y: {
                 beginAtZero: true
+            },
+            animation: {
+                duration: 1000, // Animation duration in milliseconds
+                easing: 'easeOutBounce' // Easing function for the animation
             }
         }
     }
@@ -513,7 +521,7 @@ new Chart(ctxApdex, {
              labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
              datasets: [
                  {
-                     label: 'Global Performance Index',
+                     label: 'Global Engagement Index',
                      data: [
                          0.401, 0.405056134, 0.408338178, 0.40763676, 0.420816691,
                          0.429004177, 0.443274506, 0.436500861, 0.434618559, 0.434021975,
@@ -557,7 +565,11 @@ new Chart(ctxApdex, {
                      min: 0,
                      max: 1
                  }
-             }
+             },
+             animation: {
+                duration: 1000, // Animation duration in milliseconds
+                easing: 'easeOutBounce' // Easing function for the animation
+            }
          }
      });
 
@@ -619,7 +631,11 @@ new Chart(ctxApdex, {
                  y: {
                      beginAtZero: true
                  }
-             }
+             },
+             animation: {
+                duration: 1000, // Animation duration in milliseconds
+                easing: 'easeOutBounce' // Easing function for the animation
+            }
          }
      });
 </script>
