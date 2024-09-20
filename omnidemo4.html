@@ -429,20 +429,30 @@ new Chart(ctxApdex, {
     type: 'line',
     data: {
         labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
-        datasets: [{
-            label: 'APDex',
-            data: [
-            0.901, 0.90281422, 0.902641668, 0.902152936, 0.910323441, 
-            0.911465571, 0.921116609, 0.922228641, 0.916308139, 0.814884465, 
-            0.619742953, 0.714187475, 0.858854476, 0.903273062, 0.898139841, 
-            0.895264967, 0.899932656, 0.899469677, 0.904028465, 0.89995843, 
-            0.900910865, 0.908017563, 0.919074102, 0.928432977, 0.94299457, 
-            0.953004333, 0.955021932, 0.958237697, 0.960984597, 0.962336053
-        ],
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 2,
-            tension: 0.1
-        }]
+        datasets: [
+            {
+                label: 'APDex',
+                data: [
+                    0.901, 0.90281422, 0.902641668, 0.902152936, 0.910323441, 
+                    0.911465571, 0.921116609, 0.922228641, 0.916308139, 0.814884465, 
+                    0.619742953, 0.714187475, 0.858854476, 0.903273062, 0.898139841, 
+                    0.895264967, 0.899932656, 0.899469677, 0.904028465, 0.89995843, 
+                    0.900910865, 0.908017563, 0.919074102, 0.928432977, 0.94299457, 
+                    0.953004333, 0.955021932, 0.958237697, 0.960984597, 0.962336053
+                ],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            },
+            {
+                label: 'Benchmark',
+                data: Array(30).fill(0.80), // 30 data points all set to 0.80
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5], // Optional: makes the line dashed
+                tension: 0.1
+            }
+        ]
     },
     options: {
         plugins: {
@@ -451,7 +461,7 @@ new Chart(ctxApdex, {
                 text: 'Application Performance Index (APDex)',
             },
             legend: {
-                display: false,
+                display: true,
                 position: 'bottom'
             }
         },
@@ -552,58 +562,66 @@ new Chart(ctxApdex, {
      });
 
      const ctxCustomerFeedback = document.getElementById('customer_feedback_chart').getContext('2d');
-new Chart(ctxCustomerFeedback, {
-    type: 'line',
-    data: {
-        labels: Array.from({length: 31}, (_, i) => `Day ${i + 1}`),
-        datasets: [
-            {
-                label: 'Negative',
-                data: [
-                    1200, 1205, 1240, 1384, 1439, 1321, 1046, 980, 1455, 1493,
-                    4470, 4923, 4432, 1795, 1054, 1628, 1645, 1617, 1536, 1443,
-                    1113, 1000, 1574, 1481, 1687, 1712, 1568, 1248, 1137, 1706,
-                    1636
-                ],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 2,
-                tension: 0.1
-            },
-            {
-                label: 'Positive',
-                data: [
-                    600, 607, 617, 676, 660, 590, 480, 449, 670, 685,
-                    768, 770, 673, 537, 483, 698, 686, 738, 722, 645,
-                    524, 474, 696, 675, 747, 743, 673, 543, 480, 694,
-                    681
-                ],
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 2,
-                tension: 0.1
-            }
-        ]
-    },
-    options: {
-        plugins: {
-            title: {
-                display: true,
-                text: 'Customer Feedback',
-            },
-            legend: {
-                display: true,
-                position: 'bottom'
-            }
-        },
-        scales: {
-            x: {
-                display: false // Hides the x-axis labels
-            },
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
+     new Chart(ctxCustomerFeedback, {
+         type: 'line',
+         data: {
+             labels: Array.from({length: 31}, (_, i) => `Day ${i + 1}`),
+             datasets: [
+                 {
+                     label: 'Negative',
+                     data: [
+                         1200, 1205, 1240, 1384, 1439, 1321, 1046, 980, 1455, 1493,
+                         4470, 4923, 4432, 1795, 1054, 1628, 1645, 1617, 1536, 1443,
+                         1113, 1000, 1574, 1481, 1687, 1712, 1568, 1248, 1137, 1706,
+                         1636
+                     ],
+                     borderColor: 'rgba(255, 99, 132, 1)',
+                     borderWidth: 2,
+                     tension: 0.1
+                 },
+                 {
+                     label: 'Positive',
+                     data: [
+                         600, 607, 617, 676, 660, 590, 480, 449, 670, 685,
+                         768, 770, 673, 537, 483, 698, 686, 738, 722, 645,
+                         524, 474, 696, 675, 747, 743, 673, 543, 480, 694,
+                         681
+                     ],
+                     borderColor: 'rgba(54, 162, 235, 1)',
+                     borderWidth: 2,
+                     tension: 0.1
+                 },
+                 {
+                     label: 'Benchmark',
+                     data: Array(31).fill(1500), // 31 data points all set to 1500
+                     borderColor: 'rgba(75, 192, 192, 1)',
+                     borderWidth: 2,
+                     borderDash: [5, 5], // Optional: makes the line dashed
+                     tension: 0.1
+                 }
+             ]
+         },
+         options: {
+             plugins: {
+                 title: {
+                     display: true,
+                     text: 'Customer Feedback',
+                 },
+                 legend: {
+                     display: true,
+                     position: 'bottom'
+                 }
+             },
+             scales: {
+                 x: {
+                     display: false // Hides the x-axis labels
+                 },
+                 y: {
+                     beginAtZero: true
+                 }
+             }
+         }
+     });
 </script>
 
 </body>
