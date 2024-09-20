@@ -132,7 +132,7 @@
             margin-bottom: 20px;
         }
 
-        #engagementChart, #apdexChart, #globalPerformanceChart {
+        #engagementChart, #apdexChart, #globalPerformanceChart, #customer_feedback_chart {
             width: 45%; /* Adjust width to fit both charts side by side */
             border: 1px solid #ddd;
             height: 100%;
@@ -233,7 +233,7 @@
         <div class="kpi-card negative">
             <i class="fas fa-chart-bar" title="Global Engagement Index." ></i> <!-- Normal icon for performance index -->
             <p>GEI</p>
-            <h3>.44</h3>
+            <h3>0.44</h3>
             <i class="fas fa-exclamation-triangle warning-icon" title="Global Engagement Index is below average."></i> <!-- Warning icon with tooltip -->
         </div>
         <div class="kpi-card positive">
@@ -282,6 +282,7 @@
     </div>
     <div id="chart">
                 <canvas id="apdexChart"></canvas> <!-- Moved canvas element for APDex chart -->
+                <canvas id="customer_feedback_chart"></canvas> 
     </div>
     <p>This is a demo of a new services portal for our business idea.</p>
     <p>Our portal offers a comprehensive suite of tools and services designed to enhance your gaming experience. From game development to player support, we have everything you need to succeed.</p>
@@ -549,6 +550,60 @@ new Chart(ctxApdex, {
              }
          }
      });
+
+     const ctxCustomerFeedback = document.getElementById('customer_feedback_chart').getContext('2d');
+new Chart(ctxCustomerFeedback, {
+    type: 'line',
+    data: {
+        labels: Array.from({length: 31}, (_, i) => `Day ${i + 1}`),
+        datasets: [
+            {
+                label: 'Negative',
+                data: [
+                    1200, 1205, 1240, 1384, 1439, 1321, 1046, 980, 1455, 1493,
+                    4470, 4923, 4432, 1795, 1054, 1628, 1645, 1617, 1536, 1443,
+                    1113, 1000, 1574, 1481, 1687, 1712, 1568, 1248, 1137, 1706,
+                    1636
+                ],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            },
+            {
+                label: 'Positive',
+                data: [
+                    600, 607, 617, 676, 660, 590, 480, 449, 670, 685,
+                    768, 770, 673, 537, 483, 698, 686, 738, 722, 645,
+                    524, 474, 696, 675, 747, 743, 673, 543, 480, 694,
+                    681
+                ],
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            }
+        ]
+    },
+    options: {
+        plugins: {
+            title: {
+                display: true,
+                text: 'Customer Feedback',
+            },
+            legend: {
+                display: true,
+                position: 'bottom'
+            }
+        },
+        scales: {
+            x: {
+                display: false // Hides the x-axis labels
+            },
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
 </script>
 
 </body>
