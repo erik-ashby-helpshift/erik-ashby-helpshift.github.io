@@ -229,6 +229,7 @@
             display: block;
             width: 80%;
             max-width: 700px;
+            max-height: 500px; /* Restrict image height to 500px */
         }
         
         .close {
@@ -974,6 +975,14 @@ new Chart(ctxApdex, {
     span.onclick = function() {
         var modal = document.getElementById('retention-modal');
         modal.style.display = 'none';
+    }
+    
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        var modal = document.getElementById('retention-modal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
     }
 
 </script>
