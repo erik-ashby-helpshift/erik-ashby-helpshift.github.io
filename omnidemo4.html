@@ -334,6 +334,7 @@
     </div>
     <div id="chart">
         <canvas id="efigs_engagement_index"></canvas>
+        <canvas id="ckj_engagement_index"></canvas>
     </div>
     <p>Game Central features.</p>
 </div>
@@ -803,6 +804,96 @@ new Chart(ctxApdex, {
             }
         }
     });
+
+    const ctxCkjEngagement = document.getElementById('ckj_engagement_index').getContext('2d');
+    new Chart(ctxCkjEngagement, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+            datasets: [
+                {
+                    label: 'Chinese',
+                    data: [
+                        0.092303662, 0.091018396, 0.089335457, 0.094604804, 0.091978701,
+                        0.092379591, 0.093132055, 0.09482328, 0.100294179, 0.094521554,
+                        0.080883083, 0.081232352, 0.08054004, 0.081322888, 0.080212523,
+                        0.081192318, 0.091303752, 0.100539538, 0.095619495, 0.094853608,
+                        0.093070037, 0.100062196, 0.102058638, 0.099288068, 0.100238401,
+                        0.102680472, 0.103330214, 0.103910948, 0.101629915, 0.104094444,
+                        0.101342939
+                    ],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Korean',
+                    data: [
+                        0.059752958, 0.059306296, 0.059170252, 0.063551081, 0.059928231,
+                        0.059396183, 0.060509921, 0.064918244, 0.06120208, 0.060375299,
+                        0.054068588, 0.053062519, 0.054458911, 0.054849238, 0.055780664,
+                        0.05676484, 0.057997347, 0.06319488, 0.066401082, 0.063573515,
+                        0.0635796, 0.065655217, 0.064625867, 0.067330278, 0.068077348,
+                        0.068475884, 0.068331443, 0.067232973, 0.072110127, 0.069949586,
+                        0.069373311
+                    ],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Japanese',
+                    data: [
+                        0.148891057, 0.152436088, 0.154017045, 0.148615492, 0.151515645,
+                        0.150991149, 0.157837333, 0.159325832, 0.156950029, 0.158877291,
+                        0.136033525, 0.135764683, 0.137796516, 0.133213349, 0.136200673,
+                        0.134797709, 0.147179455, 0.161200679, 0.159808028, 0.158836728,
+                        0.164034889, 0.161385881, 0.166304791, 0.168041437, 0.171948535,
+                        0.174700099, 0.177944531, 0.172812932, 0.169778473, 0.170670617,
+                        0.170148211
+                    ],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Benchmark',
+                    data: Array(30).fill(0.5), // 30 data points all set to 0.5
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5], // Optional: makes the line dashed
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'CKJ Engagement Index',
+                },
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                x: {
+                    display: false // Hides the x-axis labels
+                },
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 1
+                }
+            },
+            animation: {
+                duration: 1000, // Animation duration in milliseconds
+                easing: 'easeOutBounce' // Easing function for the animation
+            }
+        }
+    });
+</script>
 
 </script>
 
