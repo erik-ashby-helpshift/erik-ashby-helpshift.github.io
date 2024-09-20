@@ -521,7 +521,9 @@ new Chart(ctxApdex, {
                 display: false // Hides the x-axis labels
             },
             y: {
-                beginAtZero: true
+                beginAtZero: true,
+                min: 0,
+                max: 1
             },
         },
         animation: {
@@ -790,7 +792,9 @@ new Chart(ctxApdex, {
                     display: false // Hides the x-axis labels
                 },
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    min: 0,
+                    max: 1
                 }
             },
             animation: {
