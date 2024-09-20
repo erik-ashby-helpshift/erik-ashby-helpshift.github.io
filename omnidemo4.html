@@ -412,6 +412,9 @@
                 }
             },
             scales: {
+                x: {
+                    display: false // Hides the x-axis labels
+                },
                 y: {
                     beginAtZero: true
                 }
@@ -424,7 +427,7 @@ const ctxApdex = document.getElementById('apdexChart').getContext('2d');
 new Chart(ctxApdex, {
     type: 'line',
     data: {
-        // labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+        labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
         datasets: [{
             label: 'APDex',
             data: [
@@ -452,6 +455,9 @@ new Chart(ctxApdex, {
             }
         },
         scales: {
+            x: {
+                display: false // Hides the x-axis labels
+            },
             y: {
                 beginAtZero: true
             }
@@ -493,7 +499,7 @@ new Chart(ctxApdex, {
      new Chart(ctxGlobalPerformance, {
          type: 'line',
          data: {
-             // labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+             labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
              datasets: [
                  {
                      label: 'Global Performance Index',
@@ -532,6 +538,9 @@ new Chart(ctxApdex, {
                  }
              },
              scales: {
+                x: {
+                    display: false // Hides the x-axis labels
+                },
                  y: {
                      beginAtZero: true,
                      min: 0,
