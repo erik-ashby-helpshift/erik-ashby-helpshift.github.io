@@ -249,6 +249,39 @@
             cursor: pointer;
         }
 
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        #events-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        #events-table th, #events-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        
+        #events-table th {
+            background-color: #f2f2f2;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        #events-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        #events-table tr:hover {
+            background-color: #ddd;
+        }
+        
+        #events-table th.sortable:hover {
+            background-color: #ddd;
+        }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -388,26 +421,38 @@
     </div>
     <section id="events-alerts">
         <h3>Events and Alerts</h3>
-        <ul>
-            <li>
-                <strong>Title:</strong> Game Update - Bingo Bash v1.53; Global<br>
-                <strong>Date/Time:</strong> August 3rd<br>
-                <strong>Recommendations:</strong> N/A<br>
-                <button>Actions</button>
-            </li>
-            <li>
-                <strong>Title:</strong> Engagement Alert - German engagement is below expectations<br>
-                <strong>Date/Time:</strong> August 5th<br>
-                <strong>Recommendations:</strong> Add German specific game content<br>
-                <button>Actions</button>
-            </li>
-            <li>
-                <strong>Title:</strong> Engagement Alert - German engagement is below expectations<br>
-                <strong>Date/Time:</strong> August 5th<br>
-                <strong>Recommendations:</strong> Add German specific game content<br>
-                <button>Actions</button>
-            </li>
-        </ul>
+        <div class="table-container">
+            <table id="events-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date/Time</th>
+                        <th>Recommendations</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Game Update - Bingo Bash v1.53; Global</td>
+                        <td>August 3rd</td>
+                        <td>N/A</td>
+                        <td><button>Actions</button></td>
+                    </tr>
+                    <tr>
+                        <td>Engagement Alert - German engagement is below expectations</td>
+                        <td>August 5th</td>
+                        <td>Add German specific game content</td>
+                        <td><button>Actions</button></td>
+                    </tr>
+                    <tr>
+                        <td>Engagement Alert - German engagement is below expectations</td>
+                        <td>August 5th</td>
+                        <td>Add German specific game content</td>
+                        <td><button>Actions</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
     <section id="placeholder">
         <h3>Placeholder</h3>
