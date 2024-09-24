@@ -1223,6 +1223,28 @@ new Chart(ctxApdex, {
         })));
     });
 
+    document.addEventListener('DOMContentLoaded', function () {
+        const actionButtons = document.querySelectorAll('.action-button');
+        const modal = document.getElementById('action-dialog');
+        const span = document.getElementsByClassName('close')[0];
+    
+        actionButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                modal.style.display = 'block';
+            });
+        });
+    
+        span.onclick = function () {
+            modal.style.display = 'none';
+        }
+    
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    });
+
 </script>
 </body>
 </html>
