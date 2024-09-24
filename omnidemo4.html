@@ -248,10 +248,23 @@
             text-decoration: none;
             cursor: pointer;
         }
-
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+        }
+        
         #events-alerts {
             width: 75%;
-            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-y: auto;
+            max-height: 400px; /* Adjust as needed */
+        }
+        
+        #placeholder {
+            width: 23%; /* Slightly less than 25% to account for spacing */
             background-color: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
@@ -266,6 +279,8 @@
         #events-table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.8em; /* Two sizes smaller */
+            text-align: left; /* Left justified */
         }
         
         #events-table th, #events-table td {
@@ -275,7 +290,6 @@
         
         #events-table th {
             background-color: #f2f2f2;
-            text-align: left;
             cursor: pointer;
         }
         
@@ -428,45 +442,77 @@
         <canvas id="efigs_engagement_index"></canvas>
         <canvas id="ckj_engagement_index"></canvas>
     </div>
-    <section id="events-alerts">
-        <h3>Events and Alerts</h3>
-        <div class="table-container">
-            <table id="events-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Date/Time</th>
-                        <th>Recommendations</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Game Update - Bingo Bash v1.53; Global</td>
-                        <td>August 3rd</td>
-                        <td>N/A</td>
-                        <td><button>Actions</button></td>
-                    </tr>
-                    <tr>
-                        <td>Engagement Alert - German engagement is below expectations</td>
-                        <td>August 5th</td>
-                        <td>Add German specific game content</td>
-                        <td><button>Actions</button></td>
-                    </tr>
-                    <tr>
-                        <td>Engagement Alert - German engagement is below expectations</td>
-                        <td>August 5th</td>
-                        <td>Add German specific game content</td>
-                        <td><button>Actions</button></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-    <section id="placeholder">
-        <h3>Placeholder</h3>
-        <p>This is a placeholder for future content.</p>
-    </section>
+    <div class="main-content">
+        <section id="events-alerts">
+            <h3>Events and Alerts</h3>
+            <div class="table-container">
+                <table id="events-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date/Time</th>
+                            <th>Recommendations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Game Update - Bingo Bash v1.53; Global</td>
+                            <td>August 3rd</td>
+                            <td>N/A</td>
+                            <td><button>Actions</button></td>
+                        </tr>
+                        <tr>
+                            <td>Engagement Alert - German engagement is below expectations</td>
+                            <td>August 5th</td>
+                            <td>Add German specific game content</td>
+                            <td><button>Actions</button></td>
+                        </tr>
+                        <tr>
+                            <td>Engagement Alert - German engagement is below expectations</td>
+                            <td>August 5th</td>
+                            <td>Add German specific game content</td>
+                            <td><button>Actions</button></td>
+                        </tr>
+                        <tr>
+                            <td>Server Maintenance - Monopoly Go</td>
+                            <td>August 6th</td>
+                            <td>Notify users about downtime</td>
+                            <td><button>Actions</button></td>
+                        </tr>
+                        <tr>
+                            <td>New Feature Release - WWE Champions</td>
+                            <td>August 7th</td>
+                            <td>Promote new features</td>
+                            <td><button>Actions</button></td>
+                        </tr>
+                        <tr>
+                            <td>Security Alert - Bingo Bash</td>
+                            <td>August 8th</td>
+                            <td>Investigate and resolve</td>
+                            <td><button>Actions</button></td>
+                        </tr>
+                        <tr>
+                            <td>Performance Issue - Monopoly Go</td>
+                            <td>August 9th</td>
+                            <td>Optimize server performance</td>
+                            <td><button>Actions</button></td>
+                        </tr>
+                        <tr>
+                            <td>User Feedback - WWE Champions</td>
+                            <td>August 10th</td>
+                            <td>Review and implement suggestions</td>
+                            <td><button>Actions</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section id="placeholder">
+            <h3>Placeholder</h3>
+            <p>This is a placeholder for future content.</p>
+        </section>
+    </div>
     <p>Game Central features.</p>
 </div>
 
