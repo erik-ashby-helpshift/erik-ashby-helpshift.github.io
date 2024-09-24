@@ -248,6 +248,9 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* Styles for game central section */
+
         .main-content {
             display: flex;
             justify-content: space-between;
@@ -304,6 +307,61 @@
         #events-table th.sortable:hover {
             background-color: #ddd;
         }
+        
+        /* Action Button */
+        .action-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+        
+        /* Modal Dialog */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }       
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -442,78 +500,116 @@
         <canvas id="efigs_engagement_index"></canvas>
         <canvas id="ckj_engagement_index"></canvas>
     </div>
-    <div class="main-content">
-        <section id="events-alerts">
-            <h3>Events and Alerts</h3>
-            <div class="table-container">
-                <table id="events-table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Date/Time</th>
-                            <th>Recommendations</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Game Update - Bingo Bash v1.53; Global</td>
-                            <td>August 3rd</td>
-                            <td>N/A</td>
-                            <td><button>Actions</button></td>
-                        </tr>
-                        <tr>
-                            <td>Engagement Alert - German engagement is below expectations</td>
-                            <td>August 5th</td>
-                            <td>Add German specific game content</td>
-                            <td><button>Actions</button></td>
-                        </tr>
-                        <tr>
-                            <td>Engagement Alert - German engagement is below expectations</td>
-                            <td>August 5th</td>
-                            <td>Add German specific game content</td>
-                            <td><button>Actions</button></td>
-                        </tr>
-                        <tr>
-                            <td>Server Maintenance - Monopoly Go</td>
-                            <td>August 6th</td>
-                            <td>Notify users about downtime</td>
-                            <td><button>Actions</button></td>
-                        </tr>
-                        <tr>
-                            <td>New Feature Release - WWE Champions</td>
-                            <td>August 7th</td>
-                            <td>Promote new features</td>
-                            <td><button>Actions</button></td>
-                        </tr>
-                        <tr>
-                            <td>Security Alert - Bingo Bash</td>
-                            <td>August 8th</td>
-                            <td>Investigate and resolve</td>
-                            <td><button>Actions</button></td>
-                        </tr>
-                        <tr>
-                            <td>Performance Issue - Monopoly Go</td>
-                            <td>August 9th</td>
-                            <td>Optimize server performance</td>
-                            <td><button>Actions</button></td>
-                        </tr>
-                        <tr>
-                            <td>User Feedback - WWE Champions</td>
-                            <td>August 10th</td>
-                            <td>Review and implement suggestions</td>
-                            <td><button>Actions</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+    <div id="game-central" class="content" style="display:none;">
+        <h2>Game Central</h2>
+        <!-- Dropdown for selecting games -->
+        <div class="dropdown-container">
+            <label for="game-select">Select Game:</label>
+            <select id="game-select">
+                <option value="all">All</option>
+                <option value="monopoly-go">Monopoly Go</option>
+                <option value="bingo-bash">Bingo Bash</option>
+                <option value="wwe-champions">WWE Champions</option>
+            </select>
+        </div>
+        <div class="kpi-container">
+            <!-- KPI Cards for Game Central -->
+            <div class="kpi-card positive">
+                <i class="fas fa-gamepad"></i>
+                <p>Games</p>
+                <h3>3</h3>
             </div>
-        </section>
-        <section id="placeholder">
-            <h3>Placeholder</h3>
-            <p>This is a placeholder for future content.</p>
-        </section>
-    </div>
+            <div class="kpi-card negative">
+                <i class="fas fa-chart-bar"></i>
+                <p>GEI</p>
+                <h3>0.44</h3>
+                <i class="fas fa-exclamation-triangle warning-icon" title="Global Engagement Index is below average."></i> <!-- Warning icon with tooltip -->
+            </div>
+            <div class="kpi-card positive" id="seven-day-retention">
+                <i class="fas fa-calendar-week"></i>
+                <p>7 Day Retention</p>
+                <h3>61.10%</h3>
+            </div>
+            <div class="kpi-card positive" id="thirty-day-retention">
+                <i class="fas fa-calendar-alt"></i>
+                <p>30 Day Retention</p>
+                <h3>14.45%</h3>
+            </div>
+        </div>
+        <div id="large_chart">
+            <canvas id="efigs_engagement_index"></canvas>
+            <canvas id="ckj_engagement_index"></canvas>
+        </div>
+        <div class="main-content">
+            <section id="events-alerts">
+                <h3>Events and Alerts</h3>
+                <div class="table-container">
+                    <table id="events-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Date/Time</th>
+                                <th>Recommendations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Game Update - Bingo Bash v1.53; Global</td>
+                                <td>August 3rd</td>
+                                <td>N/A</td>
+                            </tr>
+                            <tr>
+                                <td>Engagement Alert - German engagement is below expectations</td>
+                                <td>August 5th</td>
+                                <td>Add German specific game content <button class="action-button">Actions</button></td>
+                            </tr>
+                            <tr>
+                                <td>Engagement Alert - German engagement is below expectations</td>
+                                <td>August 5th</td>
+                                <td>Add German specific game content <button class="action-button">Actions</button></td>
+                            </tr>
+                            <tr>
+                                <td>Server Maintenance - Monopoly Go</td>
+                                <td>August 6th</td>
+                                <td>Notify users about downtime <button class="action-button">Actions</button></td>
+                            </tr>
+                            <tr>
+                                <td>New Feature Release - WWE Champions</td>
+                                <td>August 7th</td>
+                                <td>Promote new features <button class="action-button">Actions</button></td>
+                            </tr>
+                            <tr>
+                                <td>Security Alert - Bingo Bash</td>
+                                <td>August 8th</td>
+                                <td>Investigate and resolve <button class="action-button">Actions</button></td>
+                            </tr>
+                            <tr>
+                                <td>Performance Issue - Monopoly Go</td>
+                                <td>August 9th</td>
+                                <td>Optimize server performance <button class="action-button">Actions</button></td>
+                            </tr>
+                            <tr>
+                                <td>User Feedback - WWE Champions</td>
+                                <td>August 10th</td>
+                                <td>Review and implement suggestions <button class="action-button">Actions</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="placeholder">
+                <h3>Placeholder</h3>
+                <p>This is a placeholder for future content.</p>
+            </section>
+        </div>
     <p>Game Central features.</p>
+        <!-- Action Dialog -->
+        <div id="action-dialog" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <p>Placeholder action - To be implemented</p>
+            </div>
+        </div>
 </div>
 
 <!-- Modal for displaying the image -->
