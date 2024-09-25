@@ -498,7 +498,7 @@
         <canvas id="efigs_engagement_index"></canvas>
         <canvas id="ckj_engagement_index"></canvas>
     </div>
-
+s
     <!-- New section -->
     <div class="main-content">
         <section id="events-alerts">
@@ -635,6 +635,21 @@
 </div>
 
 <script>
+
+    (function () {
+              var PLATFORM_ID = "ashbys_platform_20240925150556567-019c48b0639084a",
+              DOMAIN = "ashbys",
+              LANGUAGE = "en";
+        
+              window.helpshiftConfig = {
+                platformId: PLATFORM_ID,
+                domain: DOMAIN,
+                language: LANGUAGE
+              };
+      }) ();
+        
+    !function(t,e){if("function"!=typeof window.Helpshift){var n=function()  {n.q.push(arguments)};n.q=[],window.Helpshift=n;var i,a=t.getElementsByTagName  ("script")[0];if(t.getElementById(e))return;i=t.createElement("script"),  i.async=!0,i.id=e,i.src="https://webchat.helpshift.com/latest/webChat.js";var o=function(){  window.Helpshift("init")};window.attachEvent?i.attachEvent("onload",o):  i.addEventListener("load",o,!1),a.parentNode.insertBefore(i,a)}  else window.Helpshift("update")}(document,"hs-chat");
+
     function showContent(sectionId) {
         // Hide all sections
         document.querySelectorAll('.content').forEach(section => section.style.display = 'none');
