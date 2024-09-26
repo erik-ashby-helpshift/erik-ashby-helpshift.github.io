@@ -14,7 +14,7 @@
     canvas {
       display: block;
       margin: 0 auto;
-      background-color: #eee;
+      background-color: #7ec850; /* Grass background */
     }
   </style>
 </head>
@@ -33,7 +33,7 @@
     // Player properties
     const player = {
       x: canvas.width / 2 - 15,
-      y: canvas.height - 50,
+      y: canvas.height - 60,
       width: 30,
       height: 30,
       color: '#00ff00',
@@ -48,7 +48,9 @@
     const vehicleWidth = 50;
     const vehicleHeight = 30;
     const lanes = 5;
-    const laneHeight = (canvas.height - 100) / lanes;
+    const roadStartY = 50;
+    const roadEndY = canvas.height - 50;
+    const laneHeight = (roadEndY - roadStartY) / lanes;
 
     // Create vehicles in each lane
     function createVehicles() {
@@ -56,7 +58,7 @@
       for (let i = 0; i < lanes; i++) {
         const vehicle = {
           x: Math.random() * canvas.width,
-          y: 50 + i * laneHeight + (laneHeight - vehicleHeight) / 2,
+          y: roadStartY + i * laneHeight + (laneHeight - vehicleHeight) / 2,
           width: vehicleWidth,
           height: vehicleHeight,
           color: '#ff0000',
@@ -67,17 +69,49 @@
       }
     }
 
+    // Draw start and end lines
+    function drawRoadLines() {
+      // Road start line
+      ctx.fillStyle = '#8B4513'; // Brown color for the road
+      ctx.fillRect(0, roadStartY, canvas.width, roadEndY - roadStartY);
+
+      ctx.strokeStyle = '#FFFFFF'; // White color for the lines
+      ctx.lineWidth = 4;
+
+      // Start line
+      ctx.beginPath();
+      ctx.moveTo(0, roadEndY);
+      ctx.lineTo(canvas.width, roadEndY);
+      ctx.stroke();
+
+      // End line
+      ctx.beginPath();
+      ctx.moveTo(0, roadStartY);
+      ctx.lineTo(canvas.width, roadStartY);
+      ctx.stroke();
+    }
+
     // Draw player
     function drawPlayer() {
       ctx.fillStyle = player.color;
       ctx.fillRect(player.x, player.y, player.width, player.height);
     }
 
-    // Draw vehicles
+    // Draw 8-bit vehicles
     function drawVehicles() {
       vehicles.forEach((vehicle) => {
-        ctx.fillStyle = vehicle.color;
-        ctx.fillRect(vehicle.x, vehicle.y, vehicle.width, vehicle.height);
+        ctx.fillStyle = '#0000FF'; // Blue color for the vehicles
+
+        // Draw the body of the car
+        ctx.fillRect(vehicle.x, vehicle.y + 5, vehicle.width, vehicle.height - 10);
+
+        // Draw the top of the car
+        ctx.fillRect(vehicle.x + 10, vehicle.y, vehicle.width - 20, vehicle.height - 15);
+
+        // Draw wheels
+        ctx.fillStyle = '#000000'; // Black color for the wheels
+        ctx.fillRect(vehicle.x + 5, vehicle.y + vehicle.height - 5, 10, 5);
+        ctx.fillRect(vehicle.x + vehicle.width - 15, vehicle.y + vehicle.height - 5, 10, 5);
       });
     }
 
@@ -133,12 +167,12 @@
     // Reset player position
     function resetPlayer() {
       player.x = canvas.width / 2 - player.width / 2;
-      player.y = canvas.height - 50;
+      player.y = canvas.height - 60;
     }
 
     // Check win condition
     function checkWin() {
-      if (player.y <= 0) {
+      if (player.y <= roadStartY) {
         gameOver = true;
         setTimeout(() => {
           alert('Congratulations! You crossed the road safely.');
@@ -160,7 +194,11 @@
         return;
       }
 
+      // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the road and lines
+      drawRoadLines();
 
       drawPlayer();
       drawVehicles();
