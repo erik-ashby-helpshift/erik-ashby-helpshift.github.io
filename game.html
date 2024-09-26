@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Road Killers</title>
+  <style>
+    /* CSS Styling */
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <script>
+    // JavaScript Logic
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game variables
+    let lives = 3;
+    let gameOver = false;
+
+    // Player properties
+    const player = {
+      x: canvas.width / 2 - 15,
+      y: canvas.height - 50,
+      width: 30,
+      height: 30,
+      color: '#00ff00',
+      speed: 5,
+      moving: false,
+      dx: 0,
+      dy: 0,
+    };
+
+    // Vehicle properties
+    const vehicles = [];
+    const vehicleWidth = 50;
+    const vehicleHeight = 30;
+    const lanes = 5;
+    const laneHeight = (canvas.height - 100) / lanes;
+
+    // Create vehicles in each lane
+    function createVehicles() {
+      vehicles.length = 0;
+      for (let i = 0; i < lanes; i++) {
+        const vehicle = {
+          x: Math.random() * canvas.width,
+          y: 50 + i * laneHeight + (laneHeight - vehicleHeight) / 2,
+          width: vehicleWidth,
+          height: vehicleHeight,
+          color: '#ff0000',
+          speed: 2 + Math.random() * 3,
+          direction: i % 2 === 0 ? 1 : -1, // Alternate direction per lane
+        };
+        vehicles.push(vehicle);
+      }
+    }
+
+    // Draw player
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    // Draw vehicles
+    function drawVehicles() {
+      vehicles.forEach((vehicle) => {
+        ctx.fillStyle = vehicle.color;
+        ctx.fillRect(vehicle.x, vehicle.y, vehicle.width, vehicle.height);
+      });
+    }
+
+    // Move player
+    function movePlayer() {
+      player.x += player.dx;
+      player.y += player.dy;
+
+      // Boundary checking
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+      if (player.y < 0) player.y = 0;
+      if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+    }
+
+    // Move vehicles
+    function moveVehicles() {
+      vehicles.forEach((vehicle) => {
+        vehicle.x += vehicle.speed * vehicle.direction;
+
+        // Wrap vehicles around the screen
+        if (vehicle.direction === 1 && vehicle.x > canvas.width) {
+          vehicle.x = -vehicle.width;
+        } else if (vehicle.direction === -1 && vehicle.x + vehicle.width < 0) {
+          vehicle.x = canvas.width;
+        }
+      });
+    }
+
+    // Check collisions
+    function checkCollisions() {
+      vehicles.forEach((vehicle) => {
+        if (
+          player.x < vehicle.x + vehicle.width &&
+          player.x + player.width > vehicle.x &&
+          player.y < vehicle.y + vehicle.height &&
+          player.y + player.height > vehicle.y
+        ) {
+          // Collision detected
+          lives--;
+          resetPlayer();
+          if (lives === 0) {
+            gameOver = true;
+            setTimeout(() => {
+              alert('Game Over!');
+              window.location.reload();
+            }, 100);
+          }
+        }
+      });
+    }
+
+    // Reset player position
+    function resetPlayer() {
+      player.x = canvas.width / 2 - player.width / 2;
+      player.y = canvas.height - 50;
+    }
+
+    // Check win condition
+    function checkWin() {
+      if (player.y <= 0) {
+        gameOver = true;
+        setTimeout(() => {
+          alert('Congratulations! You crossed the road safely.');
+          window.location.reload();
+        }, 100);
+      }
+    }
+
+    // Draw game info
+    function drawInfo() {
+      ctx.fillStyle = '#000';
+      ctx.font = '20px Arial';
+      ctx.fillText(`Lives: ${lives}`, 10, 30);
+    }
+
+    // Game loop
+    function gameLoop() {
+      if (gameOver) {
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawPlayer();
+      drawVehicles();
+      drawInfo();
+
+      movePlayer();
+      moveVehicles();
+      checkCollisions();
+      checkWin();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') {
+        player.dy = -player.speed;
+      }
+      if (e.key === 'ArrowDown') {
+        player.dy = player.speed;
+      }
+      if (e.key === 'ArrowLeft') {
+        player.dx = -player.speed;
+      }
+      if (e.key === 'ArrowRight') {
+        player.dx = player.speed;
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        player.dy = 0;
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        player.dx = 0;
+      }
+    });
+
+    // Initialize game
+    function init() {
+      createVehicles();
+      resetPlayer();
+      gameLoop();
+    }
+
+    init();
+  </script>
+</body>
+</html>
