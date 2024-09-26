@@ -30,17 +30,29 @@
     let lives = 3;
     let gameOver = false;
 
+    // Load images
+    const lizardImage = new Image();
+    lizardImage.src = 'lizard.png'; // Provide the path to your lizard image
+
+    // Ensure the image is loaded before starting the game
+    lizardImage.onload = function() {
+      init();
+    };
+
     // Player properties
     const player = {
       x: canvas.width / 2 - 15,
       y: canvas.height - 60,
       width: 30,
       height: 30,
-      color: '#00ff00',
       speed: 5,
       moving: false,
       dx: 0,
       dy: 0,
+      frameX: 0,
+      frameY: 0,
+      spriteWidth: 64, // Width of one frame in the sprite sheet
+      spriteHeight: 64, // Height of one frame in the sprite sheet
     };
 
     // Vehicle properties
@@ -71,34 +83,69 @@
 
     // Draw start and end lines
     function drawRoadLines() {
+      // Save the context state
+      ctx.save();
+
+      // Apply transformation for 45-degree angle
+      ctx.setTransform(1, 0.5, -1, 1, canvas.width / 2, 0);
+
       // Road start line
       ctx.fillStyle = '#8B4513'; // Brown color for the road
-      ctx.fillRect(0, roadStartY, canvas.width, roadEndY - roadStartY);
+      ctx.fillRect(-canvas.width, roadStartY, canvas.width * 2, roadEndY - roadStartY);
 
       ctx.strokeStyle = '#FFFFFF'; // White color for the lines
       ctx.lineWidth = 4;
 
       // Start line
       ctx.beginPath();
-      ctx.moveTo(0, roadEndY);
+      ctx.moveTo(-canvas.width, roadEndY);
       ctx.lineTo(canvas.width, roadEndY);
       ctx.stroke();
 
       // End line
       ctx.beginPath();
-      ctx.moveTo(0, roadStartY);
+      ctx.moveTo(-canvas.width, roadStartY);
       ctx.lineTo(canvas.width, roadStartY);
       ctx.stroke();
+
+      // Restore the context to its original state
+      ctx.restore();
     }
 
     // Draw player
     function drawPlayer() {
-      ctx.fillStyle = player.color;
-      ctx.fillRect(player.x, player.y, player.width, player.height);
+      // Option 1: Using an image sprite
+      ctx.drawImage(
+        lizardImage,
+        player.frameX * player.spriteWidth,
+        player.frameY * player.spriteHeight,
+        player.spriteWidth,
+        player.spriteHeight,
+        player.x,
+        player.y,
+        player.width,
+        player.height
+      );
+
+      // Option 2: Drawing a simple lizard shape if image is not available
+      // ctx.fillStyle = '#00ff00';
+      // ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    // Animate player sprite
+    function handlePlayerFrame() {
+      if (player.dx !== 0 || player.dy !== 0) {
+        player.frameX = (player.frameX + 1) % 4; // Assuming 4 frames in sprite sheet
+      } else {
+        player.frameX = 0;
+      }
     }
 
     // Draw 8-bit vehicles
     function drawVehicles() {
+      ctx.save();
+      ctx.setTransform(1, 0.5, -1, 1, canvas.width / 2, 0); // Apply same transformation
+
       vehicles.forEach((vehicle) => {
         ctx.fillStyle = '#0000FF'; // Blue color for the vehicles
 
@@ -113,6 +160,8 @@
         ctx.fillRect(vehicle.x + 5, vehicle.y + vehicle.height - 5, 10, 5);
         ctx.fillRect(vehicle.x + vehicle.width - 15, vehicle.y + vehicle.height - 5, 10, 5);
       });
+
+      ctx.restore();
     }
 
     // Move player
@@ -144,11 +193,14 @@
     // Check collisions
     function checkCollisions() {
       vehicles.forEach((vehicle) => {
+        const transformedPlayer = transformPoint(player.x, player.y);
+        const transformedVehicle = transformPoint(vehicle.x, vehicle.y);
+
         if (
-          player.x < vehicle.x + vehicle.width &&
-          player.x + player.width > vehicle.x &&
-          player.y < vehicle.y + vehicle.height &&
-          player.y + player.height > vehicle.y
+          transformedPlayer.x < transformedVehicle.x + vehicle.width &&
+          transformedPlayer.x + player.width > transformedVehicle.x &&
+          transformedPlayer.y < transformedVehicle.y + vehicle.height &&
+          transformedPlayer.y + player.height > transformedVehicle.y
         ) {
           // Collision detected
           lives--;
@@ -162,6 +214,13 @@
           }
         }
       });
+    }
+
+    // Transform point to match the transformed road
+    function transformPoint(x, y) {
+      const newX = x - y * 1;
+      const newY = y + x * 0.5;
+      return { x: newX, y: newY };
     }
 
     // Reset player position
@@ -208,6 +267,7 @@
       moveVehicles();
       checkCollisions();
       checkWin();
+      handlePlayerFrame();
 
       requestAnimationFrame(gameLoop);
     }
@@ -244,7 +304,6 @@
       gameLoop();
     }
 
-    init();
   </script>
 </body>
 </html>
