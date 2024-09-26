@@ -30,6 +30,9 @@
     let lives = 3;
     let gameOver = false;
 
+    // Scaling factor to shrink the road by 50%
+    const scale = 0.5;
+
     // Player properties
     const player = {
       x: canvas.width / 2,
@@ -73,15 +76,22 @@
       // Save the context state
       ctx.save();
 
-      // Apply transformation for 45-degree angle
-      ctx.setTransform(1, 0.5, -1, 1, canvas.width / 2, 0);
+      // Apply transformation for 45-degree angle with scaling
+      ctx.setTransform(
+        scale,                // scaleX
+        0.5 * scale,          // skewY
+        -1 * scale,           // skewX
+        scale,                // scaleY
+        canvas.width / 2,     // translateX
+        0                     // translateY
+      );
 
       // Draw the road
       ctx.fillStyle = '#8B4513'; // Brown color for the road
       ctx.fillRect(-canvas.width, roadStartY, canvas.width * 2, roadEndY - roadStartY);
 
       ctx.strokeStyle = '#FFFFFF'; // White color for the lines
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 4 * scale;   // Adjust line width according to scale
 
       // Start line
       ctx.beginPath();
@@ -104,13 +114,20 @@
       // Save the context state
       ctx.save();
 
-      // Transform the context to match the road angle
-      ctx.setTransform(1, 0.5, -1, 1, canvas.width / 2, 0);
+      // Transform the context to match the road angle and scale
+      ctx.setTransform(
+        scale,                // scaleX
+        0.5 * scale,          // skewY
+        -1 * scale,           // skewX
+        scale,                // scaleY
+        canvas.width / 2,     // translateX
+        0                     // translateY
+      );
 
       // Draw the lizard as a simple shape
       ctx.fillStyle = player.color;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, player.width / 2, 0, Math.PI * 2);
+      ctx.arc(player.x, player.y, (player.width / 2) * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Restore the context to its original state
@@ -120,21 +137,48 @@
     // Draw 8-bit vehicles
     function drawVehicles() {
       ctx.save();
-      ctx.setTransform(1, 0.5, -1, 1, canvas.width / 2, 0); // Apply same transformation
+      ctx.setTransform(
+        scale,                // scaleX
+        0.5 * scale,          // skewY
+        -1 * scale,           // skewX
+        scale,                // scaleY
+        canvas.width / 2,     // translateX
+        0                     // translateY
+      );
 
       vehicles.forEach((vehicle) => {
         ctx.fillStyle = vehicle.color;
 
         // Draw the body of the car
-        ctx.fillRect(vehicle.x, vehicle.y + 5, vehicle.width, vehicle.height - 10);
+        ctx.fillRect(
+          vehicle.x,
+          vehicle.y + 5,
+          vehicle.width * scale,
+          (vehicle.height - 10) * scale
+        );
 
         // Draw the top of the car
-        ctx.fillRect(vehicle.x + 10, vehicle.y, vehicle.width - 20, vehicle.height - 15);
+        ctx.fillRect(
+          vehicle.x + 10,
+          vehicle.y,
+          (vehicle.width - 20) * scale,
+          (vehicle.height - 15) * scale
+        );
 
         // Draw wheels
         ctx.fillStyle = '#000000'; // Black color for the wheels
-        ctx.fillRect(vehicle.x + 5, vehicle.y + vehicle.height - 5, 10, 5);
-        ctx.fillRect(vehicle.x + vehicle.width - 15, vehicle.y + vehicle.height - 5, 10, 5);
+        ctx.fillRect(
+          vehicle.x + 5,
+          vehicle.y + (vehicle.height - 5) * scale,
+          10 * scale,
+          5 * scale
+        );
+        ctx.fillRect(
+          vehicle.x + vehicle.width - 15,
+          vehicle.y + (vehicle.height - 5) * scale,
+          10 * scale,
+          5 * scale
+        );
       });
 
       ctx.restore();
@@ -172,11 +216,13 @@
         const transformedPlayer = transformPoint(player.x, player.y);
         const transformedVehicle = transformPoint(vehicle.x, vehicle.y);
 
+        const playerRadius = (player.width / 2) * scale;
+
         if (
-          transformedPlayer.x < transformedVehicle.x + vehicle.width &&
-          transformedPlayer.x + player.width > transformedVehicle.x &&
-          transformedPlayer.y < transformedVehicle.y + vehicle.height &&
-          transformedPlayer.y + player.height > transformedVehicle.y
+          transformedPlayer.x + playerRadius > transformedVehicle.x &&
+          transformedPlayer.x - playerRadius < transformedVehicle.x + vehicle.width * scale &&
+          transformedPlayer.y + playerRadius > transformedVehicle.y &&
+          transformedPlayer.y - playerRadius < transformedVehicle.y + vehicle.height * scale
         ) {
           // Collision detected
           lives--;
@@ -194,9 +240,9 @@
 
     // Transform point to match the transformed road
     function transformPoint(x, y) {
-      // Inverse of the transformation matrix
-      const newX = x - y * -1;
-      const newY = y - x * 0.5;
+      // Inverse of the transformation matrix with scaling
+      const newX = (x - canvas.width / 2) / scale + ((y) * 1) / scale;
+      const newY = (y - ((x - canvas.width / 2) * 0.5)) / scale;
       return { x: newX, y: newY };
     }
 
@@ -284,3 +330,4 @@
   </script>
 </body>
 </html>
+
