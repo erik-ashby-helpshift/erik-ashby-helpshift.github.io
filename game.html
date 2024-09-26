@@ -30,13 +30,10 @@
     let lives = 3;
     let gameOver = false;
 
-    // Remove scaling factor
-    const scale = 0.5;
-
     // Player properties
     const player = {
-      x: canvas.width / 2,
-      y: canvas.height - 100,
+      x: canvas.width / 2 - 20,
+      y: canvas.height - 70,
       width: 40,
       height: 40,
       speed: 5,
@@ -47,11 +44,11 @@
 
     // Vehicle properties
     const vehicles = [];
-    const vehicleWidth = 80;  // Increased size
-    const vehicleHeight = 50; // Increased size
+    const vehicleWidth = 80;
+    const vehicleHeight = 50;
     const lanes = 5;
-    const roadStartY = 0;
-    const roadEndY = canvas.height;
+    const roadStartY = 50;
+    const roadEndY = canvas.height - 50;
     const laneHeight = (roadEndY - roadStartY) / lanes;
 
     // Create vehicles in each lane
@@ -63,7 +60,7 @@
           y: roadStartY + i * laneHeight + (laneHeight - vehicleHeight) / 2,
           width: vehicleWidth,
           height: vehicleHeight,
-          speed: 3 + Math.random() * 2, // Adjusted speed
+          speed: 3 + Math.random() * 2,
           direction: i % 2 === 0 ? 1 : -1, // Alternate direction per lane
           color: '#0000FF', // Vehicle color
         };
@@ -73,79 +70,37 @@
 
     // Draw start and end lines
     function drawRoadLines() {
-      // Save the context state
-      ctx.save();
-
-      // Apply transformation for 45-degree angle
-      ctx.setTransform(
-        1,                  // scaleX
-        0.5,                // skewY
-        -1,                 // skewX
-        1,                  // scaleY
-        canvas.width / 2,   // translateX
-        -canvas.height / 4  // translateY (Adjusted to center the road)
-      );
-
       // Draw the road
       ctx.fillStyle = '#8B4513'; // Brown color for the road
-      ctx.fillRect(-canvas.width * 2, roadStartY, canvas.width * 4, roadEndY);
+      ctx.fillRect(0, roadStartY, canvas.width, roadEndY - roadStartY);
 
       ctx.strokeStyle = '#FFFFFF'; // White color for the lines
       ctx.lineWidth = 4;
 
       // Start line
       ctx.beginPath();
-      ctx.moveTo(-canvas.width * 2, roadEndY);
-      ctx.lineTo(canvas.width * 2, roadEndY);
+      ctx.moveTo(0, roadEndY);
+      ctx.lineTo(canvas.width, roadEndY);
       ctx.stroke();
 
       // End line
       ctx.beginPath();
-      ctx.moveTo(-canvas.width * 2, roadStartY);
-      ctx.lineTo(canvas.width * 2, roadStartY);
+      ctx.moveTo(0, roadStartY);
+      ctx.lineTo(canvas.width, roadStartY);
       ctx.stroke();
-
-      // Restore the context to its original state
-      ctx.restore();
     }
 
     // Draw player
     function drawPlayer() {
-      // Save the context state
-      ctx.save();
-
-      // Transform the context to match the road angle
-      ctx.setTransform(
-        1,                  // scaleX
-        0.5,                // skewY
-        -1,                 // skewX
-        1,                  // scaleY
-        canvas.width / 2,   // translateX
-        -canvas.height / 4  // translateY
-      );
-
       // Draw the lizard as a simple shape
       ctx.fillStyle = player.color;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, player.width / 2, 0, Math.PI * 2);
+      ctx.arc(player.x + player.width / 2, player.y + player.height / 2, player.width / 2, 0, Math.PI * 2);
       ctx.fill();
-
-      // Restore the context to its original state
-      ctx.restore();
     }
 
     // Draw 8-bit vehicles
     function drawVehicles() {
-      ctx.save();
-      ctx.setTransform(
-        1,                  // scaleX
-        0.5,                // skewY
-        -1,                 // skewX
-        1,                  // scaleY
-        canvas.width / 2,   // translateX
-        -canvas.height / 4  // translateY
-      );
-
       vehicles.forEach((vehicle) => {
         ctx.fillStyle = vehicle.color;
 
@@ -180,8 +135,6 @@
           5
         );
       });
-
-      ctx.restore();
     }
 
     // Move player
@@ -191,9 +144,9 @@
 
       // Boundary checking
       if (player.x < 0) player.x = 0;
-      if (player.x > canvas.width) player.x = canvas.width;
+      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
       if (player.y < 0) player.y = 0;
-      if (player.y > canvas.height) player.y = canvas.height;
+      if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
     }
 
     // Move vehicles
@@ -202,10 +155,10 @@
         vehicle.x += vehicle.speed * vehicle.direction;
 
         // Wrap vehicles around the screen
-        if (vehicle.direction === 1 && vehicle.x > canvas.width + vehicle.width) {
+        if (vehicle.direction === 1 && vehicle.x > canvas.width) {
           vehicle.x = -vehicle.width;
-        } else if (vehicle.direction === -1 && vehicle.x < -vehicle.width) {
-          vehicle.x = canvas.width + vehicle.width;
+        } else if (vehicle.direction === -1 && vehicle.x + vehicle.width < 0) {
+          vehicle.x = canvas.width;
         }
       });
     }
@@ -213,16 +166,11 @@
     // Check collisions
     function checkCollisions() {
       vehicles.forEach((vehicle) => {
-        const transformedPlayer = transformPoint(player.x, player.y);
-        const transformedVehicle = transformPoint(vehicle.x, vehicle.y);
-
-        const playerRadius = player.width / 2;
-
         if (
-          transformedPlayer.x + playerRadius > transformedVehicle.x &&
-          transformedPlayer.x - playerRadius < transformedVehicle.x + vehicle.width &&
-          transformedPlayer.y + playerRadius > transformedVehicle.y &&
-          transformedPlayer.y - playerRadius < transformedVehicle.y + vehicle.height
+          player.x < vehicle.x + vehicle.width &&
+          player.x + player.width > vehicle.x &&
+          player.y < vehicle.y + vehicle.height &&
+          player.y + player.height > vehicle.y
         ) {
           // Collision detected
           lives--;
@@ -238,25 +186,15 @@
       });
     }
 
-    // Transform point to match the transformed road
-    function transformPoint(x, y) {
-      // Inverse of the transformation matrix
-      const translateX = canvas.width / 2;
-      const translateY = -canvas.height / 4;
-      const newX = x - translateX + y * -1;
-      const newY = y - translateY - (x - translateX) * 0.5;
-      return { x: newX, y: newY };
-    }
-
     // Reset player position
     function resetPlayer() {
-      player.x = canvas.width / 2;
-      player.y = canvas.height - 100;
+      player.x = canvas.width / 2 - player.width / 2;
+      player.y = canvas.height - 70;
     }
 
     // Check win condition
     function checkWin() {
-      if (player.y <= roadStartY + player.height / 2) {
+      if (player.y <= roadStartY) {
         gameOver = true;
         setTimeout(() => {
           alert('Congratulations! You crossed the road safely.');
@@ -332,6 +270,7 @@
   </script>
 </body>
 </html>
+
 
 
 
