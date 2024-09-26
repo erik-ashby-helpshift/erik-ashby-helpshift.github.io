@@ -30,29 +30,16 @@
     let lives = 3;
     let gameOver = false;
 
-    // Load images
-    const lizardImage = new Image();
-    lizardImage.src = 'lizard.png'; // Provide the path to your lizard image
-
-    // Ensure the image is loaded before starting the game
-    lizardImage.onload = function() {
-      init();
-    };
-
     // Player properties
     const player = {
-      x: canvas.width / 2 - 15,
+      x: canvas.width / 2,
       y: canvas.height - 60,
       width: 30,
       height: 30,
       speed: 5,
-      moving: false,
       dx: 0,
       dy: 0,
-      frameX: 0,
-      frameY: 0,
-      spriteWidth: 64, // Width of one frame in the sprite sheet
-      spriteHeight: 64, // Height of one frame in the sprite sheet
+      color: '#00ff00', // Lizard color
     };
 
     // Vehicle properties
@@ -73,9 +60,9 @@
           y: roadStartY + i * laneHeight + (laneHeight - vehicleHeight) / 2,
           width: vehicleWidth,
           height: vehicleHeight,
-          color: '#ff0000',
           speed: 2 + Math.random() * 3,
           direction: i % 2 === 0 ? 1 : -1, // Alternate direction per lane
+          color: '#0000FF', // Vehicle color
         };
         vehicles.push(vehicle);
       }
@@ -89,7 +76,7 @@
       // Apply transformation for 45-degree angle
       ctx.setTransform(1, 0.5, -1, 1, canvas.width / 2, 0);
 
-      // Road start line
+      // Draw the road
       ctx.fillStyle = '#8B4513'; // Brown color for the road
       ctx.fillRect(-canvas.width, roadStartY, canvas.width * 2, roadEndY - roadStartY);
 
@@ -114,31 +101,20 @@
 
     // Draw player
     function drawPlayer() {
-      // Option 1: Using an image sprite
-      ctx.drawImage(
-        lizardImage,
-        player.frameX * player.spriteWidth,
-        player.frameY * player.spriteHeight,
-        player.spriteWidth,
-        player.spriteHeight,
-        player.x,
-        player.y,
-        player.width,
-        player.height
-      );
+      // Save the context state
+      ctx.save();
 
-      // Option 2: Drawing a simple lizard shape if image is not available
-      // ctx.fillStyle = '#00ff00';
-      // ctx.fillRect(player.x, player.y, player.width, player.height);
-    }
+      // Transform the context to match the road angle
+      ctx.setTransform(1, 0.5, -1, 1, canvas.width / 2, 0);
 
-    // Animate player sprite
-    function handlePlayerFrame() {
-      if (player.dx !== 0 || player.dy !== 0) {
-        player.frameX = (player.frameX + 1) % 4; // Assuming 4 frames in sprite sheet
-      } else {
-        player.frameX = 0;
-      }
+      // Draw the lizard as a simple shape
+      ctx.fillStyle = player.color;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.width / 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Restore the context to its original state
+      ctx.restore();
     }
 
     // Draw 8-bit vehicles
@@ -147,7 +123,7 @@
       ctx.setTransform(1, 0.5, -1, 1, canvas.width / 2, 0); // Apply same transformation
 
       vehicles.forEach((vehicle) => {
-        ctx.fillStyle = '#0000FF'; // Blue color for the vehicles
+        ctx.fillStyle = vehicle.color;
 
         // Draw the body of the car
         ctx.fillRect(vehicle.x, vehicle.y + 5, vehicle.width, vehicle.height - 10);
@@ -171,9 +147,9 @@
 
       // Boundary checking
       if (player.x < 0) player.x = 0;
-      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+      if (player.x > canvas.width) player.x = canvas.width;
       if (player.y < 0) player.y = 0;
-      if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+      if (player.y > canvas.height) player.y = canvas.height;
     }
 
     // Move vehicles
@@ -182,10 +158,10 @@
         vehicle.x += vehicle.speed * vehicle.direction;
 
         // Wrap vehicles around the screen
-        if (vehicle.direction === 1 && vehicle.x > canvas.width) {
-          vehicle.x = -vehicle.width;
-        } else if (vehicle.direction === -1 && vehicle.x + vehicle.width < 0) {
-          vehicle.x = canvas.width;
+        if (vehicle.direction === 1 && vehicle.x > canvas.width * 1.5) {
+          vehicle.x = -canvas.width / 2;
+        } else if (vehicle.direction === -1 && vehicle.x < -canvas.width / 2) {
+          vehicle.x = canvas.width * 1.5;
         }
       });
     }
@@ -218,14 +194,15 @@
 
     // Transform point to match the transformed road
     function transformPoint(x, y) {
-      const newX = x - y * 1;
-      const newY = y + x * 0.5;
+      // Inverse of the transformation matrix
+      const newX = x - y * -1;
+      const newY = y - x * 0.5;
       return { x: newX, y: newY };
     }
 
     // Reset player position
     function resetPlayer() {
-      player.x = canvas.width / 2 - player.width / 2;
+      player.x = canvas.width / 2;
       player.y = canvas.height - 60;
     }
 
@@ -267,7 +244,6 @@
       moveVehicles();
       checkCollisions();
       checkWin();
-      handlePlayerFrame();
 
       requestAnimationFrame(gameLoop);
     }
@@ -304,6 +280,7 @@
       gameLoop();
     }
 
+    init();
   </script>
 </body>
 </html>
