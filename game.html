@@ -30,15 +30,15 @@
     let lives = 3;
     let gameOver = false;
 
-    // Scaling factor to shrink the road by 50%
-    const scale = 0.5;
+    // Remove scaling factor
+    // const scale = 1;
 
     // Player properties
     const player = {
       x: canvas.width / 2,
-      y: canvas.height - 60,
-      width: 30,
-      height: 30,
+      y: canvas.height - 100,
+      width: 40,
+      height: 40,
       speed: 5,
       dx: 0,
       dy: 0,
@@ -47,11 +47,11 @@
 
     // Vehicle properties
     const vehicles = [];
-    const vehicleWidth = 50;
-    const vehicleHeight = 30;
-    const lanes = 4;
-    const roadStartY = 50;
-    const roadEndY = canvas.height - 150;
+    const vehicleWidth = 80;  // Increased size
+    const vehicleHeight = 50; // Increased size
+    const lanes = 5;
+    const roadStartY = 0;
+    const roadEndY = canvas.height;
     const laneHeight = (roadEndY - roadStartY) / lanes;
 
     // Create vehicles in each lane
@@ -63,7 +63,7 @@
           y: roadStartY + i * laneHeight + (laneHeight - vehicleHeight) / 2,
           width: vehicleWidth,
           height: vehicleHeight,
-          speed: 2 + Math.random() * 3,
+          speed: 3 + Math.random() * 2, // Adjusted speed
           direction: i % 2 === 0 ? 1 : -1, // Alternate direction per lane
           color: '#0000FF', // Vehicle color
         };
@@ -76,33 +76,33 @@
       // Save the context state
       ctx.save();
 
-      // Apply transformation for 45-degree angle with scaling
+      // Apply transformation for 45-degree angle
       ctx.setTransform(
-        scale,                // scaleX
-        0.5 * scale,          // skewY
-        -1 * scale,           // skewX
-        scale,                // scaleY
-        canvas.width / 2,     // translateX
-        0                     // translateY
+        1,                  // scaleX
+        0.5,                // skewY
+        -1,                 // skewX
+        1,                  // scaleY
+        canvas.width / 2,   // translateX
+        -canvas.height / 4  // translateY (Adjusted to center the road)
       );
 
       // Draw the road
       ctx.fillStyle = '#8B4513'; // Brown color for the road
-      ctx.fillRect(-canvas.width, roadStartY, canvas.width * 2, roadEndY - roadStartY);
+      ctx.fillRect(-canvas.width * 2, roadStartY, canvas.width * 4, roadEndY);
 
       ctx.strokeStyle = '#FFFFFF'; // White color for the lines
-      ctx.lineWidth = 4 * scale;   // Adjust line width according to scale
+      ctx.lineWidth = 4;
 
       // Start line
       ctx.beginPath();
-      ctx.moveTo(-canvas.width, roadEndY);
-      ctx.lineTo(canvas.width, roadEndY);
+      ctx.moveTo(-canvas.width * 2, roadEndY);
+      ctx.lineTo(canvas.width * 2, roadEndY);
       ctx.stroke();
 
       // End line
       ctx.beginPath();
-      ctx.moveTo(-canvas.width, roadStartY);
-      ctx.lineTo(canvas.width, roadStartY);
+      ctx.moveTo(-canvas.width * 2, roadStartY);
+      ctx.lineTo(canvas.width * 2, roadStartY);
       ctx.stroke();
 
       // Restore the context to its original state
@@ -114,20 +114,20 @@
       // Save the context state
       ctx.save();
 
-      // Transform the context to match the road angle and scale
+      // Transform the context to match the road angle
       ctx.setTransform(
-        scale,                // scaleX
-        0.5 * scale,          // skewY
-        -1 * scale,           // skewX
-        scale,                // scaleY
-        canvas.width / 2,     // translateX
-        0                     // translateY
+        1,                  // scaleX
+        0.5,                // skewY
+        -1,                 // skewX
+        1,                  // scaleY
+        canvas.width / 2,   // translateX
+        -canvas.height / 4  // translateY
       );
 
       // Draw the lizard as a simple shape
       ctx.fillStyle = player.color;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, (player.width / 2) * scale, 0, Math.PI * 2);
+      ctx.arc(player.x, player.y, player.width / 2, 0, Math.PI * 2);
       ctx.fill();
 
       // Restore the context to its original state
@@ -138,12 +138,12 @@
     function drawVehicles() {
       ctx.save();
       ctx.setTransform(
-        scale,                // scaleX
-        0.5 * scale,          // skewY
-        -1 * scale,           // skewX
-        scale,                // scaleY
-        canvas.width / 2,     // translateX
-        0                     // translateY
+        1,                  // scaleX
+        0.5,                // skewY
+        -1,                 // skewX
+        1,                  // scaleY
+        canvas.width / 2,   // translateX
+        -canvas.height / 4  // translateY
       );
 
       vehicles.forEach((vehicle) => {
@@ -153,31 +153,31 @@
         ctx.fillRect(
           vehicle.x,
           vehicle.y + 5,
-          vehicle.width * scale,
-          (vehicle.height - 10) * scale
+          vehicle.width,
+          vehicle.height - 10
         );
 
         // Draw the top of the car
         ctx.fillRect(
           vehicle.x + 10,
           vehicle.y,
-          (vehicle.width - 20) * scale,
-          (vehicle.height - 15) * scale
+          vehicle.width - 20,
+          vehicle.height - 15
         );
 
         // Draw wheels
         ctx.fillStyle = '#000000'; // Black color for the wheels
         ctx.fillRect(
           vehicle.x + 5,
-          vehicle.y + (vehicle.height - 5) * scale,
-          10 * scale,
-          5 * scale
+          vehicle.y + vehicle.height - 5,
+          10,
+          5
         );
         ctx.fillRect(
           vehicle.x + vehicle.width - 15,
-          vehicle.y + (vehicle.height - 5) * scale,
-          10 * scale,
-          5 * scale
+          vehicle.y + vehicle.height - 5,
+          10,
+          5
         );
       });
 
@@ -202,10 +202,10 @@
         vehicle.x += vehicle.speed * vehicle.direction;
 
         // Wrap vehicles around the screen
-        if (vehicle.direction === 1 && vehicle.x > canvas.width * 1.5) {
-          vehicle.x = -canvas.width / 2;
-        } else if (vehicle.direction === -1 && vehicle.x < -canvas.width / 2) {
-          vehicle.x = canvas.width * 1.5;
+        if (vehicle.direction === 1 && vehicle.x > canvas.width + vehicle.width) {
+          vehicle.x = -vehicle.width;
+        } else if (vehicle.direction === -1 && vehicle.x < -vehicle.width) {
+          vehicle.x = canvas.width + vehicle.width;
         }
       });
     }
@@ -216,13 +216,13 @@
         const transformedPlayer = transformPoint(player.x, player.y);
         const transformedVehicle = transformPoint(vehicle.x, vehicle.y);
 
-        const playerRadius = (player.width / 2) * scale;
+        const playerRadius = player.width / 2;
 
         if (
           transformedPlayer.x + playerRadius > transformedVehicle.x &&
-          transformedPlayer.x - playerRadius < transformedVehicle.x + vehicle.width * scale &&
+          transformedPlayer.x - playerRadius < transformedVehicle.x + vehicle.width &&
           transformedPlayer.y + playerRadius > transformedVehicle.y &&
-          transformedPlayer.y - playerRadius < transformedVehicle.y + vehicle.height * scale
+          transformedPlayer.y - playerRadius < transformedVehicle.y + vehicle.height
         ) {
           // Collision detected
           lives--;
@@ -240,21 +240,23 @@
 
     // Transform point to match the transformed road
     function transformPoint(x, y) {
-      // Inverse of the transformation matrix with scaling
-      const newX = (x - canvas.width / 2) / scale + ((y) * 1) / scale;
-      const newY = (y - ((x - canvas.width / 2) * 0.5)) / scale;
+      // Inverse of the transformation matrix
+      const translateX = canvas.width / 2;
+      const translateY = -canvas.height / 4;
+      const newX = x - translateX + y * -1;
+      const newY = y - translateY - (x - translateX) * 0.5;
       return { x: newX, y: newY };
     }
 
     // Reset player position
     function resetPlayer() {
       player.x = canvas.width / 2;
-      player.y = canvas.height - 60;
+      player.y = canvas.height - 100;
     }
 
     // Check win condition
     function checkWin() {
-      if (player.y <= roadStartY) {
+      if (player.y <= roadStartY + player.height / 2) {
         gameOver = true;
         setTimeout(() => {
           alert('Congratulations! You crossed the road safely.');
@@ -330,4 +332,6 @@
   </script>
 </body>
 </html>
+
+
 
