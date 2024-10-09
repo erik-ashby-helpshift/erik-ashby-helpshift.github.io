@@ -1,130 +1,238 @@
-/* Reset and basic styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Golf Clash - Your Game Title</title>
+    <style>
+        /* Reset and basic styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-    font-family: Arial, sans-serif;
-    color: #333;
-}
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
 
-/* Navigation */
-nav {
-    background: rgba(0, 0, 0, 0.7);
-    padding: 1em;
-    position: fixed;
-    width: 100%;
-    top: 0;
-}
+        /* Navigation */
+        nav {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1em;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
 
-nav ul {
-    list-style: none;
-    display: flex;
-    justify-content: flex-end;
-}
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: flex-end;
+        }
 
-nav li {
-    margin-left: 2em;
-}
+        nav li {
+            margin-left: 2em;
+        }
 
-nav a {
-    color: #fff;
-    text-decoration: none;
-}
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
 
-/* Hero Section */
-.hero {
-    background: url('hero-background.jpg') no-repeat center center/cover;
-    height: 100vh;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding-top: 5em; /* To offset fixed nav */
-}
+        /* Hero Section */
+        .hero {
+            background: url('your-hero-image.jpg') no-repeat center center/cover;
+            height: 100vh;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 5em; /* Offset for fixed nav */
+        }
 
-.hero-content h1 {
-    font-size: 4em;
-    margin-bottom: 0.5em;
-}
+        .hero-content h1 {
+            font-size: 4em;
+            margin-bottom: 0.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
 
-.hero-content p {
-    font-size: 1.5em;
-    margin-bottom: 1em;
-}
+        .hero-content p {
+            font-size: 1.5em;
+            margin-bottom: 1em;
+            max-width: 600px;
+        }
 
-.btn {
-    background: #28a745;
-    color: #fff;
-    padding: 1em 2em;
-    text-decoration: none;
-    border-radius: 5px;
-}
+        .btn {
+            background: #28a745;
+            color: #fff;
+            padding: 1em 2em;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            transition: background 0.3s;
+        }
 
-/* Features Section */
-.features {
-    padding: 4em 2em;
-    background: #f9f9f9;
-    text-align: center;
-}
+        .btn:hover {
+            background: #218838;
+        }
 
-.features h2 {
-    margin-bottom: 2em;
-}
+        /* Features Section */
+        .features {
+            padding: 4em 2em;
+            background: #f9f9f9;
+            text-align: center;
+        }
 
-.feature-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+        .features h2 {
+            margin-bottom: 2em;
+            font-size: 2.5em;
+        }
 
-.feature-item {
-    flex: 1 1 300px;
-    margin: 1em;
-    text-align: left;
-}
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2em;
+        }
 
-.feature-item img {
-    width: 100%;
-    height: auto;
-    border-radius: 5px;
-}
+        .feature-item {
+            flex: 1 1 300px;
+            max-width: 300px;
+            text-align: left;
+        }
 
-.feature-item h3 {
-    margin-top: 1em;
-}
+        .feature-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
 
-/* Community Section */
-.community {
-    padding: 4em 2em;
-    background: #fff;
-    text-align: center;
-}
+        .feature-item h3 {
+            margin-top: 1em;
+            font-size: 1.5em;
+        }
 
-.community h2 {
-    margin-bottom: 1em;
-}
+        .feature-item p {
+            margin-top: 0.5em;
+            line-height: 1.5;
+        }
 
-/* Footer */
-footer {
-    background: #222;
-    color: #aaa;
-    text-align: center;
-    padding: 1em 0;
-}
+        /* Community Section */
+        .community {
+            padding: 4em 2em;
+            background: #fff;
+            text-align: center;
+        }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .nav ul {
-        flex-direction: column;
-        align-items: center;
-    }
+        .community h2 {
+            margin-bottom: 1em;
+            font-size: 2.5em;
+        }
 
-    .feature-list {
-        flex-direction: column;
-    }
-}
+        .community p {
+            max-width: 600px;
+            margin: 0 auto 2em auto;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        footer {
+            background: #222;
+            color: #aaa;
+            text-align: center;
+            padding: 1em 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav li {
+                margin-left: 0;
+                margin-bottom: 1em;
+            }
+
+            .hero-content h1 {
+                font-size: 3em;
+            }
+
+            .hero-content p {
+                font-size: 1.2em;
+            }
+
+            .feature-list {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="hero">
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">Support</a></li>
+            </ul>
+        </nav>
+        <div class="hero-content">
+            <h1>Golf Clash</h1>
+            <p>Experience the thrill of golf like never before. Join millions of players worldwide in exciting real-time multiplayer matches!</p>
+            <a href="#" class="btn">Play Now</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Features Section -->
+        <section class="features">
+            <h2>Game Features</h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <img src="feature1.jpg" alt="Real-time Multiplayer">
+                    <h3>Real-time Multiplayer</h3>
+                    <p>Compete against players from around the world in exciting matches.</p>
+                </div>
+                <div class="feature-item">
+                    <img src="feature2.jpg" alt="Stunning Courses">
+                    <h3>Stunning Courses</h3>
+                    <p>Play on beautifully rendered courses that challenge your skills.</p>
+                </div>
+                <div class="feature-item">
+                    <img src="feature3.jpg" alt="Customizable Equipment">
+                    <h3>Customizable Equipment</h3>
+                    <p>Unlock clubs and balls to improve your game and customize your play style.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section class="community">
+            <h2>Join the Community</h2>
+            <p>Connect with other players, share tips, and stay updated on the latest news and events.</p>
+            <a href="#" class="btn">Learn More</a>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2024 Your Company Name. All rights reserved.</p>
+    </footer>
+
+    <!-- Optional JavaScript -->
+    <script>
+        // Add any interactive JavaScript you need here
+    </script>
+</body>
+</html>
