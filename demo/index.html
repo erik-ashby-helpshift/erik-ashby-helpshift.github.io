@@ -14,6 +14,8 @@
         body {
             font-family: Arial, sans-serif;
             color: #333;
+            background: url('https://media.contentapi.ea.com/content/dam/eacom/golf-clash/common/golf-clash-featured-image-211013.jpg.adapt.crop191x100.1200w.jpg') no-repeat center center fixed;
+            background-size: contain;
         }
 
         /* Navigation */
@@ -107,9 +109,8 @@
         }
 
         .feature-item img {
-            width: 100%;
-            height: auto;
-            border-radius: 5px;
+            width: 50px;
+            height: 50px;
         }
 
         .feature-item h3 {
@@ -200,17 +201,17 @@
             <h2>Game Features</h2>
             <div class="feature-list">
                 <div class="feature-item">
-                    <img src="feature1.jpg" alt="Real-time Multiplayer">
+                    <img src="https://media.contentapi.ea.com/content/dam/eacom/common/medallion-violet.png" alt="Real-time Multiplayer">
                     <h3>Real-time Multiplayer</h3>
                     <p>Compete against players from around the world in exciting matches.</p>
                 </div>
                 <div class="feature-item">
-                    <img src="feature2.jpg" alt="Stunning Courses">
+                    <img src="https://media.contentapi.ea.com/content/dam/eacom/common/medallion-violet.png" alt="Stunning Courses">
                     <h3>Stunning Courses</h3>
                     <p>Play on beautifully rendered courses that challenge your skills.</p>
                 </div>
                 <div class="feature-item">
-                    <img src="feature3.jpg" alt="Customizable Equipment">
+                    <img src="https://media.contentapi.ea.com/content/dam/eacom/common/medallion-violet.png" alt="Customizable Equipment">
                     <h3>Customizable Equipment</h3>
                     <p>Unlock clubs and balls to improve your game and customize your play style.</p>
                 </div>
@@ -232,7 +233,21 @@
 
     <!-- Optional JavaScript -->
     <script>
-        // Add any interactive JavaScript you need here
-    </script>
+        (function () {
+          var PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb",
+              DOMAIN = "ashbys",
+              APP_ID = "47",
+              WIDGET_TYPE ="webchat";
+      
+          window.helpshiftWidgetConfig = {
+            platformId: PLATFORM_ID,
+            domain: DOMAIN,
+            appId: APP_ID,
+            widgetType: WIDGET_TYPE
+          };
+        }) ();
+      
+        !function(t,e,n){if("function"!=typeof window.HelpshiftWidget){var i=function(){i.q.push(arguments)};i.q=[],window.HelpshiftWidget=i;var a,o=t.getElementsByTagName("script")[0];if(!t.getElementById(e)){(a=t.createElement("script")).async=!0,a.id=e,a.src="https://hs-widget.helpshift.com/init.js";var f=function(){window.HelpshiftWidget("init")};window.attachEvent?(a.attachEvent("onload",f),"function"==typeof n&&a.attachEvent("onerror",n)):(a.addEventListener("load",f,!1),"function"==typeof n&&a.addEventListener("error",n)),o.parentNode.insertBefore(a,o)}}else window.HelpshiftWidget("update")}(document,"hs-widget");
+      </script>    
 </body>
 </html>
