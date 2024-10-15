@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Game Title</title>
+    <style>
+        /* Importing the fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000; /* Dark background */
+            color: #fff; /* White text */
+        }
+
+   /* Navigation Bar */
+        .navbar {
+            display: flex;
+            justify-content: flex-start; /* Left justify the navbar */
+            align-items: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar .logo {
+            margin-right: 30px; /* Add some space between the logo and the nav links */
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 700;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background-image: url('your-game-image.jpg'); /* Replace with your game image */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Overlay */
+        }
+
+        .hero-content {
+        background-image: url('EAStarWars.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 1000px;
+        height: 600px;
+        padding: 20px; /* Adjust padding as needed */
+        color: white; /* Ensure text is readable */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        box-sizing: border-box;
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.5em;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .hero button {
+            padding: 15px 30px;
+            font-size: 1em;
+            font-weight: 700;
+            background-color: #0070f3; /* Accent color */
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .section h2 {
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+
+        .section p {
+            font-size: 1.2em;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #111;
+            padding: 40px 20px;
+            text-align: center;
+            color: #666;
+        }
+
+        .footer a {
+            color: #666;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5em;
+            }
+
+            .hero p {
+                font-size: 1em;
+            }
+
+            .section h2 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="#">
+                <img src="https://media.contentapi.ea.com/content/dam/ea/starwars/star-wars-jedi-survivor/homepage/common/aj-navlogo-white-stacked.svg" alt="YourGameLogo" style="height: 40px;">
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#story">Story</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" id="features">
+        <h2>Game Features</h2>
+        <p>Discover the exciting features of our game, including immersive gameplay, stunning graphics, and an engaging storyline that will keep you hooked for hours.</p>
+    </section>
+
+    <!-- Story Section -->
+    <section class="section" id="story" style="background-color: #111;">
+        <h2>Our Story</h2>
+        <p>Delve into the rich lore of our game universe. Uncover secrets, meet intriguing characters, and embark on quests that will challenge and thrill you.</p>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section" id="contact">
+        <h2>Get in Touch</h2>
+        <p>Have questions or need support? Contact us, and we'll be happy to assist you.</p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Your Game Company. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+        </div>
+    </footer>
+
+</body>
+<script>
+    (function () {
+          var PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb",
+          DOMAIN = "ashbys",
+          LANGUAGE = "en";
+    
+          window.helpshiftConfig = {
+            platformId: PLATFORM_ID,
+            domain: DOMAIN,
+            language: LANGUAGE
+          };
+        }) ();
+    
+        !function(t,e){if("function"!=typeof window.Helpshift){var n=function()  {n.q.push(arguments)};n.q=[],window.Helpshift=n;var i,a=t.getElementsByTagName  ("script")[0];if(t.getElementById(e))return;i=t.createElement("script"),  i.async=!0,i.id=e,i.src="https://webchat.helpshift.com/latest/webChat.js";var o=function(){  window.Helpshift("init")};window.attachEvent?i.attachEvent("onload",o):  i.addEventListener("load",o,!1),a.parentNode.insertBefore(i,a)}  else window.Helpshift("update")}(document,"hs-chat");
+    </script>
+</html>
