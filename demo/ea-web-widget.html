@@ -14,10 +14,10 @@
             color: #fff; /* White text */
         }
 
-        /* Navigation Bar */
+   /* Navigation Bar */
         .navbar {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start; /* Left justify the navbar */
             align-items: center;
             padding: 20px;
             background-color: rgba(0, 0, 0, 0.8);
@@ -25,6 +25,10 @@
             width: 100%;
             top: 0;
             z-index: 100;
+        }
+
+        .navbar .logo {
+            margin-right: 30px; /* Add some space between the logo and the nav links */
         }
 
         .navbar a {
@@ -57,9 +61,20 @@
         }
 
         .hero-content {
-            position: relative;
-            text-align: center;
-            color: #fff;
+        background-image: url('EAStarWars.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 1000px;
+        height: 600px;
+        padding: 20px; /* Adjust padding as needed */
+        color: white; /* Ensure text is readable */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        box-sizing: border-box;
         }
 
         .hero h1 {
@@ -135,7 +150,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="logo">
-            <a href="#">YourGameLogo</a>
+            <a href="#">
+                <img src="https://media.contentapi.ea.com/content/dam/ea/starwars/star-wars-jedi-survivor/homepage/common/aj-navlogo-white-stacked.svg" alt="YourGameLogo" style="height: 40px;">
+            </a>
         </div>
         <div class="nav-links">
             <a href="#features">Features</a>
@@ -147,9 +164,6 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Your Game Title</h1>
-            <p>Experience an epic adventure like no other.</p>
-            <button>Pre-Order Now</button>
         </div>
     </section>
 
@@ -180,5 +194,21 @@
     </footer>
 
 </body>
+<script>
+    (function () {
+      var PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb",
+          DOMAIN = "ashbys",
+          APP_ID = "47",
+          WIDGET_TYPE ="webchat";
+  
+      window.helpshiftWidgetConfig = {
+        platformId: PLATFORM_ID,
+        domain: DOMAIN,
+        appId: APP_ID,
+        widgetType: WIDGET_TYPE
+      };
+    }) ();
+  
+    !function(t,e,n){if("function"!=typeof window.HelpshiftWidget){var i=function(){i.q.push(arguments)};i.q=[],window.HelpshiftWidget=i;var a,o=t.getElementsByTagName("script")[0];if(!t.getElementById(e)){(a=t.createElement("script")).async=!0,a.id=e,a.src="https://hs-widget.helpshift.com/init.js";var f=function(){window.HelpshiftWidget("init")};window.attachEvent?(a.attachEvent("onload",f),"function"==typeof n&&a.attachEvent("onerror",n)):(a.addEventListener("load",f,!1),"function"==typeof n&&a.addEventListener("error",n)),o.parentNode.insertBefore(a,o)}}else window.HelpshiftWidget("update")}(document,"hs-widget");
+  </script>  
 </html>
-
