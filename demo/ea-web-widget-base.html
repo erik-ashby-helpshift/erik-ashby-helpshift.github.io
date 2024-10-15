@@ -160,6 +160,11 @@
             appId: APP_ID,
             widgetType: WIDGET_TYPE
           };
+          helpshiftWidgetConfig.widgetOptions = {
+                // ...
+                fullScreen: true,
+          };
+
         }) ();
       
         !function(t,e,n){
@@ -174,7 +179,7 @@
                 }
             }
             else window.HelpshiftWidget("update")
-            
+
             HelpshiftWidget("open");
         }
         (document,"hs-widget");
