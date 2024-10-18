@@ -91,28 +91,28 @@
         }
 
         function createCar() {
-            const car = document.createElement('div');
-            car.classList.add('car');
-            car.style.top = `${Math.random() * 350}px`;
-            car.style.right = '-40px';
-            gameArea.appendChild(car);
+    const car = document.createElement('div');
+    car.classList.add('car');
+    car.style.top = `${Math.random() * 350}px`;
+    car.style.left = '300px'; // Start from the right edge
+    gameArea.appendChild(car);
 
-            moveCar(car);
-        }
+    moveCar(car);
+}
 
         function moveCar(car) {
-            let pos = -40;
-            const interval = setInterval(() => {
-                if (pos > 300) {
-                    clearInterval(interval);
-                    gameArea.removeChild(car);
-                } else {
-                    pos += carSpeed;
-                    car.style.right = `${-pos}px`;
-                    checkCollision(car);
-                }
-            }, 20);
+    let pos = 300; // Start from the right edge of the game area
+    const interval = setInterval(() => {
+        if (pos < -40) { // Car has moved completely off the left side
+            clearInterval(interval);
+            gameArea.removeChild(car);
+        } else {
+            pos -= carSpeed;
+            car.style.left = `${pos}px`; // Use left instead of right
+            checkCollision(car);
         }
+    }, 20);
+}
 
         function checkCollision(car) {
             const playerRect = player.getBoundingClientRect();
