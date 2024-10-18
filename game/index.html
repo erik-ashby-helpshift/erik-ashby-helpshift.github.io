@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Frogger-like Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #gameArea {
+            width: 300px;
+            height: 400px;
+            background-color: #333;
+            position: relative;
+            overflow: hidden;
+        }
+        #player {
+            width: 20px;
+            height: 20px;
+            background-color: green;
+            position: absolute;
+            bottom: 10px;
+            left: 140px;
+        }
+        .car {
+            width: 40px;
+            height: 20px;
+            background-color: red;
+            position: absolute;
+        }
+        #score {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="player"></div>
+    </div>
+    <div id="score">Score: 0</div>
+    <button id="speedButton">Speed Up!</button>
+
+    <script>
+        const player = document.getElementById('player');
+        const gameArea = document.getElementById('gameArea');
+        const scoreDisplay = document.getElementById('score');
+        const speedButton = document.getElementById('speedButton');
+        let score = 0;
+        let carSpeed = 2;
+
+        document.addEventListener('keydown', movePlayer);
+
+        function movePlayer(e) {
+            const playerRect = player.getBoundingClientRect();
+            const gameRect = gameArea.getBoundingClientRect();
+
+            switch(e.key) {
+                case 'ArrowUp':
+                    if (playerRect.top > gameRect.top)
+                        player.style.top = `${playerRect.top - gameRect.top - 10}px`;
+                    break;
+                case 'ArrowDown':
+                    if (playerRect.bottom < gameRect.bottom)
+                        player.style.top = `${playerRect.top - gameRect.top + 10}px`;
+                    break;
+                case 'ArrowLeft':
+                    if (playerRect.left > gameRect.left)
+                        player.style.left = `${playerRect.left - gameRect.left - 10}px`;
+                    break;
+                case 'ArrowRight':
+                    if (playerRect.right < gameRect.right)
+                        player.style.left = `${playerRect.left - gameRect.left + 10}px`;
+                    break;
+            }
+
+            checkWin();
+        }
+
+        function createCar() {
+            const car = document.createElement('div');
+            car.classList.add('car');
+            car.style.top = `${Math.random() * 350}px`;
+            car.style.right = '-40px';
+            gameArea.appendChild(car);
+
+            moveCar(car);
+        }
+
+        function moveCar(car) {
+            let pos = -40;
+            const interval = setInterval(() => {
+                if (pos > 300) {
+                    clearInterval(interval);
+                    gameArea.removeChild(car);
+                } else {
+                    pos += carSpeed;
+                    car.style.right = `${-pos}px`;
+                    checkCollision(car);
+                }
+            }, 20);
+        }
+
+        function checkCollision(car) {
+            const playerRect = player.getBoundingClientRect();
+            const carRect = car.getBoundingClientRect();
+
+            if (playerRect.left < carRect.right && playerRect.right > carRect.left &&
+                playerRect.top < carRect.bottom && playerRect.bottom > carRect.top) {
+                alert('Game Over!');
+                resetGame();
+            }
+        }
+
+        function checkWin() {
+            if (player.offsetTop <= 0) {
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                resetPlayerPosition();
+            }
+        }
+
+        function resetPlayerPosition() {
+            player.style.top = '';
+            player.style.left = '140px';
+        }
+
+        function resetGame() {
+            score = 0;
+            scoreDisplay.textContent = 'Score: 0';
+            resetPlayerPosition();
+            document.querySelectorAll('.car').forEach(car => car.remove());
+        }
+
+        speedButton.addEventListener('click', () => {
+            carSpeed += 0.5;
+            alert('Cars are now faster!');
+        });
+
+        setInterval(createCar, 2000);
+    </script>
+</body>
+</html>
