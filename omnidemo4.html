@@ -391,35 +391,24 @@
 </head>
 <body>
 
-<div class="header">
-    <img src="Scopely_Main_Logo.jpg" alt="Scopely Logo">
-    <h2>Scopely - Omni Central Dashboard</h2>
-    <i class="fas fa-user account-icon" id="accountIcon"></i>
-    <div id="accountDialog" class="account-dialog">
-        <h3>Account: Erik Ashby</h3>
-        <p>Role: Super Admin</p>
-        <hr>
-        <p>License: Omni Pro</p>
-        <p><a href="#" id="billingDetails">Billing: (Click here to see billing details)</a></p>
+    <div class="nav">
+        <img src="Scopely_Main_Logo.jpg" alt="Scopely Logo" class="navbar-logo">
+        <a href="#home" onclick="showContent('home')"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="#game-central" onclick="showContent('game-central')"><i class="fas fa-gamepad"></i> Game Central</a>
+        <a href="#developer-central" onclick="showContent('developer-central')"><i class="fas fa-code"></i> Developer Central</a>
+        <a href="#qa-central" onclick="showContent('qa-central')"><i class="fas fa-check-circle"></i> QA Central</a>
+        <a href="#support-central" onclick="showContent('support-central')"><i class="fas fa-life-ring"></i> Support Central</a>
+        <a href="#vip" onclick="showContent('vip')"><i class="fas fa-star"></i> VIP</a>
+        <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><i class="fas fa-shield-alt"></i> Trust and Safety</a>
+        <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><i class="fas fa-cogs"></i> Service Dashboards</a>
+        <div class="service-submenu">
+            <a href="#helpshift" onclick="showContent('helpshift')"><i class="fas fa-comments"></i> Helpshift</a>
+            <a href="#language-ai" onclick="showContent('language-ai')"><i class="fas fa-language"></i> Language AI</a>
+            <a href="#mighty-build" onclick="showContent('mighty-build')"><i class="fas fa-tools"></i> Mighty Build</a>
+            <a href="#xcontent-management" onclick="showContent('xcontent-management')"><i class="fas fa-file-alt"></i> Xcontent Management</a>
+        </div>
+        <a href="#account" class="account-icon" onclick="showContent('account')"><i class="fas fa-user"></i> Account</a>
     </div>
-</div>
-
-<div class="nav">
-    <a href="#home" onclick="showContent('home')"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="#game-central" onclick="showContent('game-central')"><i class="fas fa-gamepad"></i> Game Central</a>
-    <a href="#developer-central" onclick="showContent('developer-central')"><i class="fas fa-code"></i> Developer Central</a>
-    <a href="#qa-central" onclick="showContent('qa-central')"><i class="fas fa-check-circle"></i> QA Central</a>
-    <a href="#support-central" onclick="showContent('support-central')"><i class="fas fa-life-ring"></i> Support Central</a>
-    <a href="#vip" onclick="showContent('vip')"><i class="fas fa-star"></i> VIP</a>
-    <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><i class="fas fa-shield-alt"></i> Trust and Safety</a>
-    <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><i class="fas fa-cogs"></i> Service Dashboards</a>
-    <div class="service-submenu">
-        <a href="#helpshift" onclick="showContent('helpshift')"><i class="fas fa-comments"></i> Helpshift</a>
-        <a href="#language-ai" onclick="showContent('language-ai')"><i class="fas fa-language"></i> Language AI</a>
-        <a href="#mighty-build" onclick="showContent('mighty-build')"><i class="fas fa-tools"></i> Mighty Build</a>
-        <a href="#xcontent-management" onclick="showContent('xcontent-management')"><i class="fas fa-file-alt"></i> Xcontent Management</a>
-    </div>
-</div>
 
 <div id="home" class="content">
     <!-- New Alerts and Status Section -->
