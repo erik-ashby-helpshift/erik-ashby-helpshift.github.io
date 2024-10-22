@@ -361,28 +361,28 @@
             cursor: pointer;
         } 
 
-        .alerts-status {
+        .overview {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
 }
 
-.alerts-status .game-image {
+.overview .game-image {
     width: 100px;
     height: auto;
     margin-right: 20px;
 }
 
-.alerts-status .status-messages {
+.overview .overview-messages {
     flex-grow: 1;
 }
 
-.alerts-status .status-messages h2 {
+.overview .overview-messages h2 {
     margin: 0;
     font-size: 1.5em;
 }
 
-.alerts-status .status-messages p {
+.overview .overview-messages p {
     margin: 5px 0 0;
 }
 
@@ -419,13 +419,14 @@
 
 <div id="home" class="content">
     <!-- New Alerts and Status Section -->
-    <div class="alerts-status">
+    <div class="overview">
         <img src="resources/images/msf.png" alt="Game Image" class="game-image">
-        <div class="status-messages">
+        <div class="overview-messages">
             <h2>Alerts and Status</h2>
             <p>No current alerts.</p> <!-- Placeholder for status messages -->
         </div>
     </div>
+    <hr>
     <div class="kpi-container">
         <!-- KPI Cards Above the Chart -->
         <div class="kpi-card negative">
