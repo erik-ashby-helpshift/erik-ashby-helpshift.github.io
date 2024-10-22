@@ -50,9 +50,10 @@
         }
     
         .account-icon {
-            margin-top: auto; /* Push the account icon to the bottom */
-            margin-bottom: 20px;
-            font-size: 18px;
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 24px;
             cursor: pointer;
         }
     
@@ -69,28 +70,11 @@
             padding: 15px;
             z-index: 1001;
         }
-        .navbar {
-            display: flex;
-            align-items: center;
-            flex-direction: column; /* Stack items vertically */
-        }
-
-        .navbar-logo {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 20px;
-        }
-
-        .account-icon {
-            margin-top: auto; /* Push the account icon to the bottom */
-            margin-bottom: 20px;
-        }
-
 
         .nav {
             position: fixed;
             font-size: 14px; /* Adjust the size as needed */
-            top: 0px; /* Adjusted to fit below the header */
+            top: 60px; /* Adjusted to fit below the header */
             left: 0;
             height: calc(100% - 60px);
             width: 180px;
@@ -123,8 +107,8 @@
             margin-left: 20px;
         }
         .content {
-            margin-left: 180px;
-            margin-top: 0px; /* Margin increased to ensure content is not cut off */
+            margin-left: 240px;
+            margin-top: 40px; /* Margin increased to ensure content is not cut off */
             width: calc(100% - 240px);
             height: calc(100% - 40px);
             padding: 20px;
@@ -377,66 +361,75 @@
             cursor: pointer;
         } 
 
-        .overview {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        .alerts-status {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-        .overview .game-image {
-            width: 100px;
-            height: auto;
-            margin-right: 20px;
-        }
+.alerts-status .game-image {
+    width: 100px;
+    height: auto;
+    margin-right: 20px;
+}
 
-        .overview .status-messages {
-            flex-grow: 1;
-        }
+.alerts-status .status-messages {
+    flex-grow: 1;
+}
 
-        .overview .status-messages h2 {
-            margin: 0;
-            font-size: 1.5em;
-        }
+.alerts-status .status-messages h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
 
-        .overview .status-messages p {
-            margin: 5px 0 0;
-        }
+.alerts-status .status-messages p {
+    margin: 5px 0 0;
+}
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <div class="nav">
-        <img src="Scopely_Main_Logo.jpg" alt="Scopely Logo" class="navbar-logo">
-        <a href="#home" onclick="showContent('home')"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-        <a href="#game-central" onclick="showContent('game-central')"><i class="fas fa-gamepad"></i> Game Central</a>
-        <a href="#developer-central" onclick="showContent('developer-central')"><i class="fas fa-code"></i> Developer Central</a>
-        <a href="#qa-central" onclick="showContent('qa-central')"><i class="fas fa-check-circle"></i> QA Central</a>
-        <a href="#support-central" onclick="showContent('support-central')"><i class="fas fa-life-ring"></i> Support Central</a>
-        <a href="#vip" onclick="showContent('vip')"><i class="fas fa-star"></i> VIP</a>
-        <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><i class="fas fa-shield-alt"></i> Trust and Safety</a>
-        <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><i class="fas fa-cogs"></i> Service Dashboards</a>
-        <div class="service-submenu">
-            <a href="#helpshift" onclick="showContent('helpshift')"><i class="fas fa-comments"></i> Helpshift</a>
-            <a href="#language-ai" onclick="showContent('language-ai')"><i class="fas fa-language"></i> Language AI</a>
-            <a href="#mighty-build" onclick="showContent('mighty-build')"><i class="fas fa-tools"></i> Mighty Build</a>
-            <a href="#xcontent-management" onclick="showContent('xcontent-management')"><i class="fas fa-file-alt"></i> Xcontent Management</a>
-        </div>
-        <a href="#account" class="account-icon" onclick="showContent('account')"><i class="fas fa-user"></i> Account</a>
+<div class="header">
+    <img src="Scopely_Main_Logo.jpg" alt="Scopely Logo">
+    <h2>Scopely - Omni Central Dashboard</h2>
+    <i class="fas fa-user account-icon" id="accountIcon"></i>
+    <div id="accountDialog" class="account-dialog">
+        <h3>Account: Erik Ashby</h3>
+        <p>Role: Super Admin</p>
+        <hr>
+        <p>License: Omni Pro</p>
+        <p><a href="#" id="billingDetails">Billing: (Click here to see billing details)</a></p>
     </div>
+</div>
+
+<div class="nav">
+    <a href="#home" onclick="showContent('home')"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="#game-central" onclick="showContent('game-central')"><i class="fas fa-gamepad"></i> Game Central</a>
+    <a href="#developer-central" onclick="showContent('developer-central')"><i class="fas fa-code"></i> Developer Central</a>
+    <a href="#qa-central" onclick="showContent('qa-central')"><i class="fas fa-check-circle"></i> QA Central</a>
+    <a href="#support-central" onclick="showContent('support-central')"><i class="fas fa-life-ring"></i> Support Central</a>
+    <a href="#vip" onclick="showContent('vip')"><i class="fas fa-star"></i> VIP</a>
+    <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><i class="fas fa-shield-alt"></i> Trust and Safety</a>
+    <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><i class="fas fa-cogs"></i> Service Dashboards</a>
+    <div class="service-submenu">
+        <a href="#helpshift" onclick="showContent('helpshift')"><i class="fas fa-comments"></i> Helpshift</a>
+        <a href="#language-ai" onclick="showContent('language-ai')"><i class="fas fa-language"></i> Language AI</a>
+        <a href="#mighty-build" onclick="showContent('mighty-build')"><i class="fas fa-tools"></i> Mighty Build</a>
+        <a href="#xcontent-management" onclick="showContent('xcontent-management')"><i class="fas fa-file-alt"></i> Xcontent Management</a>
+    </div>
+</div>
 
 <div id="home" class="content">
     <!-- New Alerts and Status Section -->
-    <div class="overview">
-        <img src="/resources/images/msf.png" alt="Game Image" class="game-image">
+    <div class="alerts-status">
+        <img src="resources/images/msf.png" alt="Game Image" class="game-image">
         <div class="status-messages">
-            <h2>Game Live Overview</h2>
-            <p>Marvel Strike Force</p> <!-- Placeholder for status messages -->
+            <h2>Alerts and Status</h2>
+            <p>No current alerts.</p> <!-- Placeholder for status messages -->
         </div>
     </div>
-    <hr>
-    <h2>Game Engagement</h2>
     <div class="kpi-container">
         <!-- KPI Cards Above the Chart -->
         <div class="kpi-card negative">
