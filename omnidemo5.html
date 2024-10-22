@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrandX Game Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        hr {
+            border: none;
+            height: 2px;
+            background-color: #ccc;
+            margin: 20px 0; 
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #333;
+            color: white;
+            padding: 0px 0;
+            z-index: 1000;
+        }
+    
+        .header img {
+            position: absolute;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+        }
+    
+        .header h2 {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 24px;
+            margin: 0;
+        }
+    
+        .account-icon {
+            margin-top: auto; /* Push the account icon to the bottom */
+            margin-bottom: 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    
+        .account-dialog {
+            display: none;
+            position: absolute;
+            right: 25px;
+            top: 50px; 
+            background-color: white;
+            color: black;
+            border: 1px solid #5e5e5e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+            z-index: 1001;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            flex-direction: column; /* Stack items vertically */
+        }
+
+        .navbar-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+        }
+
+        .account-icon {
+            margin-top: auto; /* Push the account icon to the bottom */
+            margin-bottom: 20px;
+        }
+
+
+        .nav {
+            position: fixed;
+            font-size: 14px; /* Adjust the size as needed */
+            top: 0px; /* Adjusted to fit below the header */
+            left: 0;
+            height: calc(100% - 60px);
+            width: 180px;
+            background-color: #444;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav a {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-align: left;
+            padding: 14px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid #555;
+        }
+        .nav a.active {
+            background-color: #666;
+            color: white;
+        }
+        .nav a i {
+            margin-right: 10px; /* Adjust spacing between icon and text */
+        }
+        .nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .service-submenu {
+            display: none;
+            margin-left: 20px;
+        }
+        .content {
+            margin-left: 180px;
+            margin-top: 0px; /* Margin increased to ensure content is not cut off */
+            width: calc(100% - 240px);
+            height: calc(100% - 40px);
+            padding: 20px;
+            text-align: center;
+        }
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #chart {
+            display: flex;
+            justify-content: space-around; /* Ensure charts are side by side */
+            width: 100%;
+            height: 200px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        #large_chart {
+            display: flex;
+            justify-content: space-around; /* Ensure charts are side by side */
+            width: 100%;
+            height: 200px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        #engagementChart, #apdexChart, #globalPerformanceChart, #customer_feedback_chart, #efigs_engagement_index, #ckj_engagement_index {
+            width: 45%; /* Adjust width to fit both charts side by side */
+            border: 1px solid #ddd;
+            height: 100%;
+        }
+
+        .kpi-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+    
+        .kpi-card {
+            background-color: white;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            width: 22%;
+            margin: 0 5px; /* Add margin to create a buffer between cards */
+        }
+    
+        .kpi-card i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+    
+        .kpi-card p {
+            margin: 0;
+            font-size: 16px;
+            color: #666;
+        }
+    
+        .kpi-card h3 {
+            margin: 10px 0 0;
+            font-size: 24px;
+        }
+    
+        .kpi-card.positive {
+            border-left: 5px solid green;
+        }
+    
+        .kpi-card.negative {
+            border-left: 5px solid red;
+        }
+    
+        .kpi-card.neutral {
+            border-left: 5px solid gray;
+        }
+
+        .warning-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #ffcc00; /* Warning color */
+            cursor: pointer;
+        }
+
+        .dropdown-container {
+            margin-bottom: 20px;
+        }
+    
+        #game-select {
+            padding: 5px;
+            font-size: 16px;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 600px;
+            max-height: 500px; /* Restrict image height to 500px */
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Styles for game central section */
+
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        #events-alerts {
+            width: 75%;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-y: auto;
+            max-height: 400px; /* Adjust as needed */
+        }
+        
+        #placeholder {
+            width: 23%; /* Slightly less than 25% to account for spacing */
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        #events-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8em; /* Two sizes smaller */
+            text-align: left; /* Left justified */
+        }
+        
+        #events-table th, #events-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        
+        #events-table th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        
+        #events-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        #events-table tr:hover {
+            background-color: #ddd;
+        }
+        
+        #events-table th.sortable:hover {
+            background-color: #ddd;
+        }
+        
+        /* Action Button */
+        .action-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #007bff;
+            font-size: 1em;
+        }
+        
+        .action-button:hover {
+            color: #0056b3;
+        }
+        
+        /* Modal Dialog */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        } 
+
+        .overview {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .overview .game-image {
+            width: 100px;
+            height: auto;
+            margin-right: 20px;
+        }
+
+        .overview .status-messages {
+            flex-grow: 1;
+        }
+
+        .overview .status-messages h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .overview .status-messages p {
+            margin: 5px 0 0;
+        }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="nav">
+        <img src="Scopely_Main_Logo.jpg" alt="Scopely Logo" class="navbar-logo">
+        <a href="#home" onclick="showContent('home')"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="#game-central" onclick="showContent('game-central')"><i class="fas fa-gamepad"></i> Game Central</a>
+        <a href="#developer-central" onclick="showContent('developer-central')"><i class="fas fa-code"></i> Developer Central</a>
+        <a href="#qa-central" onclick="showContent('qa-central')"><i class="fas fa-check-circle"></i> QA Central</a>
+        <a href="#support-central" onclick="showContent('support-central')"><i class="fas fa-life-ring"></i> Support Central</a>
+        <a href="#vip" onclick="showContent('vip')"><i class="fas fa-star"></i> VIP</a>
+        <a href="#trust-and-safety" onclick="showContent('trust-and-safety')"><i class="fas fa-shield-alt"></i> Trust and Safety</a>
+        <a href="#service-dashboards" class="service-dashboards-toggle" onclick="toggleSubMenu(event)"><i class="fas fa-cogs"></i> Service Dashboards</a>
+        <div class="service-submenu">
+            <a href="#helpshift" onclick="showContent('helpshift')"><i class="fas fa-comments"></i> Helpshift</a>
+            <a href="#language-ai" onclick="showContent('language-ai')"><i class="fas fa-language"></i> Language AI</a>
+            <a href="#mighty-build" onclick="showContent('mighty-build')"><i class="fas fa-tools"></i> Mighty Build</a>
+            <a href="#xcontent-management" onclick="showContent('xcontent-management')"><i class="fas fa-file-alt"></i> Xcontent Management</a>
+        </div>
+        <a href="#account" class="account-icon" onclick="showContent('account')"><i class="fas fa-user"></i> Account</a>
+    </div>
+
+<div id="home" class="content">
+    <!-- New Alerts and Status Section -->
+    <div class="overview">
+        <img src="/resources/images/msf.png" alt="Game Image" class="game-image">
+        <div class="status-messages">
+            <h2>Game Live Overview</h2>
+            <p>Marvel Strike Force</p> <!-- Placeholder for status messages -->
+        </div>
+    </div>
+    <hr>
+    <h2>Game Engagement</h2>
+    <div class="kpi-container">
+        <!-- KPI Cards Above the Chart -->
+        <div class="kpi-card negative">
+            <i class="fas fa-chart-bar" title="Global Engagement Index." ></i> <!-- Normal icon for performance index -->
+            <p>GEI</p>
+            <h3>0.44</h3>
+            <i class="fas fa-exclamation-triangle warning-icon" title="Global Engagement Index is below average."></i> <!-- Warning icon with tooltip -->
+        </div>
+        <div class="kpi-card positive">
+            <i class="fas fa-users"></i>
+            <p>MAU</p>
+            <h3>1.65M</h3>
+        </div>
+        <div class="kpi-card positive">
+            <i class="fas fa-user-friends"></i>
+            <p>DAU</p>
+            <h3>1.43M</h3>
+        </div>
+        <div class="kpi-card negative">
+            <i class="fas fa-chart-line"></i>
+            <p>Daily Sessions</p>
+            <h3>2.64M</h3>
+        </div>
+    </div>
+    <div id="chart">
+        <canvas id="engagementChart"></canvas>
+        <canvas id="globalPerformanceChart"></canvas> <!-- New canvas element for Global Performance Index chart -->
+    </div>
+    <hr>
+    <div class="kpi-container">
+        <!-- KPI Cards Below the Chart -->
+        <div class="kpi-card positive">
+            <i class="fas fa-smile"></i>
+            <p>APDex</p>
+            <h3>0.92</h3>
+        </div>
+        <div class="kpi-card positive">
+            <i class="fas fa-bug"></i>
+            <p>Crash Sessions</p>
+            <h3>0.12%</h3>
+        </div>
+        <div class="kpi-card negative">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Issue Free Sessions</p>
+            <h3>98.3%</h3>
+        </div>
+        <div class="kpi-card negative">
+            <i class="fas fa-bug"></i>
+            <p>Active User Reported Bugs</p>
+            <h3>75</h3>
+        </div>
+    </div>
+    <div id="chart">
+                <canvas id="apdexChart"></canvas> <!-- Moved canvas element for APDex chart -->
+                <canvas id="customer_feedback_chart"></canvas> 
+    </div>
+    <p>This is a demo of a new services portal for our business idea.</p>
+    <p>Our portal offers a comprehensive suite of tools and services designed to enhance your gaming experience. From game development to player support, we have everything you need to succeed.</p>
+
+</div>
+
+<div id="game-central" class="content" style="display:none;">
+    <h2>Game Central</h2>
+    <!-- Dropdown for selecting games -->
+    <div class="dropdown-container">
+        <label for="game-select">Select Game:</label>
+        <select id="game-select">
+            <option value="all">All</option>
+            <option value="monopoly-go">Monopoly Go</option>
+            <option value="bingo-bash">Bingo Bash</option>
+            <option value="wwe-champions">WWE Champions</option>
+        </select>
+    </div>
+    <div class="kpi-container">
+        <!-- KPI Cards for Game Central -->
+        <div class="kpi-card positive">
+            <i class="fas fa-gamepad"></i>
+            <p>Games</p>
+            <h3>3</h3>
+        </div>
+        <div class="kpi-card negative">
+            <i class="fas fa-chart-bar"></i>
+            <p>GEI</p>
+            <h3>0.44</h3>
+            <i class="fas fa-exclamation-triangle warning-icon" title="Global Engagement Index is below average."></i> <!-- Warning icon with tooltip -->
+        </div>
+        <div class="kpi-card positive" id="seven-day-retention">
+            <i class="fas fa-calendar-week"></i>
+            <p>7 Day Retention</p>
+            <h3>61.10%</h3>
+        </div>
+        <div class="kpi-card positive" id="thirty-day-retention">
+            <i class="fas fa-calendar-alt"></i>
+            <p>30 Day Retention</p>
+            <h3>14.45%</h3>
+        </div>
+    </div>
+    <div id="large_chart">
+        <canvas id="efigs_engagement_index"></canvas>
+        <canvas id="ckj_engagement_index"></canvas>
+    </div>
+s
+    <!-- New section -->
+    <div class="main-content">
+        <section id="events-alerts">
+            <h3>Events and Alerts</h3>
+            <div class="table-container">
+                <table id="events-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date/Time</th>
+                            <th>Recommendations</th>
+                            <th></th> <!-- Empty header for action icons -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Game Update - Bingo Bash v1.53; Global</td>
+                            <td>August 3rd</td>
+                            <td>N/A</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Engagement Alert - German engagement is below expectations</td>
+                            <td>August 5th</td>
+                            <td>Add German specific game content</td>
+                            <td><button class="action-button"><i class="fas fa-cog"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td>Engagement Alert - German engagement is below expectations</td>
+                            <td>August 5th</td>
+                            <td>Add German specific game content</td>
+                            <td><button class="action-button"><i class="fas fa-cog"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td>Server Maintenance - Monopoly Go</td>
+                            <td>August 6th</td>
+                            <td>Notify users about downtime</td>
+                            <td><button class="action-button"><i class="fas fa-cog"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td>New Feature Release - WWE Champions</td>
+                            <td>August 7th</td>
+                            <td>Promote new features</td>
+                            <td><button class="action-button"><i class="fas fa-cog"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td>Security Alert - Bingo Bash</td>
+                            <td>August 8th</td>
+                            <td>Investigate and resolve</td>
+                            <td><button class="action-button"><i class="fas fa-cog"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td>Performance Issue - Monopoly Go</td>
+                            <td>August 9th</td>
+                            <td>Optimize server performance</td>
+                            <td><button class="action-button"><i class="fas fa-cog"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td>User Feedback - WWE Champions</td>
+                            <td>August 10th</td>
+                            <td>Review and implement suggestions</td>
+                            <td><button class="action-button"><i class="fas fa-cog"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section id="placeholder">
+            <h3>Placeholder</h3>
+            <p>This is a placeholder for future content.</p>
+        </section>
+    </div>
+    <p>Game Central features.</p>
+
+    <!-- Action Dialog -->
+    <div id="action-dialog" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Placeholder action - To be implemented</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for displaying the image -->
+<div id="retention-modal" class="modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="retention-image">
+    <div id="caption"></div>
+</div>
+
+<div id="developer-central" class="content" style="display:none;">
+    <h2>Developer Central</h2>
+    <p>Developer Central features.</p>
+</div>
+
+<div id="qa-central" class="content" style="display:none;">
+    <h2>QA Central</h2>
+    <p>QA Central features.</p>
+</div>
+
+<div id="support-central" class="content" style="display:none;">
+    <h2>Support Central</h2>
+    <p>Support Central features.</p>
+</div>
+
+<div id="vip" class="content" style="display:none;">
+    <h2>VIP</h2>
+    <p>VIP features.</p>
+</div>
+
+<div id="trust-and-safety" class="content" style="display:none;">
+    <h2>Trust and Safety</h2>
+    <p>Trust and Safety features.</p>
+</div>
+
+<div id="helpshift" class="content" style="display:none;">
+    <h2>Helpshift</h2>
+    <p>Helpshift features.</p>
+</div>
+
+<div id="language-ai" class="content" style="display:none;">
+    <h2>Language AI</h2>
+    <p>Language AI features.</p>
+</div>
+
+<div id="mighty-build" class="content" style="display:none;">
+    <h2>Mighty Build</h2>
+    <p>Mighty Build features.</p>
+</div>
+
+<div id="xcontent-management" class="content" style="display:none;">
+    <h2>Xcontent Management</h2>
+    <p>Xcontent Management features.</p>
+</div>
+
+<script>
+
+    (function () {
+              var PLATFORM_ID = "ashbys_platform_20240925150556567-019c48b0639084a",
+              DOMAIN = "ashbys",
+              LANGUAGE = "en";
+        
+              window.helpshiftConfig = {
+                platformId: PLATFORM_ID,
+                domain: DOMAIN,
+                language: LANGUAGE
+              };
+      }) ();
+        
+    !function(t,e){if("function"!=typeof window.Helpshift){var n=function()  {n.q.push(arguments)};n.q=[],window.Helpshift=n;var i,a=t.getElementsByTagName  ("script")[0];if(t.getElementById(e))return;i=t.createElement("script"),  i.async=!0,i.id=e,i.src="https://webchat.helpshift.com/latest/webChat.js";var o=function(){  window.Helpshift("init")};window.attachEvent?i.attachEvent("onload",o):  i.addEventListener("load",o,!1),a.parentNode.insertBefore(i,a)}  else window.Helpshift("update")}(document,"hs-chat");
+
+    function showContent(sectionId) {
+        // Hide all sections
+        document.querySelectorAll('.content').forEach(section => section.style.display = 'none');
+        // Show the selected section
+        document.getElementById(sectionId).style.display = 'block';
+        document.querySelectorAll('.nav a').forEach(link => link.classList.remove('active'));
+        document.querySelector(`.nav a[href='#${sectionId}']`).classList.add('active');
+    }
+
+    // Chart.js script to create the engagement graph
+    const ctx = document.getElementById('engagementChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+            datasets: [
+                {
+                    label: 'Engagement',
+                    data: [
+                        1001086.318,
+                        1009080.837,
+                        1017334.908,
+                        1022723.036,
+                        1031393.484,
+                        1047994.699,
+                        1088740.69,
+                        1092496.333,
+                        1133695.818,
+                        1161414.927,
+                        1129807.997,
+                        1103898.077,
+                        1093749.465,
+                        1155555.568,
+                        1183553.589,
+                        1208159.857,
+                        1341122.241,
+                        1349317.36,
+                        1351423.123,
+                        1373708.875,
+                        1421313.427,
+                        1439066.966,
+                        1403445.372,
+                        1379312.495,
+                        1378744.689,
+                        1388661.054,
+                        1436716.994,
+                        1497311.932,
+                        1561888.727
+                    ],
+                    //data //
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Benchmark',
+                    data: Array(30).fill(1750000), // 30 data points all set to 1,750,000
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5], // Optional: makes the line dashed
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Daily Active Users (DAU) Engagement',
+                },
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                x: {
+                    display: false // Hides the x-axis labels
+                },
+                y: {
+                    beginAtZero: true
+                }
+
+            },
+            animation: {
+                duration: 1000, // Animation duration in milliseconds
+                easing: 'easeOutBounce' // Easing function for the animation
+            }
+        }
+    });
+
+// Chart.js script to create the APDex graph
+const ctxApdex = document.getElementById('apdexChart').getContext('2d');
+new Chart(ctxApdex, {
+    type: 'line',
+    data: {
+        labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+        datasets: [
+            {
+                label: 'APDex',
+                data: [
+                    0.901, 0.90281422, 0.902641668, 0.902152936, 0.910323441, 
+                    0.911465571, 0.921116609, 0.922228641, 0.916308139, 0.814884465, 
+                    0.619742953, 0.714187475, 0.858854476, 0.903273062, 0.898139841, 
+                    0.895264967, 0.899932656, 0.899469677, 0.904028465, 0.89995843, 
+                    0.900910865, 0.908017563, 0.919074102, 0.928432977, 0.94299457, 
+                    0.953004333, 0.955021932, 0.958237697, 0.960984597, 0.962336053
+                ],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            },
+            {
+                label: 'Benchmark',
+                data: Array(30).fill(0.80), // 30 data points all set to 0.80
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5], // Optional: makes the line dashed
+                tension: 0.1
+            }
+        ]
+    },
+    options: {
+        plugins: {
+            title: {
+                display: true,
+                text: 'Application Performance Index (APDex)',
+            },
+            legend: {
+                display: true,
+                position: 'bottom'
+            }
+        },
+        scales: {
+            x: {
+                display: false // Hides the x-axis labels
+            },
+            y: {
+                beginAtZero: true,
+                min: 0,
+                max: 1
+            },
+        },
+        animation: {
+            duration: 1000, // Animation duration in milliseconds
+            easing: 'easeOutBounce' // Easing function for the animation
+        }
+    }
+});
+
+    // JavaScript to show the account dialog
+    const accountIcon = document.getElementById('accountIcon');
+    const accountDialog = document.getElementById('accountDialog');
+    const billingDetailsLink = document.getElementById('billingDetails');
+
+    accountIcon.addEventListener('click', () => {
+        accountDialog.style.display = 'block';
+        setTimeout(() => {
+            accountDialog.style.display = 'none';
+        }, 5000); // Keeps the dialog open for 5 seconds
+    });
+
+    // Optional: Show billing details alert
+    billingDetailsLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        alert('Billing details are not yet implemented.');
+    });
+
+    // JavaScript to toggle the Service Dashboards submenu
+    function toggleSubMenu(event) {
+        event.preventDefault();
+        const subMenu = document.querySelector('.service-submenu');
+        if (subMenu.style.display === 'none' || subMenu.style.display === '') {
+            subMenu.style.display = 'block';
+        } else {
+            subMenu.style.display = 'none';
+        }
+    }
+
+     // New Chart.js script for Global Performance Index graph
+     const ctxGlobalPerformance = document.getElementById('globalPerformanceChart').getContext('2d');
+     new Chart(ctxGlobalPerformance, {
+         type: 'line',
+         data: {
+             labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+             datasets: [
+                 {
+                     label: 'Global Engagement Index',
+                     data: [
+                         0.401, 0.405056134, 0.408338178, 0.40763676, 0.420816691,
+                         0.429004177, 0.443274506, 0.436500861, 0.434618559, 0.434021975,
+                         0.333254921, 0.335871791, 0.340288824, 0.339569805, 0.331671473,
+                         0.330306972, 0.375784823, 0.420993938, 0.424161059, 0.431266846,
+                         0.427658848, 0.439307843, 0.448819479, 0.460809759, 0.47403102,
+                         0.481008106, 0.48650314, 0.485449792, 0.478723264, 0.475959392,
+                         0.470249728
+                     ],
+                     borderColor: 'rgba(54, 162, 235, 1)',
+                     borderWidth: 2,
+                     tension: 0.1
+                 },
+                 {
+                     label: 'Benchmark',
+                     data: Array(30).fill(0.5), // 30 data points all set to 0.5
+                     borderColor: 'rgba(255, 99, 132, 1)',
+                     borderWidth: 2,
+                     borderDash: [5, 5], // Optional: makes the line dashed
+                     tension: 0.1
+                 }
+             ]
+         },
+         options: {
+             plugins: {
+                 title: {
+                     display: true,
+                     text: 'Global Engagement Index',
+                 },
+                 legend: {
+                     display: true,
+                     position: 'bottom'
+                 }
+             },
+             scales: {
+                x: {
+                    display: false // Hides the x-axis labels
+                },
+                 y: {
+                     beginAtZero: true,
+                     min: 0,
+                     max: 1
+                 }
+             },
+             animation: {
+                duration: 1000, // Animation duration in milliseconds
+                easing: 'easeOutBounce' // Easing function for the animation
+            }
+         }
+     });
+
+     const ctxCustomerFeedback = document.getElementById('customer_feedback_chart').getContext('2d');
+     new Chart(ctxCustomerFeedback, {
+         type: 'line',
+         data: {
+             labels: Array.from({length: 31}, (_, i) => `Day ${i + 1}`),
+             datasets: [
+                 {
+                     label: 'Negative',
+                     data: [
+                         1200, 1205, 1240, 1384, 1439, 1321, 1046, 980, 1455, 1493,
+                         4470, 4923, 4432, 1795, 1054, 1628, 1645, 1617, 1536, 1443,
+                         1113, 1000, 1574, 1481, 1687, 1712, 1568, 1248, 1137, 1706,
+                         1636
+                     ],
+                     borderColor: 'rgba(255, 99, 132, 1)',
+                     borderWidth: 2,
+                     tension: 0.1
+                 },
+                 {
+                     label: 'Positive',
+                     data: [
+                         600, 607, 617, 676, 660, 590, 480, 449, 670, 685,
+                         768, 770, 673, 537, 483, 698, 686, 738, 722, 645,
+                         524, 474, 696, 675, 747, 743, 673, 543, 480, 694,
+                         681
+                     ],
+                     borderColor: 'rgba(54, 162, 235, 1)',
+                     borderWidth: 2,
+                     tension: 0.1
+                 },
+                 {
+                     label: 'Benchmark',
+                     data: Array(31).fill(1500), // 31 data points all set to 1500
+                     borderColor: 'rgba(75, 192, 192, 1)',
+                     borderWidth: 2,
+                     borderDash: [5, 5], // Optional: makes the line dashed
+                     tension: 0.1
+                 }
+             ]
+         },
+         options: {
+             plugins: {
+                 title: {
+                     display: true,
+                     text: 'Customer Feedback',
+                 },
+                 legend: {
+                     display: true,
+                     position: 'bottom'
+                 }
+             },
+             scales: {
+                 x: {
+                     display: false // Hides the x-axis labels
+                 },
+                 y: {
+                     beginAtZero: true
+                 }
+            }
+         }
+     });
+
+
+    const ctxEfigsEngagement = document.getElementById('efigs_engagement_index').getContext('2d');
+    new Chart(ctxEfigsEngagement, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+            datasets: [
+                {
+                    label: 'English',
+                    data: [
+                        0.601, 0.603504577, 0.601550334, 0.600576785, 0.609601166,
+                        0.619637926, 0.628105494, 0.63559138, 0.640902544, 0.637049321,
+                        0.53980913, 0.543581197, 0.53854372, 0.542423967, 0.544972475,
+                        0.544073437, 0.598503625, 0.650076552, 0.647204497, 0.645666613,
+                        0.651158572, 0.661877225, 0.667956252, 0.676931254, 0.686931683,
+                        0.692187721, 0.693744178, 0.688108982, 0.684390137, 0.678954435,
+                        0.677222091
+                    ],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'French',
+                    data: [
+                        0.452134704, 0.451755093, 0.452869344, 0.451873007, 0.455839861,
+                        0.464993223, 0.474446092, 0.478709951, 0.477168337, 0.476540743,
+                        0.40534562, 0.406972175, 0.405512802, 0.404016785, 0.407763145,
+                        0.406586423, 0.447664077, 0.489626838, 0.48389027, 0.483881752,
+                        0.488203348, 0.494364073, 0.498492858, 0.506116975, 0.516047721,
+                        0.518562836, 0.520185688, 0.51622755, 0.515161529, 0.509197306,
+                        0.507989094
+                    ],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Italian',
+                    data: [
+                        0.402895487, 0.423819604, 0.3691337, 0.35261696, 0.410102255,
+                        0.447895622, 0.365662354, 0.509095842, 0.407925026, 0.395262513,
+                        0.327631194, 0.321165479, 0.378115829, 0.376095507, 0.455661863,
+                        0.348324107, 0.454427504, 0.447085621, 0.443767057, 0.420986376,
+                        0.456987008, 0.466933816, 0.424265539, 0.500634767, 0.44839313,
+                        0.559754309, 0.442805478, 0.469100426, 0.499148997, 0.473302692,
+                        0.512870767
+                    ],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'German',
+                    data: [
+                        0.197347047, 0.185551431, 0.216980603, 0.246724085, 0.201732093,
+                        0.243383448, 0.234102717, 0.253665171, 0.196179802, 0.232828475,
+                        0.194192605, 0.195383676, 0.226004824, 0.181685516, 0.197995152,
+                        0.172679305, 0.236416338, 0.203560811, 0.228859223, 0.251232601,
+                        0.248759565, 0.243049174, 0.241571776, 0.221507727, 0.226195394,
+                        0.247590397, 0.254361531, 0.229747113, 0.230406867, 0.196329645,
+                        0.286060864
+                    ],
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Spanish',
+                    data: [
+                        0.480311025, 0.484337904, 0.477266355, 0.479272329, 0.487353124,
+                        0.496938901, 0.502168116, 0.508144131, 0.516588224, 0.511719521,
+                        0.432638283, 0.43639022, 0.431560197, 0.435775806, 0.436445737,
+                        0.433959557, 0.479944514, 0.517536212, 0.514671829, 0.515715125,
+                        0.524019316, 0.529086793, 0.534698001, 0.538921205, 0.55085291,
+                        0.557210072, 0.555100901, 0.550719882, 0.550716029, 0.54563841,
+                        0.540883798
+                    ],
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Benchmark',
+                    data: Array(30).fill(0.5), // 30 data points all set to 0.5
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5], // Optional: makes the line dashed
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'EFIGS Engagement Index',
+                },
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                x: {
+                    display: false // Hides the x-axis labels
+                },
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 1
+                }
+            },
+            animation: {
+                duration: 1000, // Animation duration in milliseconds
+                easing: 'easeOutBounce' // Easing function for the animation
+            }
+        }
+    });
+
+    const ctxCkjEngagement = document.getElementById('ckj_engagement_index').getContext('2d');
+    new Chart(ctxCkjEngagement, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+            datasets: [
+                {
+                    label: 'Chinese',
+                    data: [
+                        0.092303662, 0.091018396, 0.089335457, 0.094604804, 0.091978701,
+                        0.092379591, 0.093132055, 0.09482328, 0.100294179, 0.094521554,
+                        0.080883083, 0.081232352, 0.08054004, 0.081322888, 0.080212523,
+                        0.081192318, 0.091303752, 0.100539538, 0.095619495, 0.094853608,
+                        0.093070037, 0.100062196, 0.102058638, 0.099288068, 0.100238401,
+                        0.102680472, 0.103330214, 0.103910948, 0.101629915, 0.104094444,
+                        0.101342939
+                    ],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Korean',
+                    data: [
+                        0.059752958, 0.059306296, 0.059170252, 0.063551081, 0.059928231,
+                        0.059396183, 0.060509921, 0.064918244, 0.06120208, 0.060375299,
+                        0.054068588, 0.053062519, 0.054458911, 0.054849238, 0.055780664,
+                        0.05676484, 0.057997347, 0.06319488, 0.066401082, 0.063573515,
+                        0.0635796, 0.065655217, 0.064625867, 0.067330278, 0.068077348,
+                        0.068475884, 0.068331443, 0.067232973, 0.072110127, 0.069949586,
+                        0.069373311
+                    ],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Japanese',
+                    data: [
+                        0.148891057, 0.152436088, 0.154017045, 0.148615492, 0.151515645,
+                        0.150991149, 0.157837333, 0.159325832, 0.156950029, 0.158877291,
+                        0.136033525, 0.135764683, 0.137796516, 0.133213349, 0.136200673,
+                        0.134797709, 0.147179455, 0.161200679, 0.159808028, 0.158836728,
+                        0.164034889, 0.161385881, 0.166304791, 0.168041437, 0.171948535,
+                        0.174700099, 0.177944531, 0.172812932, 0.169778473, 0.170670617,
+                        0.170148211
+                    ],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                },
+                {
+                    label: 'Benchmark',
+                    data: Array(30).fill(0.5), // 30 data points all set to 0.5
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5], // Optional: makes the line dashed
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'CKJ Engagement Index',
+                },
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                x: {
+                    display: false // Hides the x-axis labels
+                },
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 1
+                }
+            },
+            animation: {
+                duration: 1000, // Animation duration in milliseconds
+                easing: 'easeOutBounce' // Easing function for the animation
+            }
+        }
+    });
+
+    document.getElementById('seven-day-retention').addEventListener('click', function() {
+        showModal('7 Day Retention');
+    });
+    
+    document.getElementById('thirty-day-retention').addEventListener('click', function() {
+        showModal('30 Day Retention');
+    });
+    
+    function showModal(captionText) {
+        var modal = document.getElementById('retention-modal');
+        var modalImg = document.getElementById('retention-image');
+        var caption = document.getElementById('caption');
+        modal.style.display = 'block';
+        modalImg.src = 'retention.png';
+        caption.innerHTML = captionText;
+    }
+    
+    // testing
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName('close')[0];
+    
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        var modal = document.getElementById('retention-modal');
+        modal.style.display = 'none';
+    }
+    
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        var modal = document.getElementById('retention-modal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+    
+        const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
+            v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+        )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+    
+        document.querySelectorAll('#events-table th').forEach(th => th.addEventListener('click', (() => {
+            const table = th.closest('table');
+            Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+                .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+                .forEach(tr => table.appendChild(tr));
+        })));
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const actionButtons = document.querySelectorAll('.action-button');
+        const modal = document.getElementById('action-dialog');
+        const span = document.getElementsByClassName('close')[0];
+    
+        actionButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                modal.style.display = 'block';
+            });
+        });
+    
+        span.onclick = function () {
+            modal.style.display = 'none';
+        }
+    
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    });
+
+</script>
+</body>
+</html>
