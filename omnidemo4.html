@@ -361,30 +361,30 @@
             cursor: pointer;
         } 
 
-        .alerts-status {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-}
+        overview {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-.alerts-status .game-image {
-    width: 100px;
-    height: auto;
-    margin-right: 20px;
-}
+        .overview .game-image {
+            width: 100px;
+            height: auto;
+            margin-right: 20px;
+        }
 
-.alerts-status .status-messages {
-    flex-grow: 1;
-}
+        .overview .status-messages {
+            flex-grow: 1;
+        }
 
-.alerts-status .status-messages h2 {
-    margin: 0;
-    font-size: 1.5em;
-}
+        .overview .status-messages h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
 
-.alerts-status .status-messages p {
-    margin: 5px 0 0;
-}
+        .overview .status-messages p {
+            margin: 5px 0 0;
+        }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -423,7 +423,7 @@
 
 <div id="home" class="content">
     <!-- New Alerts and Status Section -->
-    <div class="alerts-status">
+    <div class="overview">
         <img src="/resources/images/msf.png" alt="Game Image" class="game-image">
         <div class="status-messages">
             <h2>Game Live Overview</h2>
@@ -431,6 +431,7 @@
         </div>
     </div>
     <hr>
+    <h2>Game Engagement</h2>
     <div class="kpi-container">
         <!-- KPI Cards Above the Chart -->
         <div class="kpi-card negative">
