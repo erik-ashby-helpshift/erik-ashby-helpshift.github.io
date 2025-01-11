@@ -1,15 +1,15 @@
 import requests
-from bs4 import BeautifulSoup
-import pandas as pd
-from snowflake.connector import connect
+#from bs4 import BeautifulSoup
+#import pandas as pd
+#from snowflake.connector import connect
 from datetime import datetime
 import logging
 from urllib.parse import urljoin, urlparse
 from collections import deque
 
 # Import Azure AD authentication libraries
-from azure.identity import InteractiveBrowserCredential, DeviceCodeCredential
-from snowflake.connector.connection import SnowflakeConnection
+#from azure.identity import InteractiveBrowserCredential, DeviceCodeCredential
+#from snowflake.connector.connection import SnowflakeConnection
 
 class SnowflakeWebCrawler:
     def __init__(self, account, user, warehouse, database, schema):
