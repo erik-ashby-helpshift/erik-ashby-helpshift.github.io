@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Helpshift Issues List</title>
   <style>
-    /* Simple styling to illustrate a right-hand navigation and main content */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -12,22 +11,53 @@
 
     .container {
       display: flex;
-      flex-direction: row; /* main-content on the left, nav on the right */
-      min-height: 100vh;  /* fill the entire viewport height */
+      flex-direction: row;
+      min-height: 100vh;
     }
 
-    .main-content {
-      flex: 1; /* takes all available space except the width used by nav */
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
+    /* Left navigation pane */
     .navigation {
       width: 250px;
-      background-color: #f4f4f4;
+      background-color: #333;
+      color: #fff;
       padding: 20px;
       box-sizing: border-box;
-      border-left: 1px solid #ccc; /* a subtle left border for the nav */
+    }
+
+    .navigation h2 {
+      margin-top: 0;
+      color: #fff;
+    }
+
+    .navigation ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .navigation ul li a {
+      color: #ccc;
+      text-decoration: none;
+    }
+
+    .navigation ul li a:hover {
+      color: #fff;
+    }
+
+    /* Main content area (middle column) */
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* Right pane for agent chat */
+    .chat-pane {
+      width: 300px;
+      border-left: 1px solid #ccc;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
     }
 
     h1 {
@@ -44,15 +74,20 @@
       border: 1px solid #ddd;
       margin: 0 0 10px 0;
       padding: 10px;
+      transition: background-color 0.3s;
     }
 
-    /* Basic loading message style */
+    /* Hover highlight */
+    #issuesList li:hover {
+      background-color: #eee;
+      cursor: pointer;
+    }
+
     #loadingMessage {
       font-style: italic;
       color: #555;
     }
 
-    /* Basic error message style */
     #errorMessage {
       color: #b00;
       font-weight: bold;
@@ -62,21 +97,8 @@
 <body>
 
 <div class="container">
-  <!-- Main content area where we will list the issues -->
-  <div class="main-content">
-    <h1>Open Tickets</h1>
-    
-    <!-- Loading message shown while we fetch data -->
-    <div id="loadingMessage">Loading issues...</div>
-    
-    <!-- Error message container -->
-    <div id="errorMessage"></div>
-    
-    <!-- Unordered list where we will inject the issues -->
-    <ul id="issuesList"></ul>
-  </div>
-
-  <!-- Right-side navigation area -->
+  
+  <!-- Left navigation pane -->
   <div class="navigation">
     <h2>Navigation</h2>
     <ul>
@@ -86,6 +108,21 @@
       <li><a href="#">Settings</a></li>
     </ul>
   </div>
+
+  <!-- Main content (middle column) -->
+  <div class="main-content">
+    <h1>Open Tickets</h1>
+    <div id="loadingMessage">Loading issues...</div>
+    <div id="errorMessage"></div>
+    <ul id="issuesList"></ul>
+  </div>
+
+  <!-- Right pane for agent chat -->
+  <div class="chat-pane">
+    <h2>Agent Chat</h2>
+    <p>This is where the agent chat will go. (Code to be added later.)</p>
+  </div>
+
 </div>
 
 <script>
@@ -119,12 +156,9 @@
       // Adjust accordingly based on the actual JSON structure.
       const issues = data.issues || [];
 
-      // Once we have the issues, we remove the "loading" message
       document.getElementById("loadingMessage").style.display = 'none';
 
-      // Build the list of issues
       const issuesList = document.getElementById("issuesList");
-
       if (issues.length === 0) {
         issuesList.innerHTML = "<li>No open issues found.</li>";
         return;
@@ -132,9 +166,7 @@
 
       issues.forEach(issue => {
         const li = document.createElement("li");
-
-        // Customize how you display each issue here:
-        // For example, let's say each issue has an 'id', 'title' and 'state'.
+        // Customize how you display each issue:
         li.innerHTML = `
           <strong>Issue ID:</strong> ${issue.id} <br/>
           <strong>Title:</strong> ${issue.title} <br/>
@@ -144,7 +176,7 @@
       });
     } catch (error) {
       document.getElementById("loadingMessage").style.display = 'none';
-      document.getElementById("errorMessage").innerText = 
+      document.getElementById("errorMessage").innerText =
         "Failed to load issues: " + error.message;
     }
   }
@@ -152,5 +184,6 @@
   // When the page loads, fetch the issues
   window.addEventListener("DOMContentLoaded", fetchIssues);
 </script>
+
 </body>
 </html>
