@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Helpshift Issues List</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      min-height: 100vh;
+    }
+
+    /* Left navigation pane */
+    .navigation {
+      width: 250px;
+      background-color: #333;
+      color: #fff;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .navigation h2 {
+      margin-top: 0;
+      color: #fff;
+    }
+
+    .navigation ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .navigation ul li a {
+      color: #ccc;
+      text-decoration: none;
+    }
+
+    .navigation ul li a:hover {
+      color: #fff;
+    }
+
+    /* Main content area (middle column) */
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* Right pane for agent chat */
+    .chat-pane {
+      width: 600px;
+      border-left: 1px solid #ccc;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    #issuesList {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #issuesList li {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      margin: 0 0 10px 0;
+      padding: 10px;
+      transition: background-color 0.3s;
+    }
+
+    /* Hover highlight */
+    #issuesList li:hover {
+      background-color: #eee;
+      cursor: pointer;
+    }
+
+    #loadingMessage {
+      font-style: italic;
+      color: #555;
+    }
+
+    #errorMessage {
+      color: #b00;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- Left navigation pane -->
+  <div class="navigation">
+    <h2>Navigation</h2>
+    <ul>
+      <li><a href="#">Dashboard</a></li>
+      <li><a href="#">My Tickets</a></li>
+      <li><a href="#">Analytics</a></li>
+      <li><a href="#">Settings</a></li>
+    </ul>
+  </div>
+
+  <!-- Main content (middle column) -->
+  <div class="main-content">
+    <h1>Open Tickets</h1>
+    <div id="loadingMessage">Loading issues...</div>
+    <div id="errorMessage"></div>
+    <ul id="issuesList"></ul>
+  </div>
+
+  <!-- Right pane for agent chat -->
+  <div class="chat-pane">
+    <h2>Agent Chat</h2>
+    <p>This is where the agent chat will go. (Code to be added later.)</p>
+  </div>
+
+</div>
+
+<script>
+  // Replace these with real values or dynamic logic
+  const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
+  const HELPSHIFT_API_KEY = "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";       // e.g. "abc123456..."
+  const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues`;
+
+  // For Basic Auth, Helpshift often uses "YOUR_DOMAIN:YOUR_API_KEY" (or an API key alone).
+  // Check Helpshift docs for the recommended approach. This is a demonstration:
+  const authString = btoa(`${HELPSHIFT_API_KEY}`);
+
+  // Attempt to fetch open tickets from Helpshift
+  async function fetchIssues() {
+    try {
+      const response = await fetch(HELPSHIFT_URL, {
+        method: "GET",
+        headers: {
+          "Authorization": `Basic YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // In Helpshift's response, the open issues might be in data.issues or a similar structure.
+      // Adjust accordingly based on the actual JSON structure.
+      const issues = data.issues || [];
+
+      document.getElementById("loadingMessage").style.display = 'none';
+
+      const issuesList = document.getElementById("issuesList");
+      if (issues.length === 0) {
+        issuesList.innerHTML = "<li>No open issues found.</li>";
+        return;
+      }
+
+      issues.forEach(issue => {
+        const li = document.createElement("li");
+        // Customize how you display each issue:
+        li.innerHTML = `
+          <strong>Issue ID:</strong> ${issue.id} <br/>
+          <strong>Title:</strong> ${issue.title} <br/>
+          <strong>Status:</strong> ${issue.state}
+        `;
+        issuesList.appendChild(li);
+      });
+    } catch (error) {
+      document.getElementById("loadingMessage").style.display = 'none';
+      document.getElementById("errorMessage").innerText =
+        "Failed to load issues: " + error.message;
+    }
+  }
+
+  // When the page loads, fetch the issues
+  window.addEventListener("DOMContentLoaded", fetchIssues);
+</script>
+
+</body>
+</html>

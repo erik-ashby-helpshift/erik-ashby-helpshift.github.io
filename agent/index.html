@@ -44,23 +44,14 @@
       color: #fff;
     }
 
-    /* Main content area (middle column) */
+    /* Middle column: list of issues */
     .main-content {
       flex: 1;
       padding: 20px;
       box-sizing: border-box;
     }
 
-    /* Right pane for agent chat */
-    .chat-pane {
-      width: 600px;
-      border-left: 1px solid #ccc;
-      padding: 20px;
-      box-sizing: border-box;
-      background-color: #f9f9f9;
-    }
-
-    h1 {
+    .main-content h1 {
       margin-top: 0;
     }
 
@@ -72,12 +63,12 @@
     #issuesList li {
       background: #fafafa;
       border: 1px solid #ddd;
-      margin: 0 0 10px 0;
+      margin-bottom: 10px;
       padding: 10px;
       transition: background-color 0.3s;
     }
 
-    /* Hover highlight */
+    /* Hover highlight for issues */
     #issuesList li:hover {
       background-color: #eee;
       cursor: pointer;
@@ -91,6 +82,54 @@
     #errorMessage {
       color: #b00;
       font-weight: bold;
+    }
+
+    /* Right pane for detailed issue conversation */
+    .chat-pane {
+      width: 600px; /* expanded to 600px */
+      border-left: 1px solid #ccc;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
+    }
+
+    /* Conversation styling */
+    .conversation {
+      margin: 20px 0;
+    }
+
+    .message-left {
+      background-color: #eee;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: left;
+      max-width: 70%;
+    }
+
+    .message-right {
+      background-color: #cce5ff;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: right;
+      max-width: 70%;
+      margin-left: auto; /* push to the right */
+    }
+
+    .chat-controls {
+      margin-top: 20px;
+    }
+
+    .chat-controls button {
+      margin-right: 5px;
+    }
+
+    .chat-controls textarea {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 5px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -109,7 +148,7 @@
     </ul>
   </div>
 
-  <!-- Main content (middle column) -->
+  <!-- Middle column: list of issues -->
   <div class="main-content">
     <h1>Open Tickets</h1>
     <div id="loadingMessage">Loading issues...</div>
@@ -117,10 +156,10 @@
     <ul id="issuesList"></ul>
   </div>
 
-  <!-- Right pane for agent chat -->
-  <div class="chat-pane">
-    <h2>Agent Chat</h2>
-    <p>This is where the agent chat will go. (Code to be added later.)</p>
+  <!-- Right pane: issue details & conversation -->
+  <div class="chat-pane" id="chatPane">
+    <h2>Issue Details</h2>
+    <p>Select an issue to see details here...</p>
   </div>
 
 </div>
@@ -128,20 +167,22 @@
 <script>
   // Replace these with real values or dynamic logic
   const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
-  const HELPSHIFT_API_KEY = "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";       // e.g. "abc123456..."
+  const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues`;
 
-  // For Basic Auth, Helpshift often uses "YOUR_DOMAIN:YOUR_API_KEY" (or an API key alone).
-  // Check Helpshift docs for the recommended approach. This is a demonstration:
-  const authString = btoa(`${HELPSHIFT_API_KEY}`);
+  // For Basic Auth, Helpshift often uses "YOUR_DOMAIN:YOUR_API_KEY" (or just the key).
+  // Check Helpshift docs for the recommended approach. This is only a demonstration:
+  const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
 
-  // Attempt to fetch open tickets from Helpshift
+  // When the page loads, fetch the issues
+  window.addEventListener("DOMContentLoaded", fetchIssues);
+
   async function fetchIssues() {
     try {
       const response = await fetch(HELPSHIFT_URL, {
         method: "GET",
         headers: {
-          "Authorization": `Basic YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6`,
+          "Authorization": `Basic ${authString}`,
           "Content-Type": "application/json"
         }
       });
@@ -151,14 +192,12 @@
       }
 
       const data = await response.json();
-      
-      // In Helpshift's response, the open issues might be in data.issues or a similar structure.
-      // Adjust accordingly based on the actual JSON structure.
-      const issues = data.issues || [];
-
       document.getElementById("loadingMessage").style.display = 'none';
 
+      // We'll assume the main array of issues is data.issues
+      const issues = data.issues || [];
       const issuesList = document.getElementById("issuesList");
+
       if (issues.length === 0) {
         issuesList.innerHTML = "<li>No open issues found.</li>";
         return;
@@ -166,12 +205,13 @@
 
       issues.forEach(issue => {
         const li = document.createElement("li");
-        // Customize how you display each issue:
         li.innerHTML = `
           <strong>Issue ID:</strong> ${issue.id} <br/>
           <strong>Title:</strong> ${issue.title} <br/>
-          <strong>Status:</strong> ${issue.state}
+          <strong>Status:</strong> ${issue.state_data.state}
         `;
+        // On click, load the conversation into the right pane
+        li.addEventListener("click", () => showIssueDetail(issue));
         issuesList.appendChild(li);
       });
     } catch (error) {
@@ -181,8 +221,57 @@
     }
   }
 
-  // When the page loads, fetch the issues
-  window.addEventListener("DOMContentLoaded", fetchIssues);
+  function showIssueDetail(issue) {
+    const chatPane = document.getElementById("chatPane");
+
+    // Clear out existing content
+    chatPane.innerHTML = "";
+
+    // Header (Issue #ID + Title)
+    const header = document.createElement("h2");
+    header.textContent = `Issue #${issue.id} - ${issue.title}`;
+    chatPane.appendChild(header);
+
+    // Assignee
+    const assigneeInfo = document.createElement("p");
+    assigneeInfo.textContent = `Assignee: ${issue.assignee_name || "Unassigned"}`;
+    chatPane.appendChild(assigneeInfo);
+
+    // Conversation container
+    const conversationDiv = document.createElement("div");
+    conversationDiv.classList.add("conversation");
+
+    // Each message
+    (issue.messages || []).forEach(msg => {
+      const msgDiv = document.createElement("div");
+
+      // Align end-user messages left, helpshift messages right
+      if (msg.origin === "end-user") {
+        msgDiv.classList.add("message-left");
+      } else {
+        msgDiv.classList.add("message-right");
+      }
+      msgDiv.textContent = msg.body;
+
+      conversationDiv.appendChild(msgDiv);
+    });
+
+    chatPane.appendChild(conversationDiv);
+
+    // Chat controls at the bottom
+    const controlsDiv = document.createElement("div");
+    controlsDiv.classList.add("chat-controls");
+    controlsDiv.innerHTML = `
+      <button>Yes</button>
+      <button>No</button>
+      <div style="margin-top:10px;">
+        <label for="aiInstructions"><strong>AI Instructions</strong></label><br/>
+        <textarea id="aiInstructions" rows="3" placeholder="Enter instructions for AI here"></textarea><br/>
+        <button>Submit to AI</button>
+      </div>
+    `;
+    chatPane.appendChild(controlsDiv);
+  }
 </script>
 
 </body>
