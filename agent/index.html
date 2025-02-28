@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Helpshift Issues List</title>
+  <title>Helpshift Issues List with White-space Pre-Wrap</title>
   <style>
     /* Ensure page/container fill the viewport */
     html, body {
@@ -128,22 +128,23 @@
       padding: 20px;         /* some padding around messages */
     }
 
-    .message-left {
-      background-color: #eee;
+    .message-left,
+    .message-right {
       margin: 5px 0;
       padding: 10px;
       border-radius: 5px;
-      text-align: left;
       max-width: 70%;
+      white-space: pre-wrap; /* preserve newlines and wrap text */
+    }
+
+    .message-left {
+      background-color: #eee;
+      text-align: left;
     }
 
     .message-right {
       background-color: #cce5ff;
-      margin: 5px 0;
-      padding: 10px;
-      border-radius: 5px;
       text-align: right;
-      max-width: 70%;
       margin-left: auto; /* push to the right */
     }
 
@@ -227,7 +228,7 @@
 
 <script>
  // Replace these with real values or dynamic logic
- const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
+  const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
   const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues`;
 
@@ -235,20 +236,14 @@
   // Check Helpshift docs for the recommended approach. This is only a demonstration:
   const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
 
-  // We track our issues data globally so we can quickly find an updated issue after each fetch.
   let issuesData = [];
   let selectedIssueId = null;
 
-  // On page load, fetch issues
   window.addEventListener("DOMContentLoaded", () => {
     fetchIssues();
-    // Refresh every 5 seconds
-    setInterval(fetchIssues, 5000);
+    setInterval(fetchIssues, 5000); // auto-refresh every 5s
   });
 
-  /**
-   * Fetch the list of issues from Helpshift
-   */
   async function fetchIssues() {
     try {
       const response = await fetch(HELPSHIFT_URL, {
@@ -267,19 +262,16 @@
       document.getElementById("loadingMessage").style.display = 'none';
       document.getElementById("errorMessage").textContent = "";
 
-      // Store the latest issues in our global variable
       issuesData = data.issues || [];
+      buildIssueList();
 
-      buildIssueList(); // rebuild the left pane
-
-      // If we had a selected issue, re-render it with updated data
+      // Refresh selected issue
       if (selectedIssueId !== null) {
         const updatedIssue = issuesData.find(i => i.id === selectedIssueId);
         if (updatedIssue) {
           showIssueDetail(updatedIssue);
         }
       }
-
     } catch (error) {
       document.getElementById("loadingMessage").style.display = 'none';
       document.getElementById("errorMessage").innerText =
@@ -287,12 +279,9 @@
     }
   }
 
-  /**
-   * Build the left list of issues.
-   */
   function buildIssueList() {
     const issuesList = document.getElementById("issuesList");
-    issuesList.innerHTML = ""; // Clear current list
+    issuesList.innerHTML = "";
 
     if (issuesData.length === 0) {
       issuesList.innerHTML = "<li>No open issues found.</li>";
@@ -307,12 +296,10 @@
         <strong>Status:</strong> ${issue.state_data.state}
       `;
 
-      // Highlight if this is the selected issue
       if (issue.id === selectedIssueId) {
         li.classList.add("selected-issue");
       }
 
-      // On click, load the conversation into the right pane
       li.addEventListener("click", () => {
         selectedIssueId = issue.id;
         showIssueDetail(issue);
@@ -321,23 +308,20 @@
     });
   }
 
-  /**
-   * Show the detail for a single issue in the right pane.
-   */
   function showIssueDetail(issue) {
-    // 1. Highlight this issue in the list
+    // Highlight in list
     const issuesList = document.getElementById("issuesList");
     [...issuesList.children].forEach(li => {
       li.classList.remove("selected-issue");
     });
-    const matchingLi = [...issuesList.children].find(li => 
+    const matchingLi = [...issuesList.children].find(li =>
       li.innerHTML.includes(`Issue ID:</strong> ${issue.id}`)
     );
     if (matchingLi) {
       matchingLi.classList.add("selected-issue");
     }
 
-    // 2. Update header
+    // Update header
     const issueHeader = document.getElementById("issueHeader");
     issueHeader.innerHTML = `
       <h2>Issue #${issue.id}</h2>
@@ -345,23 +329,25 @@
       <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
     `;
 
-    // 3. Update conversation
+    // Update conversation
     const conversationArea = document.getElementById("conversationArea");
-    conversationArea.innerHTML = ""; // clear out existing messages
+    conversationArea.innerHTML = "";
 
     (issue.messages || []).forEach(msg => {
       const msgDiv = document.createElement("div");
+
       if (msg.origin === "end-user") {
         msgDiv.classList.add("message-left");
       } else {
         msgDiv.classList.add("message-right");
       }
+
+      // Use textContent to preserve safety, combined with pre-wrap in CSS
       msgDiv.textContent = msg.body;
       conversationArea.appendChild(msgDiv);
     });
   }
 </script>
-
 </body>
 </html>
 
