@@ -4,15 +4,20 @@
   <meta charset="UTF-8">
   <title>Helpshift Issues List</title>
   <style>
-    body {
+    /* Ensure page/container fill the viewport */
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%; /* so 100vh logic works nicely in container */
       font-family: Arial, sans-serif;
+      font-size: 14px; /* slightly smaller base font */
     }
 
     .container {
       display: flex;
       flex-direction: row;
-      min-height: 100vh;
+      height: 100vh; /* fill the viewport height */
+      box-sizing: border-box;
     }
 
     /* Left navigation pane */
@@ -49,6 +54,7 @@
       flex: 1;
       padding: 20px;
       box-sizing: border-box;
+      overflow-y: auto; /* in case the list is very long */
     }
 
     .main-content h1 {
@@ -58,6 +64,7 @@
     #issuesList {
       list-style-type: none;
       padding: 0;
+      margin: 0;
     }
 
     #issuesList li {
@@ -86,16 +93,34 @@
 
     /* Right pane for detailed issue conversation */
     .chat-pane {
-      width: 600px; /* expanded to 600px */
+      width: 600px;          /* expanded to 600px */
       border-left: 1px solid #ccc;
-      padding: 20px;
       box-sizing: border-box;
       background-color: #f9f9f9;
+
+      /* Set up a flex column to keep conversation separate from bottom controls */
+      display: flex;
+      flex-direction: column;
+      position: relative; /* helps with sticky child elements */
     }
 
-    /* Conversation styling */
+    /* Header / Issue details in the right pane */
+    .issue-header {
+      padding: 20px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .issue-header h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 16px; /* slightly smaller, but distinct from the base size */
+    }
+
+    /* Scrollable conversation area */
     .conversation {
-      margin: 20px 0;
+      flex: 1;               /* fill remaining vertical space */
+      overflow-y: auto;      /* enable scrolling only here */
+      padding: 20px;         /* some padding around messages */
     }
 
     .message-left {
@@ -117,8 +142,13 @@
       margin-left: auto; /* push to the right */
     }
 
+    /* Chat controls pinned at the bottom */
     .chat-controls {
-      margin-top: 20px;
+      position: sticky; /* sticky within the .chat-pane container */
+      bottom: 0;
+      background-color: #f9f9f9;
+      border-top: 1px solid #ccc;
+      padding: 20px;
     }
 
     .chat-controls button {
@@ -130,6 +160,13 @@
       box-sizing: border-box;
       margin-top: 5px;
       margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .chat-controls label {
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -158,21 +195,41 @@
 
   <!-- Right pane: issue details & conversation -->
   <div class="chat-pane" id="chatPane">
-    <h2>Issue Details</h2>
-    <p>Select an issue to see details here...</p>
-  </div>
+    <!-- Will populate dynamically -->
+    <!-- We'll create a header area and a conversation area by default or dynamically. -->
+    <div class="issue-header" id="issueHeader">
+      <h2>Select an issue</h2>
+      <p>Issue details will appear here.</p>
+    </div>
 
+    <div class="conversation" id="conversationArea">
+      <!-- Messages will be populated here -->
+    </div>
+
+    <div class="chat-controls">
+      <!-- We keep these controls pinned at the bottom -->
+      <button id="yesButton">Yes</button>
+      <button id="noButton">No</button>
+      
+      <div style="margin-top:10px;">
+        <label for="aiInstructions">AI Instructions</label><br/>
+        <textarea id="aiInstructions" rows="3" 
+          placeholder="Enter instructions for AI here"></textarea><br/>
+        <button id="submitAiBtn">Submit to AI</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
   // Replace these with real values or dynamic logic
-  const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
+  const HELPSHIFT_DOMAIN = "YOUR_DOMAIN";         // e.g. "mycompany"
   const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues`;
 
   // For Basic Auth, Helpshift often uses "YOUR_DOMAIN:YOUR_API_KEY" (or just the key).
   // Check Helpshift docs for the recommended approach. This is only a demonstration:
-  const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
+  const authString = btoa(`${HELPSHIFT_DOMAIN}:${HELPSHIFT_API_KEY}`);
 
   // When the page loads, fetch the issues
   window.addEventListener("DOMContentLoaded", fetchIssues);
@@ -222,55 +279,28 @@
   }
 
   function showIssueDetail(issue) {
-    const chatPane = document.getElementById("chatPane");
+    // Update header
+    const issueHeader = document.getElementById("issueHeader");
+    issueHeader.innerHTML = `
+      <h2>Issue #${issue.id}</h2>
+      <p><strong>Title:</strong> ${issue.title}</p>
+      <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
+    `;
 
-    // Clear out existing content
-    chatPane.innerHTML = "";
+    // Update conversation
+    const conversationArea = document.getElementById("conversationArea");
+    conversationArea.innerHTML = ""; // clear out existing messages
 
-    // Header (Issue #ID + Title)
-    const header = document.createElement("h2");
-    header.textContent = `Issue #${issue.id} - ${issue.title}`;
-    chatPane.appendChild(header);
-
-    // Assignee
-    const assigneeInfo = document.createElement("p");
-    assigneeInfo.textContent = `Assignee: ${issue.assignee_name || "Unassigned"}`;
-    chatPane.appendChild(assigneeInfo);
-
-    // Conversation container
-    const conversationDiv = document.createElement("div");
-    conversationDiv.classList.add("conversation");
-
-    // Each message
     (issue.messages || []).forEach(msg => {
       const msgDiv = document.createElement("div");
-
-      // Align end-user messages left, helpshift messages right
       if (msg.origin === "end-user") {
         msgDiv.classList.add("message-left");
       } else {
         msgDiv.classList.add("message-right");
       }
       msgDiv.textContent = msg.body;
-
-      conversationDiv.appendChild(msgDiv);
+      conversationArea.appendChild(msgDiv);
     });
-
-    chatPane.appendChild(conversationDiv);
-
-    // Chat controls at the bottom
-    const controlsDiv = document.createElement("div");
-    controlsDiv.classList.add("chat-controls");
-    controlsDiv.innerHTML = `
-      <button>Yes</button>
-      <button>No</button>
-      <div style="margin-top:10px;">
-        <label for="aiInstructions"><strong>AI Instructions</strong></label><br/>
-        <textarea id="aiInstructions" rows="3" placeholder="Enter instructions for AI here"></textarea><br/>
-        <button>Submit to AI</button>
-      </div>
-    `;
-    chatPane.appendChild(controlsDiv);
   }
 </script>
 
