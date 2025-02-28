@@ -8,9 +8,9 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%; /* so 100vh logic works nicely in container */
+      height: 100%;
       font-family: Arial, sans-serif;
-      font-size: 14px; /* slightly smaller base font */
+      font-size: 14px; /* base font size slightly smaller */
     }
 
     .container {
@@ -81,6 +81,11 @@
       cursor: pointer;
     }
 
+    /* Highlight for selected issue */
+    .selected-issue {
+      background-color: #d9edf7 !important; /* a light highlight */
+    }
+
     #loadingMessage {
       font-style: italic;
       color: #555;
@@ -113,7 +118,7 @@
     .issue-header h2 {
       margin-top: 0;
       margin-bottom: 10px;
-      font-size: 16px; /* slightly smaller, but distinct from the base size */
+      font-size: 16px; /* slightly smaller than default heading */
     }
 
     /* Scrollable conversation area */
@@ -195,26 +200,25 @@
 
   <!-- Right pane: issue details & conversation -->
   <div class="chat-pane" id="chatPane">
-    <!-- Will populate dynamically -->
-    <!-- We'll create a header area and a conversation area by default or dynamically. -->
+    <!-- Header -->
     <div class="issue-header" id="issueHeader">
       <h2>Select an issue</h2>
       <p>Issue details will appear here.</p>
     </div>
 
+    <!-- Conversation -->
     <div class="conversation" id="conversationArea">
       <!-- Messages will be populated here -->
     </div>
 
+    <!-- Bottom controls -->
     <div class="chat-controls">
-      <!-- We keep these controls pinned at the bottom -->
       <button id="yesButton">Yes</button>
       <button id="noButton">No</button>
       
       <div style="margin-top:10px;">
         <label for="aiInstructions">AI Instructions</label><br/>
-        <textarea id="aiInstructions" rows="3" 
-          placeholder="Enter instructions for AI here"></textarea><br/>
+        <textarea id="aiInstructions" rows="3" placeholder="Enter instructions for AI here"></textarea><br/>
         <button id="submitAiBtn">Submit to AI</button>
       </div>
     </div>
@@ -231,9 +235,20 @@
   // Check Helpshift docs for the recommended approach. This is only a demonstration:
   const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
 
-  // When the page loads, fetch the issues
-  window.addEventListener("DOMContentLoaded", fetchIssues);
+  // We track our issues data globally so we can quickly find an updated issue after each fetch.
+  let issuesData = [];
+  let selectedIssueId = null;
 
+  // On page load, fetch issues
+  window.addEventListener("DOMContentLoaded", () => {
+    fetchIssues();
+    // Refresh every 5 seconds
+    setInterval(fetchIssues, 5000);
+  });
+
+  /**
+   * Fetch the list of issues from Helpshift
+   */
   async function fetchIssues() {
     try {
       const response = await fetch(HELPSHIFT_URL, {
@@ -250,27 +265,21 @@
 
       const data = await response.json();
       document.getElementById("loadingMessage").style.display = 'none';
+      document.getElementById("errorMessage").textContent = "";
 
-      // We'll assume the main array of issues is data.issues
-      const issues = data.issues || [];
-      const issuesList = document.getElementById("issuesList");
+      // Store the latest issues in our global variable
+      issuesData = data.issues || [];
 
-      if (issues.length === 0) {
-        issuesList.innerHTML = "<li>No open issues found.</li>";
-        return;
+      buildIssueList(); // rebuild the left pane
+
+      // If we had a selected issue, re-render it with updated data
+      if (selectedIssueId !== null) {
+        const updatedIssue = issuesData.find(i => i.id === selectedIssueId);
+        if (updatedIssue) {
+          showIssueDetail(updatedIssue);
+        }
       }
 
-      issues.forEach(issue => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <strong>Issue ID:</strong> ${issue.id} <br/>
-          <strong>Title:</strong> ${issue.title} <br/>
-          <strong>Status:</strong> ${issue.state_data.state}
-        `;
-        // On click, load the conversation into the right pane
-        li.addEventListener("click", () => showIssueDetail(issue));
-        issuesList.appendChild(li);
-      });
     } catch (error) {
       document.getElementById("loadingMessage").style.display = 'none';
       document.getElementById("errorMessage").innerText =
@@ -278,8 +287,57 @@
     }
   }
 
+  /**
+   * Build the left list of issues.
+   */
+  function buildIssueList() {
+    const issuesList = document.getElementById("issuesList");
+    issuesList.innerHTML = ""; // Clear current list
+
+    if (issuesData.length === 0) {
+      issuesList.innerHTML = "<li>No open issues found.</li>";
+      return;
+    }
+
+    issuesData.forEach(issue => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <strong>Issue ID:</strong> ${issue.id} <br/>
+        <strong>Title:</strong> ${issue.title} <br/>
+        <strong>Status:</strong> ${issue.state_data.state}
+      `;
+
+      // Highlight if this is the selected issue
+      if (issue.id === selectedIssueId) {
+        li.classList.add("selected-issue");
+      }
+
+      // On click, load the conversation into the right pane
+      li.addEventListener("click", () => {
+        selectedIssueId = issue.id;
+        showIssueDetail(issue);
+      });
+      issuesList.appendChild(li);
+    });
+  }
+
+  /**
+   * Show the detail for a single issue in the right pane.
+   */
   function showIssueDetail(issue) {
-    // Update header
+    // 1. Highlight this issue in the list
+    const issuesList = document.getElementById("issuesList");
+    [...issuesList.children].forEach(li => {
+      li.classList.remove("selected-issue");
+    });
+    const matchingLi = [...issuesList.children].find(li => 
+      li.innerHTML.includes(`Issue ID:</strong> ${issue.id}`)
+    );
+    if (matchingLi) {
+      matchingLi.classList.add("selected-issue");
+    }
+
+    // 2. Update header
     const issueHeader = document.getElementById("issueHeader");
     issueHeader.innerHTML = `
       <h2>Issue #${issue.id}</h2>
@@ -287,7 +345,7 @@
       <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
     `;
 
-    // Update conversation
+    // 3. Update conversation
     const conversationArea = document.getElementById("conversationArea");
     conversationArea.innerHTML = ""; // clear out existing messages
 
@@ -306,3 +364,4 @@
 
 </body>
 </html>
+
