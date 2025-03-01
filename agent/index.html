@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Helpshift Issues List with Updates</title>
+  <title>Helpshift Issues List with Resolved Highlight</title>
   <style>
     /* Basic page styling */
     html, body {
@@ -24,9 +24,9 @@
       height: 100vh; /* fill the viewport height */
     }
 
-    /* 1) Navigation bar: only 75px wide */
+    /* Navigation bar: only 75px wide */
     .navigation {
-      width: 90px;
+      width: 75px;
       background-color: #333;
       color: #fff;
       padding: 10px;
@@ -74,33 +74,47 @@
       margin: 0;
     }
 
-    /* 2) Simple list with lines between items (no separate box) */
+    /* Simple list with lines between items */
     #issuesList li {
       list-style: none;
       border-bottom: 1px solid #ddd;
       padding: 10px 0;
+      transition: background-color 0.3s;
     }
 
-    /* 3) Title on top (max two lines), Issue ID left, Status right below it */
-
+    /* Title with two-line clamp */
     .issue-title {
-      display: -webkit-box;          /* needed for webkit line clamp */
-      -webkit-line-clamp: 2;         /* limit to 2 lines */
-      -webkit-box-orient: vertical;  /* vertical stacking of lines */
+      display: -webkit-box;          
+      -webkit-line-clamp: 2;         
+      -webkit-box-orient: vertical;  
       overflow: hidden;
       font-weight: bold;
       margin-bottom: 5px;
     }
 
+    /* ID left, status right */
     .issue-meta {
       display: flex;
       justify-content: space-between;
     }
 
-    /* 4 & 5) Highlight resolved issues with green background, grey text */
+    /* If the item is resolved, all text is grey */
     .resolved-issue {
-      background-color: #d6f5d6; /* light green background */
-      color: #777;              /* grey text */
+      color: #777; /* grey text */
+    }
+
+    /* Highlight the word "resolved" with green background */
+    .status-resolved {
+      background-color: #cfc; 
+      color: #333;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+
+    /* Selected issue highlight */
+    .selected-issue {
+      background-color: #d9edf7 !important;
     }
 
     #loadingMessage {
@@ -115,15 +129,15 @@
 
     /* Right pane for detailed issue conversation */
     .chat-pane {
-      width: 600px;          /* expanded to 600px */
+      width: 600px;  
       border-left: 1px solid #ccc;
       background-color: #f9f9f9;
       display: flex;
       flex-direction: column;
-      position: relative; /* helps with sticky child elements */
+      position: relative;
     }
 
-    /* Header / Issue details in the right pane */
+    /* Header / Issue details */
     .issue-header {
       padding: 20px;
       border-bottom: 1px solid #ccc;
@@ -149,7 +163,7 @@
       padding: 10px;
       border-radius: 5px;
       max-width: 70%;
-      white-space: pre-wrap; /* preserve newlines and wrap text */
+      white-space: pre-wrap;
     }
 
     .message-left {
@@ -157,7 +171,6 @@
       text-align: left;
     }
 
-    /* Keep the box on the right, but text left-aligned */
     .message-right {
       background-color: #cce5ff;
       margin-left: auto;
@@ -166,7 +179,7 @@
 
     /* Chat controls pinned at the bottom */
     .chat-controls {
-      position: sticky; /* sticky within the .chat-pane container */
+      position: sticky;
       bottom: 0;
       background-color: #f9f9f9;
       border-top: 1px solid #ccc;
@@ -193,8 +206,9 @@
   </style>
 </head>
 <body>
+
 <div class="container">
-  <!-- Navigation bar (75px wide) -->
+  <!-- Navigation bar -->
   <div class="navigation">
     <h2>Nav</h2>
     <ul>
@@ -241,7 +255,8 @@
 </div>
 
 <script>
- // Replace these with real values or dynamic logic
+  // Replace these with real values or dynamic logic
+  // Replace these with real values or dynamic logic
   const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
   const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues`;
@@ -283,7 +298,7 @@
       issuesData = data.issues || [];
       buildIssueList();
 
-      // Refresh selected issue
+      // If we have a selected issue, refresh its details
       if (selectedIssueId !== null) {
         const updatedIssue = issuesData.find(i => i.id === selectedIssueId);
         if (updatedIssue) {
@@ -312,22 +327,26 @@
     issuesData.forEach(issue => {
       const li = document.createElement("li");
 
-      // If status is resolved => highlight green, all text grey
+      // If status is resolved => text is grey
+      let cssClass = "";
+      let statusHtml = issue.state_data.state;
+
       if (issue.state_data.state === 'resolved') {
-        li.classList.add("resolved-issue");
+        cssClass = "resolved-issue"; // entire list item text is grey
+        // highlight the word "resolved" with a green background
+        statusHtml = `<span class="status-resolved">resolved</span>`;
       }
 
-      // We'll create a simple structure:
-      //   <div class="issue-title">TITLE (2-line clamp)</div>
-      //   <div class="issue-meta">
-      //      <span>Issue #ID</span>
-      //      <span>STATUS</span>
-      //   </div>
+      li.className = cssClass;
+
+      // Build item:
+      //   .issue-title (2-line clamp)
+      //   .issue-meta => ID left, status right
       li.innerHTML = `
         <div class="issue-title">${issue.title}</div>
         <div class="issue-meta">
           <span>Issue #${issue.id}</span>
-          <span>${issue.state_data.state}</span>
+          <span>${statusHtml}</span>
         </div>
       `;
 
@@ -336,6 +355,7 @@
         li.classList.add("selected-issue");
       }
 
+      // Click to select
       li.addEventListener("click", () => {
         selectedIssueId = issue.id;
         showIssueDetail(issue);
@@ -348,7 +368,7 @@
    * Show the detail for a single issue in the right pane
    */
   function showIssueDetail(issue) {
-    // 1) Highlight in list
+    // Highlight in list
     const issuesList = document.getElementById("issuesList");
     [...issuesList.children].forEach(li => {
       li.classList.remove("selected-issue");
@@ -360,7 +380,7 @@
       matchingLi.classList.add("selected-issue");
     }
 
-    // 2) Update header
+    // Update header
     const issueHeader = document.getElementById("issueHeader");
     issueHeader.innerHTML = `
       <h2>Issue #${issue.id}</h2>
@@ -368,7 +388,7 @@
       <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
     `;
 
-    // 3) Update conversation
+    // Update conversation
     const conversationArea = document.getElementById("conversationArea");
     conversationArea.innerHTML = "";
 
@@ -389,5 +409,6 @@
 </script>
 </body>
 </html>
+
 
 
