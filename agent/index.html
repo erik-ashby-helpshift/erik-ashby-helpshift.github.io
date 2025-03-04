@@ -447,6 +447,7 @@
       "custom_fields": '{\"ml1\":{\"type\":\"multiline\",\"value\":\"" + instructions + "\"}}'
     };
 
+    report_payload = JSON.stringify(payload);
     const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
     const submitMsgEl = document.getElementById("submitAiMessage");
     submitMsgEl.style.display = "none"; // hide any old msg
@@ -465,7 +466,7 @@
       console.log("Full response text:", text);
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status} - ${text} - ${payload}`);
+        throw new Error(`HTTP ${response.status} - ${text} - ${report_payload}`);
       }
 
       // Show success message (or do something more advanced)
