@@ -459,7 +459,7 @@
           "Authorization": `Basic ${authString}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload)
+        body: payload
       });
 
       const text = await response.text();  // get the full response as raw text
