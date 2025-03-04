@@ -428,63 +428,59 @@
    *   "custom_fields": "{\"ml1\":{\"type\":\"multiline\",\"value\":\"(AI instructions)\"}}"
    * }
    */
-  async function submitAiInstructions() {
-    // Make sure we have a selected issue
-    if (!selectedIssueId) {
-      alert("No issue is currently selected!");
-      return;
-    }
-
-    // Grab text from the AI Instructions box
-    const instructions = document.getElementById("aiInstructions").value.trim();
-    if (!instructions) {
-      alert("Please enter AI instructions before submitting.");
-      return;
-    }
-
-    // Build the payload
-    const payload = {
-        "custom_fields": {
-          "ml1": {
-              "type": "multiline",
-              "value": "some text"
-                }
-          }
-        };
-
-    report_payload = JSON.stringify(payload);
-    const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
-    const submitMsgEl = document.getElementById("submitAiMessage");
-    submitMsgEl.style.display = "none"; // hide any old msg
-
-    try {
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Basic ${authString}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const text = await response.text();  // get the full response as raw text
-      console.log("Full response text:", text);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status} - ${text} - ${payload}`);
-      }
-
-      // Show success message (or do something more advanced)
-      submitMsgEl.textContent = "AI instructions submitted successfully!";
-      submitMsgEl.style.display = "block";
-
-      // Optionally re-fetch the issue to see updated fields
-      // fetchIssues(); // up to you
-
-    } catch (err) {
-      alert(`Failed to submit AI instructions: ${err.message} ${payload}`);
-    }
+   async function submitAiInstructions() {
+  if (!selectedIssueId) {
+    alert("No issue is currently selected!");
+    return;
   }
+
+  // Get the AI instructions from the textarea
+  const instructions = document.getElementById("aiInstructions").value.trim();
+  if (!instructions) {
+    alert("Please enter AI instructions before submitting.");
+    return;
+  }
+
+  // The Helpshift endpoint
+  const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+
+  // Build FormData instead of JSON
+  const formData = new FormData();
+  // Append your custom_fields as a string
+  formData.append(
+    "custom_fields",
+    `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+  );
+
+  const submitMsgEl = document.getElementById("submitAiMessage");
+  submitMsgEl.style.display = "none"; // hide any old msg
+
+  try {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        // Only the Authorization needed; DO NOT set Content-Type here
+        "Authorization": `Basic ${authString}`
+      },
+      body: formData
+    });
+
+    const resultText = await response.text();
+    console.log("Full response:", resultText);
+
+    if (!response.ok) {
+      throw new Error(
+        `HTTP ${response.status} – ${response.statusText}\n${resultText}`
+      );
+    }
+
+    submitMsgEl.textContent = "AI instructions submitted via FormData!";
+    submitMsgEl.style.display = "block";
+  } catch (err) {
+    alert(`Failed to submit AI instructions: ${err.message}`);
+  }
+}
+
 </script>
 </body>
 </html>
