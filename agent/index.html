@@ -461,6 +461,9 @@
         body: JSON.stringify(payload)
       });
 
+      const text = await response.text();  // get the full response as raw text
+      console.log("Full response text:", text);
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} - ${text}`);
       }
