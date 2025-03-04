@@ -466,7 +466,7 @@
       console.log("Full response text:", text);
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status} - ${text} - ${report_payload}`);
+        throw new Error(`HTTP ${response.status} - ${text} - ${payload}`);
       }
 
       // Show success message (or do something more advanced)
