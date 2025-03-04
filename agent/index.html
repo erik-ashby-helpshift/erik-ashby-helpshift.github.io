@@ -10,7 +10,7 @@
       padding: 0;
       height: 100%;
       font-family: Arial, sans-serif;
-      font-size: 14px; /* base font size slightly smaller */
+      font-size: 14px;
       box-sizing: border-box;
     }
 
@@ -203,6 +203,14 @@
       display: inline-block;
       margin-bottom: 5px;
     }
+
+    /* Optional: styling for any success/error feedback from the AI submit */
+    #submitAiMessage {
+      margin-top: 10px;
+      color: #088;
+      font-style: italic;
+      display: none; /* hidden by default */
+    }
   </style>
 </head>
 <body>
@@ -249,15 +257,15 @@
         <label for="aiInstructions">AI Instructions</label><br/>
         <textarea id="aiInstructions" rows="3" placeholder="Enter instructions for AI here"></textarea><br/>
         <button id="submitAiBtn">Submit to AI</button>
+        <div id="submitAiMessage">AI instructions submitted!</div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // Replace these with real values or dynamic logic
-  // Replace these with real values or dynamic logic
-  const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
+ // Replace these with real values or dynamic logic
+ const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
   const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues`;
 
@@ -269,9 +277,12 @@
   let selectedIssueId = null;
 
   window.addEventListener("DOMContentLoaded", () => {
+    // 1) Fetch issues immediately
     fetchIssues();
-    // auto-refresh every 5 seconds
+    // 2) Auto-refresh every 5 seconds
     setInterval(fetchIssues, 5000);
+    // 3) Hook up "Submit to AI" button
+    document.getElementById("submitAiBtn").addEventListener("click", submitAiInstructions);
   });
 
   /**
@@ -333,7 +344,7 @@
 
       if (issue.state_data.state === 'resolved') {
         cssClass = "resolved-issue"; // entire list item text is grey
-        // highlight the word "resolved" with a green background
+        // highlight the word "resolved" with green
         statusHtml = `<span class="status-resolved">resolved</span>`;
       }
 
@@ -406,9 +417,69 @@
       conversationArea.appendChild(msgDiv);
     });
   }
+
+  /**
+   * 4) Submit AI Instructions to Helpshift
+   * 
+   * We'll do a PUT to:
+   *   https://api.helpshift.com/v1/ashbys/issues/{selectedIssueId}
+   * with the payload:
+   * {
+   *   "custom_fields": "{\"ml1\":{\"type\":\"multiline\",\"value\":\"(AI instructions)\"}}"
+   * }
+   */
+  async function submitAiInstructions() {
+    // Make sure we have a selected issue
+    if (!selectedIssueId) {
+      alert("No issue is currently selected!");
+      return;
+    }
+
+    // Grab text from the AI Instructions box
+    const instructions = document.getElementById("aiInstructions").value.trim();
+    if (!instructions) {
+      alert("Please enter AI instructions before submitting.");
+      return;
+    }
+
+    // Build the payload
+    const payload = {
+      "custom_fields": `{\"ml1\":{\"type\":\"multiline\",\"value\":\"${instructions}\"}}`
+    };
+
+    const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+    const submitMsgEl = document.getElementById("submitAiMessage");
+    submitMsgEl.style.display = "none"; // hide any old msg
+
+    try {
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Basic ${authString}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+      }
+
+      // Show success message (or do something more advanced)
+      submitMsgEl.textContent = "AI instructions submitted successfully!";
+      submitMsgEl.style.display = "block";
+
+      // Optionally re-fetch the issue to see updated fields
+      // fetchIssues(); // up to you
+
+    } catch (err) {
+      alert(`Failed to submit AI instructions: ${err.message}`);
+    }
+  }
 </script>
 </body>
 </html>
+
 
 
 
