@@ -444,22 +444,17 @@
   // The Helpshift endpoint
   const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
 
-  // Build FormData instead of JSON
+  // Build FormData (mimicking Postman approach)
   const formData = new FormData();
-  // Append your custom_fields as a string
   formData.append(
     "custom_fields",
     `{"ml1":{"type":"multiline","value":"${instructions}"}}`
   );
 
-  const submitMsgEl = document.getElementById("submitAiMessage");
-  submitMsgEl.style.display = "none"; // hide any old msg
-
   try {
     const response = await fetch(url, {
       method: "PUT",
       headers: {
-        // Only the Authorization needed; DO NOT set Content-Type here
         "Authorization": `Basic ${authString}`
       },
       body: formData
@@ -474,12 +469,14 @@
       );
     }
 
-    submitMsgEl.textContent = "AI instructions submitted via FormData!";
-    submitMsgEl.style.display = "block";
+    // Clear the text box on success
+    document.getElementById("aiInstructions").value = "";
+
   } catch (err) {
     alert(`Failed to submit AI instructions: ${err.message}`);
   }
 }
+
 
 </script>
 </body>
