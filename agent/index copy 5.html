@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Helpshift Issues with Focus Filter</title>
+  <title>Helpshift Issues with Private Notes & Bot Logic</title>
   <style>
     html, body {
       margin: 0;
@@ -30,19 +30,6 @@
       color: #fff;
       padding: 10px;
       box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center; /* center items horizontally */
-      justify-content: space-between; /* space out top content and bottom toggle */
-    }
-
-    .nav-top {
-      width: 100%;
-    }
-
-    .nav-bottom {
-      width: 100%;
-      margin-top: 10px;
     }
 
     .navigation h2 {
@@ -68,22 +55,6 @@
       color: #fff;
     }
 
-    /* Focus switch container */
-    .focus-switch {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 12px;
-      color: #ccc;
-      margin-bottom: 10px;
-    }
-
-    .focus-switch label {
-      margin-left: 5px; /* small gap between checkbox and label text */
-      user-select: none;
-    }
-
     /* Middle column: list of issues */
     .main-content {
       flex: 1;
@@ -102,7 +73,10 @@
       margin: 0;
     }
 
-    /* Simple list with lines between items */
+    /* 
+      Simple list with lines between items 
+      We'll override some backgrounds dynamically in JS or with new classes
+    */
     #issuesList li {
       list-style: none;
       border-bottom: 1px solid #ddd;
@@ -124,6 +98,7 @@
       margin-bottom: 5px;
     }
 
+    /* ID left, status right */
     .issue-meta {
       display: flex;
       justify-content: space-between;
@@ -134,15 +109,16 @@
       color: #777; /* grey text */
     }
 
-    /* Light pink for issues needing help */
+    /* 1) "help" highlight => light pink, darker pink on hover/selected */
     .ai-help-issue {
       background-color: #ffe6ea; /* light pink */
     }
     .ai-help-issue:hover {
-      background-color: #ffcbd1;
+      background-color: #ffcbd1; /* darker pink on hover */
     }
+    /* When selected, also make it the darker pink */
     .ai-help-issue.selected-issue {
-      background-color: #ffcbd1 !important;
+      background-color: #ffcbd1 !important; 
     }
 
     /* Highlight the word "resolved" with green background */
@@ -154,7 +130,11 @@
       font-weight: bold;
     }
 
-    /* Selected issue highlight */
+    /* For items that are both resolved & help, we might keep text grey 
+       but the pink background from .ai-help-issue 
+    */
+
+    /* Selected issue highlight (for normal items) */
     .selected-issue {
       background-color: #d9edf7 !important;
     }
@@ -179,6 +159,7 @@
       position: relative;
     }
 
+    /* Header / Issue details */
     .issue-header {
       padding: 20px;
       border-bottom: 1px solid #ccc;
@@ -190,6 +171,7 @@
       font-size: 16px;
     }
 
+    /* Scrollable conversation area */
     .conversation {
       flex: 1;
       overflow-y: auto;
@@ -217,7 +199,7 @@
       text-align: left;
     }
 
-    /* Private note styling */
+    /* Private note styling: smaller, lighter text */
     .private-note {
       font-size: 12px;
       color: #aaa;
@@ -225,6 +207,7 @@
       white-space: pre-wrap;
     }
 
+    /* Chat controls pinned at the bottom */
     .chat-controls {
       position: sticky;
       bottom: 0;
@@ -262,25 +245,15 @@
 <body>
 
 <div class="container">
-  <!-- Left nav bar -->
+  <!-- Navigation bar -->
   <div class="navigation">
-    <div class="nav-top">
-      <h2>Nav</h2>
-      <ul>
-        <li><a href="#">Dash</a></li>
-        <li><a href="#">Tickets</a></li>
-        <li><a href="#">Stats</a></li>
-        <li><a href="#">Cfg</a></li>
-      </ul>
-    </div>
-
-    <div class="nav-bottom">
-      <!-- Focus switch -->
-      <div class="focus-switch">
-        <input type="checkbox" id="focusSwitch" />
-        <label for="focusSwitch">Focus</label>
-      </div>
-    </div>
+    <h2>Nav</h2>
+    <ul>
+      <li><a href="#">Dash</a></li>
+      <li><a href="#">Tickets</a></li>
+      <li><a href="#">Stats</a></li>
+      <li><a href="#">Cfg</a></li>
+    </ul>
   </div>
 
   <!-- Middle column: list of issues -->
@@ -328,9 +301,6 @@
   let issuesData = [];
   let selectedIssueId = null;
 
-  // "Focus" mode toggle
-  let focusModeOn = false;
-
   window.addEventListener("DOMContentLoaded", () => {
     fetchIssues();
     // auto-refresh every 5 seconds
@@ -343,16 +313,9 @@
     const aiBox = document.getElementById("aiInstructions");
     aiBox.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        e.preventDefault(); 
+        e.preventDefault(); // don't insert newline
         submitAiInstructions();
       }
-    });
-
-    // 2) Hook up the Focus switch
-    const focusSwitch = document.getElementById("focusSwitch");
-    focusSwitch.addEventListener("change", () => {
-      focusModeOn = focusSwitch.checked;
-      buildIssueList(); // rebuild the list with the filter
     });
   });
 
@@ -396,8 +359,8 @@
 
   /**
    * Build the left list of issues
-   * - If focusModeOn: skip issues with state 'resolved' or 'rejected'
-   * - Also highlight if 'ai_state' == 'help'
+   * - If custom_fields.ai_state?.value === 'help', add .ai-help-issue class
+   * - Add a warning emoji (⚠️) before the title
    */
   function buildIssueList() {
     const issuesList = document.getElementById("issuesList");
@@ -408,32 +371,25 @@
       return;
     }
 
-    // Filter & build
     issuesData.forEach(issue => {
-      const issueState = issue.state_data?.state || "";
-      // If focus is on, skip resolved or rejected
-      if (focusModeOn && (issueState === "resolved" || issueState === "rejected")) {
-        return; // skip
-      }
-
       const li = document.createElement("li");
 
-      // 1) If status is resolved => text is grey
+      // 1) Check if it's resolved => text is grey
       let cssClass = "";
-      let statusHtml = issueState;
-      if (issueState === "resolved") {
+      let statusHtml = issue.state_data.state;
+
+      if (issue.state_data.state === 'resolved') {
         cssClass = "resolved-issue";
         statusHtml = `<span class="status-resolved">resolved</span>`;
-      } else if (issueState === "rejected") {
-        // Not sure if you want a special style for 'rejected'? 
-        // We'll just display the text
       }
 
       // 2) Check if ai_state == 'help' => pink background & warning icon
       const aiStateValue = issue.custom_fields?.ai_state?.value || "";
       let warningEmoji = "";
       if (aiStateValue === "help") {
+        // apply pink background
         cssClass += (cssClass ? " " : "") + "ai-help-issue";
+        // show warning emoji
         warningEmoji = "⚠️ ";
       }
 
@@ -574,95 +530,96 @@
 
   /**
    * Submit AI Instructions
-   * 1) PUT custom_fields.ml1
-   * 2) PUT custom_fields.ai_state = none
-   * 3) POST private note
+   * 1) PUT custom_fields
+   * 2) POST private note
    */
   async function submitAiInstructions() {
-    if (!selectedIssueId) {
-      alert("No issue is currently selected!");
-      return;
+  if (!selectedIssueId) {
+    alert("No issue is currently selected!");
+    return;
+  }
+
+  const instructions = document.getElementById("aiInstructions").value.trim();
+  if (!instructions) {
+    alert("Please enter AI instructions before submitting.");
+    return;
+  }
+
+  // Step A: PUT /issues/{id} with "ml1" custom_field
+  const urlA = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+  const formDataA = new FormData();
+  formDataA.append(
+    "custom_fields",
+    `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+  );
+
+  try {
+    // -- (1) Update custom_fields.ml1 with the AI instructions --
+    let response = await fetch(urlA, {
+      method: "PUT",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formDataA
+    });
+
+    let resultText = await response.text();
+    console.log("PUT /issues (ml1) response:", resultText);
+
+    if (!response.ok) {
+      throw new Error(`PUT (ml1) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
     }
 
-    const instructions = document.getElementById("aiInstructions").value.trim();
-    if (!instructions) {
-      alert("Please enter AI instructions before submitting.");
-      return;
-    }
-
-    // Step A: PUT /issues/{id} with "ml1" custom_field
-    const urlA = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
-    const formDataA = new FormData();
-    formDataA.append(
+    // Step B: PUT /issues/{id} again, setting ai_state = "none"
+    const urlB = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+    const formDataB = new FormData();
+    formDataB.append(
       "custom_fields",
-      `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+      `{"ai_state":{"type":"singleline","value":"none"}}`
     );
 
-    try {
-      // (1) Update custom_fields.ml1
-      let response = await fetch(urlA, {
-        method: "PUT",
-        headers: { "Authorization": `Basic ${authString}` },
-        body: formDataA
-      });
+    // -- (2) Set ai_state to "none" --
+    response = await fetch(urlB, {
+      method: "PUT",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formDataB
+    });
 
-      let resultText = await response.text();
-      console.log("PUT /issues (ml1) response:", resultText);
+    resultText = await response.text();
+    console.log("PUT /issues (ai_state=none) response:", resultText);
 
-      if (!response.ok) {
-        throw new Error(`PUT (ml1) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // (2) Set ai_state to "none"
-      const urlB = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
-      const formDataB = new FormData();
-      formDataB.append(
-        "custom_fields",
-        `{"ai_state":{"type":"singleline","value":"none"}}`
-      );
-
-      response = await fetch(urlB, {
-        method: "PUT",
-        headers: { "Authorization": `Basic ${authString}` },
-        body: formDataB
-      });
-
-      resultText = await response.text();
-      console.log("PUT /issues (ai_state=none) response:", resultText);
-
-      if (!response.ok) {
-        throw new Error(`PUT (ai_state=none) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // (3) POST private note
-      const urlC = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
-      const formDataC = new FormData();
-      formDataC.append("note-text", `AI Instructions from Agent: ${instructions}`);
-
-      response = await fetch(urlC, {
-        method: "POST",
-        headers: { "Authorization": `Basic ${authString}` },
-        body: formDataC
-      });
-
-      resultText = await response.text();
-      console.log("POST /issues/.../private-notes response:", resultText);
-
-      if (!response.ok) {
-        throw new Error(`POST (private note) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // If all 3 calls succeed, clear the box
-      document.getElementById("aiInstructions").value = "";
-
-    } catch (err) {
-      alert(`Failed to submit AI instructions: ${err.message}`);
+    if (!response.ok) {
+      throw new Error(`PUT (ai_state=none) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
     }
+
+    // Step C: POST /issues/{id}/private-notes with note-text
+    const urlC = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
+    const formDataC = new FormData();
+    formDataC.append("note-text", `AI Instructions from Agent: ${instructions}`);
+
+    // -- (3) Add private note referencing the instructions --
+    response = await fetch(urlC, {
+      method: "POST",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formDataC
+    });
+
+    resultText = await response.text();
+    console.log("POST /issues/.../private-notes response:", resultText);
+
+    if (!response.ok) {
+      throw new Error(`POST (private note) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
+    }
+
+    // If all 3 calls succeed, clear the box
+    document.getElementById("aiInstructions").value = "";
+
+  } catch (err) {
+    alert(`Failed to submit AI instructions: ${err.message}`);
   }
+}
+
 </script>
 </body>
 </html>
-
 
 
 
