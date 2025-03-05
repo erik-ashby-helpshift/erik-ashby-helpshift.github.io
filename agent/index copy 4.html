@@ -73,10 +73,7 @@
       margin: 0;
     }
 
-    /* 
-      Simple list with lines between items 
-      We'll override some backgrounds dynamically in JS or with new classes
-    */
+    /* Simple list with lines between items */
     #issuesList li {
       list-style: none;
       border-bottom: 1px solid #ddd;
@@ -109,18 +106,6 @@
       color: #777; /* grey text */
     }
 
-    /* 1) "help" highlight => light pink, darker pink on hover/selected */
-    .ai-help-issue {
-      background-color: #ffe6ea; /* light pink */
-    }
-    .ai-help-issue:hover {
-      background-color: #ffcbd1; /* darker pink on hover */
-    }
-    /* When selected, also make it the darker pink */
-    .ai-help-issue.selected-issue {
-      background-color: #ffcbd1 !important; 
-    }
-
     /* Highlight the word "resolved" with green background */
     .status-resolved {
       background-color: #cfc; 
@@ -130,11 +115,7 @@
       font-weight: bold;
     }
 
-    /* For items that are both resolved & help, we might keep text grey 
-       but the pink background from .ai-help-issue 
-    */
-
-    /* Selected issue highlight (for normal items) */
+    /* Selected issue highlight */
     .selected-issue {
       background-color: #d9edf7 !important;
     }
@@ -291,12 +272,14 @@
 </div>
 
 <script>
-  const HELPSHIFT_DOMAIN = "YOUR_DOMAIN";  // e.g. "mycompany"
-  const HELPSHIFT_API_KEY = "YOUR_API_KEY";
+ // Replace with real values or dynamic logic
+  const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
+  const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
   
-  // includes=private_notes & custom_fields
+  // Add the ?includes param to fetch private_notes
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
-  const authString = btoa(`${HELPSHIFT_DOMAIN}:${HELPSHIFT_API_KEY}`);
+
+  const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
 
   let issuesData = [];
   let selectedIssueId = null;
@@ -309,7 +292,7 @@
     // Hook up "Submit to AI" button
     document.getElementById("submitAiBtn").addEventListener("click", submitAiInstructions);
 
-    // Pressing Enter in AI instructions triggers submission
+    // 1) Pressing Enter in AI instructions triggers submission
     const aiBox = document.getElementById("aiInstructions");
     aiBox.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -320,7 +303,7 @@
   });
 
   /**
-   * GET issues (including private_notes & custom_fields) from Helpshift
+   * GET issues (including private notes) from Helpshift
    */
   async function fetchIssues() {
     try {
@@ -359,8 +342,6 @@
 
   /**
    * Build the left list of issues
-   * - If custom_fields.ai_state?.value === 'help', add .ai-help-issue class
-   * - Add a warning emoji (⚠️) before the title
    */
   function buildIssueList() {
     const issuesList = document.getElementById("issuesList");
@@ -374,7 +355,6 @@
     issuesData.forEach(issue => {
       const li = document.createElement("li");
 
-      // 1) Check if it's resolved => text is grey
       let cssClass = "";
       let statusHtml = issue.state_data.state;
 
@@ -383,34 +363,19 @@
         statusHtml = `<span class="status-resolved">resolved</span>`;
       }
 
-      // 2) Check if ai_state == 'help' => pink background & warning icon
-      const aiStateValue = issue.custom_fields?.ai_state?.value || "";
-      let warningEmoji = "";
-      if (aiStateValue === "help") {
-        // apply pink background
-        cssClass += (cssClass ? " " : "") + "ai-help-issue";
-        // show warning emoji
-        warningEmoji = "⚠️ ";
-      }
-
-      li.className = cssClass.trim();
-
+      li.className = cssClass;
       li.innerHTML = `
-        <div class="issue-title">
-          ${warningEmoji}${issue.title}
-        </div>
+        <div class="issue-title">${issue.title}</div>
         <div class="issue-meta">
           <span>Issue #${issue.id}</span>
           <span>${statusHtml}</span>
         </div>
       `;
 
-      // highlight if it's currently selected
       if (issue.id === selectedIssueId) {
         li.classList.add("selected-issue");
       }
 
-      // On click -> show detail
       li.addEventListener("click", () => {
         selectedIssueId = issue.id;
         showIssueDetail(issue);
@@ -420,7 +385,10 @@
   }
 
   /**
-   * Show detail for a single issue in the right pane
+   * Show the detail for a single issue in the right pane
+   * - Merge messages & private_notes by timestamp
+   * - Display them in chronological order
+   * - Then scroll to bottom
    */
   function showIssueDetail(issue) {
     // highlight in the list
@@ -493,11 +461,11 @@
       }
     });
 
-    // Scroll to bottom
+    // 2) Scroll to bottom
     conversationArea.scrollTop = conversationArea.scrollHeight;
   }
 
-  /**
+  /** 
    * Transform potential "Bot Started"/"Bot Ended" if from a "bots-" email
    */
   function transformBotMessage(msg) {
@@ -596,7 +564,6 @@
 </script>
 </body>
 </html>
-
 
 
 
