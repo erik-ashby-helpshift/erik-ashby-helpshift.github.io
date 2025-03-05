@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Helpshift Issues List with Private Notes</title>
+  <title>Helpshift Issues with Private Notes & Bot Logic</title>
   <style>
     html, body {
       margin: 0;
@@ -81,11 +81,15 @@
       transition: background-color 0.3s;
     }
 
-    /* Title with two-line clamp */
+    /* Title with two-line clamp (including unprefixed line-clamp for lint) */
     .issue-title {
-      display: -webkit-box;          
-      -webkit-line-clamp: 2;         
-      -webkit-box-orient: vertical;  
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      display: box;
+      box-orient: vertical;
+      line-clamp: 2;
+
       overflow: hidden;
       font-weight: bold;
       margin-bottom: 5px;
@@ -176,15 +180,12 @@
       text-align: left;
     }
 
-    /* Private note styling:
-       left-aligned, medium grey text, 
-       "Private Note: " prefix.
-    */
+    /* Private note styling: smaller, lighter text */
     .private-note {
-      font-size: 12px;      /* 1 step smaller than base (14px → 12px) */
-      color: #aaa;          /* lighter grey to reduce visual clutter */
+      font-size: 12px;
+      color: #aaa;
       margin: 5px 0;
-      white-space: pre-wrap; /* preserve newlines */
+      white-space: pre-wrap;
     }
 
     /* Chat controls pinned at the bottom */
@@ -271,7 +272,7 @@
 </div>
 
 <script>
-  // Replace with real values or dynamic logic
+ // Replace with real values or dynamic logic
   const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
   const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
   
@@ -287,8 +288,18 @@
     fetchIssues();
     // auto-refresh every 5 seconds
     setInterval(fetchIssues, 5000);
+
     // Hook up "Submit to AI" button
     document.getElementById("submitAiBtn").addEventListener("click", submitAiInstructions);
+
+    // 1) Pressing Enter in AI instructions triggers submission
+    const aiBox = document.getElementById("aiInstructions");
+    aiBox.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault(); // don't insert newline
+        submitAiInstructions();
+      }
+    });
   });
 
   /**
@@ -344,21 +355,15 @@
     issuesData.forEach(issue => {
       const li = document.createElement("li");
 
-      // If status is resolved => text is grey
       let cssClass = "";
       let statusHtml = issue.state_data.state;
 
       if (issue.state_data.state === 'resolved') {
-        cssClass = "resolved-issue"; // entire list item text is grey
-        // highlight the word "resolved" with a green background
+        cssClass = "resolved-issue";
         statusHtml = `<span class="status-resolved">resolved</span>`;
       }
 
       li.className = cssClass;
-
-      // Build item:
-      //   .issue-title (2-line clamp)
-      //   .issue-meta => ID left, status right
       li.innerHTML = `
         <div class="issue-title">${issue.title}</div>
         <div class="issue-meta">
@@ -367,12 +372,10 @@
         </div>
       `;
 
-      // Mark as selected if needed
       if (issue.id === selectedIssueId) {
         li.classList.add("selected-issue");
       }
 
-      // Click to select
       li.addEventListener("click", () => {
         selectedIssueId = issue.id;
         showIssueDetail(issue);
@@ -385,6 +388,7 @@
    * Show the detail for a single issue in the right pane
    * - Merge messages & private_notes by timestamp
    * - Display them in chronological order
+   * - Then scroll to bottom
    */
   function showIssueDetail(issue) {
     // highlight in the list
@@ -407,26 +411,23 @@
       <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
     `;
 
-    // Build a combined list from messages & private_notes
+    // Combine messages & private_notes
     const conversationItems = [];
 
-    // push messages
     (issue.messages || []).forEach(msg => {
       conversationItems.push({
         type: 'message',
         body: msg.body,
-        origin: msg.origin,  // "end-user" or "helpshift"
-        // message timestamps are numeric
+        origin: msg.origin,
+        author: msg.author,
         timestamp: parseTimestamp(msg.created_at)
       });
     });
 
-    // push private notes
     (issue.private_notes || []).forEach(note => {
       conversationItems.push({
         type: 'private_note',
         body: note.body,
-        // private note timestamps are string (like "2025-03-05T00:07:18.742Z")
         timestamp: parseTimestamp(note.created_at)
       });
     });
@@ -434,29 +435,52 @@
     // Sort by timestamp ascending
     conversationItems.sort((a, b) => a.timestamp - b.timestamp);
 
-    // Now display them in order
+    // render
     const conversationArea = document.getElementById("conversationArea");
     conversationArea.innerHTML = "";
 
     conversationItems.forEach(item => {
       if (item.type === 'message') {
-        // Normal message
         const msgDiv = document.createElement("div");
         if (item.origin === "end-user") {
           msgDiv.classList.add("message-left");
         } else {
           msgDiv.classList.add("message-right");
         }
-        msgDiv.textContent = item.body;
+
+        const adjustedText = transformBotMessage(item);
+        msgDiv.textContent = adjustedText;
         conversationArea.appendChild(msgDiv);
+
       } else {
-        // Private note
+        // private_note
         const noteDiv = document.createElement("div");
         noteDiv.classList.add("private-note");
         noteDiv.textContent = "Private Note: " + item.body;
         conversationArea.appendChild(noteDiv);
       }
     });
+
+    // 2) Scroll to bottom
+    conversationArea.scrollTop = conversationArea.scrollHeight;
+  }
+
+  /** 
+   * Transform potential "Bot Started"/"Bot Ended" if from a "bots-" email
+   */
+  function transformBotMessage(msg) {
+    const isHelpshift = (msg.origin === "helpshift");
+    const firstEmail = msg.author?.emails?.[0] || "";
+    const isBotEmail = firstEmail.startsWith("bots-");
+
+    if (isHelpshift && isBotEmail) {
+      if (msg.body === "Bot Started") {
+        return `Action Started: ${msg.author?.name || "Unknown Bot"}`;
+      } else if (msg.body === "Bot Ended") {
+        return `Action Ended: ${msg.author?.name || "Unknown Bot"}`;
+      }
+    }
+    return msg.body;
   }
 
   /**
@@ -464,10 +488,8 @@
    */
   function parseTimestamp(ts) {
     if (typeof ts === "number") {
-      // Already a numeric epoch
       return ts;
     } else if (typeof ts === "string") {
-      // ISO date string, parse as Date
       return new Date(ts).getTime();
     } else {
       return 0;
@@ -475,73 +497,74 @@
   }
 
   /**
-   * Submit AI Instructions (FormData approach)
+   * Submit AI Instructions
+   * 1) PUT custom_fields
+   * 2) POST private note
    */
-   async function submitAiInstructions() {
-  if (!selectedIssueId) {
-    alert("No issue is currently selected!");
-    return;
-  }
-
-  const instructions = document.getElementById("aiInstructions").value.trim();
-  if (!instructions) {
-    alert("Please enter AI instructions before submitting.");
-    return;
-  }
-
-  // ========== Step A: PUT /issues/{id} with custom_fields ==========
-  const urlA = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
-  const formDataA = new FormData();
-  formDataA.append(
-    "custom_fields",
-    `{"ml1":{"type":"multiline","value":"${instructions}"}}`
-  );
-
-  try {
-    // 1) Update custom fields
-    let response = await fetch(urlA, {
-      method: "PUT",
-      headers: { "Authorization": `Basic ${authString}` },
-      body: formDataA
-    });
-
-    let resultText = await response.text();
-    console.log("PUT /issues response:", resultText);
-
-    if (!response.ok) {
-      throw new Error(`PUT failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
+  async function submitAiInstructions() {
+    if (!selectedIssueId) {
+      alert("No issue is currently selected!");
+      return;
     }
 
-    // ========== Step B: POST /issues/{id}/private-notes ==========
-    // with "note-text" = "AI Instructions from Agent: {instructions}"
-    const urlB = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
-    const formDataB = new FormData();
-    formDataB.append("note-text", `AI Instructions from Agent: ${instructions}`);
-
-    response = await fetch(urlB, {
-      method: "POST",
-      headers: { "Authorization": `Basic ${authString}` },
-      body: formDataB
-    });
-
-    resultText = await response.text();
-    console.log("POST /issues/.../private-notes response:", resultText);
-
-    if (!response.ok) {
-      throw new Error(`POST failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
+    const instructions = document.getElementById("aiInstructions").value.trim();
+    if (!instructions) {
+      alert("Please enter AI instructions before submitting.");
+      return;
     }
 
-    // If both calls succeed, clear the box
-    document.getElementById("aiInstructions").value = "";
+    // Step A: PUT /issues/{id} with custom_fields
+    const urlA = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+    const formDataA = new FormData();
+    formDataA.append(
+      "custom_fields",
+      `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+    );
 
-  } catch (err) {
-    alert(`Failed to submit AI instructions: ${err.message}`);
+    try {
+      // 1) Update custom fields
+      let response = await fetch(urlA, {
+        method: "PUT",
+        headers: { "Authorization": `Basic ${authString}` },
+        body: formDataA
+      });
+
+      let resultText = await response.text();
+      console.log("PUT /issues response:", resultText);
+
+      if (!response.ok) {
+        throw new Error(`PUT failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
+      }
+
+      // 2) POST /issues/{id}/private-notes with note-text
+      const urlB = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
+      const formDataB = new FormData();
+      formDataB.append("note-text", `AI Instructions from Agent: ${instructions}`);
+
+      response = await fetch(urlB, {
+        method: "POST",
+        headers: { "Authorization": `Basic ${authString}` },
+        body: formDataB
+      });
+
+      resultText = await response.text();
+      console.log("POST /issues/.../private-notes response:", resultText);
+
+      if (!response.ok) {
+        throw new Error(`POST failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
+      }
+
+      // If both calls succeed, clear the box
+      document.getElementById("aiInstructions").value = "";
+
+    } catch (err) {
+      alert(`Failed to submit AI instructions: ${err.message}`);
+    }
   }
-}
-
 </script>
 </body>
 </html>
+
 
 
 
