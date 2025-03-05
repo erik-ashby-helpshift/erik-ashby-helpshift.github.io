@@ -4,5 +4,4 @@
   
   // Add the ?includes param to fetch private_notes
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
-
   const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';

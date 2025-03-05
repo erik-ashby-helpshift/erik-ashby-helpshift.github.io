@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Helpshift Issues with Focus Filter</title>
+  <title>Helpshift Issues with Multi-Button AI Instructions</title>
   <style>
     html, body {
       margin: 0;
@@ -32,8 +32,8 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      align-items: center; /* center items horizontally */
-      justify-content: space-between; /* space out top content and bottom toggle */
+      align-items: center;
+      justify-content: space-between;
     }
 
     .nav-top {
@@ -68,7 +68,6 @@
       color: #fff;
     }
 
-    /* Focus switch container */
     .focus-switch {
       display: flex;
       align-items: center;
@@ -80,7 +79,7 @@
     }
 
     .focus-switch label {
-      margin-left: 5px; /* small gap between checkbox and label text */
+      margin-left: 5px;
       user-select: none;
     }
 
@@ -102,7 +101,6 @@
       margin: 0;
     }
 
-    /* Simple list with lines between items */
     #issuesList li {
       list-style: none;
       border-bottom: 1px solid #ddd;
@@ -110,7 +108,6 @@
       transition: background-color 0.3s;
     }
 
-    /* Title with two-line clamp (including unprefixed line-clamp for lint) */
     .issue-title {
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -131,7 +128,7 @@
 
     /* If the item is resolved, all text is grey */
     .resolved-issue {
-      color: #777; /* grey text */
+      color: #777;
     }
 
     /* Light pink for issues needing help */
@@ -145,9 +142,8 @@
       background-color: #ffcbd1 !important;
     }
 
-    /* Highlight the word "resolved" with green background */
     .status-resolved {
-      background-color: #cfc; 
+      background-color: #cfc;
       color: #333;
       padding: 2px 5px;
       border-radius: 3px;
@@ -169,9 +165,9 @@
       font-weight: bold;
     }
 
-    /* Right pane for detailed issue conversation */
+    /* Right pane for conversation */
     .chat-pane {
-      width: 600px;  
+      width: 600px;
       border-left: 1px solid #ccc;
       background-color: #f9f9f9;
       display: flex;
@@ -196,7 +192,6 @@
       padding: 20px;
     }
 
-    /* White-space: pre-wrap to preserve new lines */
     .message-left,
     .message-right {
       margin: 5px 0;
@@ -217,7 +212,6 @@
       text-align: left;
     }
 
-    /* Private note styling */
     .private-note {
       font-size: 12px;
       color: #aaa;
@@ -255,7 +249,12 @@
       margin-top: 10px;
       color: #088;
       font-style: italic;
-      display: none; /* hidden by default */
+      display: none;
+    }
+
+    /* Minor styling for the new 3 buttons row */
+    .instructions-buttons {
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -309,8 +308,15 @@
       
       <div style="margin-top:10px;">
         <label for="aiInstructions">AI Instructions</label><br/>
-        <textarea id="aiInstructions" rows="3" placeholder="Enter instructions for AI here"></textarea><br/>
-        <button id="submitAiBtn">Submit to AI</button>
+        <textarea id="aiInstructions" rows="3" placeholder="Enter instructions for AI here"></textarea>
+
+        <!-- 3 new buttons row -->
+        <div class="instructions-buttons">
+          <button id="submitInstructionsBtn">Submit Instructions</button>
+          <button id="submitAndClearBtn">Submit Instructions &amp; Clear Alert</button>
+          <button id="clearAlertBtn">Clear Alert</button>
+        </div>
+
         <div id="submitAiMessage">AI instructions submitted!</div>
       </div>
     </div>
@@ -324,35 +330,38 @@
   // Add the ?includes param to fetch private_notes
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
   const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
-
+  
   let issuesData = [];
   let selectedIssueId = null;
-
-  // "Focus" mode toggle
-  let focusModeOn = false;
+  let focusModeOn = false; // "Focus" switch
 
   window.addEventListener("DOMContentLoaded", () => {
     fetchIssues();
     // auto-refresh every 5 seconds
     setInterval(fetchIssues, 5000);
 
-    // Hook up "Submit to AI" button
-    document.getElementById("submitAiBtn").addEventListener("click", submitAiInstructions);
+    // Hook up the 3 new buttons
+    document.getElementById("submitInstructionsBtn")
+            .addEventListener("click", () => handleAiInstructions("submit"));
+    document.getElementById("submitAndClearBtn")
+            .addEventListener("click", () => handleAiInstructions("submitAndClear"));
+    document.getElementById("clearAlertBtn")
+            .addEventListener("click", () => handleAiInstructions("clear"));
 
-    // Pressing Enter in AI instructions triggers submission
+    // Pressing Enter => "submit" instructions
     const aiBox = document.getElementById("aiInstructions");
     aiBox.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault(); 
-        submitAiInstructions();
+        handleAiInstructions("submit");
       }
     });
 
-    // 2) Hook up the Focus switch
+    // Focus switch
     const focusSwitch = document.getElementById("focusSwitch");
     focusSwitch.addEventListener("change", () => {
       focusModeOn = focusSwitch.checked;
-      buildIssueList(); // rebuild the list with the filter
+      buildIssueList(); // re-filter the list
     });
   });
 
@@ -408,28 +417,24 @@
       return;
     }
 
-    // Filter & build
     issuesData.forEach(issue => {
       const issueState = issue.state_data?.state || "";
-      // If focus is on, skip resolved or rejected
       if (focusModeOn && (issueState === "resolved" || issueState === "rejected")) {
         return; // skip
       }
 
       const li = document.createElement("li");
 
-      // 1) If status is resolved => text is grey
       let cssClass = "";
       let statusHtml = issueState;
       if (issueState === "resolved") {
         cssClass = "resolved-issue";
         statusHtml = `<span class="status-resolved">resolved</span>`;
       } else if (issueState === "rejected") {
-        // Not sure if you want a special style for 'rejected'? 
-        // We'll just display the text
+        // no special styling for now
       }
 
-      // 2) Check if ai_state == 'help' => pink background & warning icon
+      // check ai_state == 'help'
       const aiStateValue = issue.custom_fields?.ai_state?.value || "";
       let warningEmoji = "";
       if (aiStateValue === "help") {
@@ -449,12 +454,12 @@
         </div>
       `;
 
-      // highlight if it's currently selected
+      // highlight if selected
       if (issue.id === selectedIssueId) {
         li.classList.add("selected-issue");
       }
 
-      // On click -> show detail
+      // click to view
       li.addEventListener("click", () => {
         selectedIssueId = issue.id;
         showIssueDetail(issue);
@@ -467,7 +472,6 @@
    * Show detail for a single issue in the right pane
    */
   function showIssueDetail(issue) {
-    // highlight in the list
     const issuesList = document.getElementById("issuesList");
     [...issuesList.children].forEach(li => {
       li.classList.remove("selected-issue");
@@ -479,7 +483,6 @@
       matchingLi.classList.add("selected-issue");
     }
 
-    // update header
     const issueHeader = document.getElementById("issueHeader");
     issueHeader.innerHTML = `
       <h2>Issue #${issue.id}</h2>
@@ -511,7 +514,6 @@
     // Sort by timestamp ascending
     conversationItems.sort((a, b) => a.timestamp - b.timestamp);
 
-    // render
     const conversationArea = document.getElementById("conversationArea");
     conversationArea.innerHTML = "";
 
@@ -529,7 +531,6 @@
         conversationArea.appendChild(msgDiv);
 
       } else {
-        // private_note
         const noteDiv = document.createElement("div");
         noteDiv.classList.add("private-note");
         noteDiv.textContent = "Private Note: " + item.body;
@@ -537,13 +538,10 @@
       }
     });
 
-    // Scroll to bottom
+    // scroll to bottom
     conversationArea.scrollTop = conversationArea.scrollHeight;
   }
 
-  /**
-   * Transform potential "Bot Started"/"Bot Ended" if from a "bots-" email
-   */
   function transformBotMessage(msg) {
     const isHelpshift = (msg.origin === "helpshift");
     const firstEmail = msg.author?.emails?.[0] || "";
@@ -559,9 +557,6 @@
     return msg.body;
   }
 
-  /**
-   * Parse timestamps from either numeric or string date
-   */
   function parseTimestamp(ts) {
     if (typeof ts === "number") {
       return ts;
@@ -573,95 +568,123 @@
   }
 
   /**
-   * Submit AI Instructions
-   * 1) PUT custom_fields.ml1
-   * 2) PUT custom_fields.ai_state = none
-   * 3) POST private note
+   * handleAiInstructions(actionType)
+   * actionType can be:
+   *   - "submit" => step1 + step3
+   *   - "clear" => step2 only
+   *   - "submitAndClear" => step1, step2, step3
    */
-  async function submitAiInstructions() {
+  async function handleAiInstructions(actionType) {
     if (!selectedIssueId) {
       alert("No issue is currently selected!");
       return;
     }
 
+    // If action includes 'submit', we need instructions text
     const instructions = document.getElementById("aiInstructions").value.trim();
-    if (!instructions) {
+    const mustHaveInstructions = (actionType === "submit" || actionType === "submitAndClear");
+
+    if (mustHaveInstructions && !instructions) {
       alert("Please enter AI instructions before submitting.");
       return;
     }
 
-    // Step A: PUT /issues/{id} with "ml1" custom_field
-    const urlA = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
-    const formDataA = new FormData();
-    formDataA.append(
+    try {
+      // Step 1) If "submit" or "submitAndClear", update custom_fields.ml1
+      if (actionType === "submit" || actionType === "submitAndClear") {
+        await putCustomFieldMl1(instructions);
+      }
+
+      // Step 2) If "clear" or "submitAndClear", set ai_state to 'none'
+      if (actionType === "clear" || actionType === "submitAndClear") {
+        await putAiStateNone();
+      }
+
+      // Step 3) If "submit" or "submitAndClear", POST private note
+      if (actionType === "submit" || actionType === "submitAndClear") {
+        await postPrivateNote(instructions);
+      }
+
+      // Clear the instructions if we did any "submit" action
+      if (actionType === "submit" || actionType === "submitAndClear") {
+        document.getElementById("aiInstructions").value = "";
+      }
+
+    } catch (err) {
+      alert(`Failed to process AI instructions: ${err.message}`);
+    }
+  }
+
+  // Helper: Step 1: PUT ml1
+  async function putCustomFieldMl1(instructions) {
+    const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+    const formData = new FormData();
+    formData.append(
       "custom_fields",
       `{"ml1":{"type":"multiline","value":"${instructions}"}}`
     );
 
-    try {
-      // (1) Update custom_fields.ml1
-      let response = await fetch(urlA, {
-        method: "PUT",
-        headers: { "Authorization": `Basic ${authString}` },
-        body: formDataA
-      });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formData
+    });
 
-      let resultText = await response.text();
-      console.log("PUT /issues (ml1) response:", resultText);
+    const resultText = await response.text();
+    console.log("PUT ml1 =>", resultText);
 
-      if (!response.ok) {
-        throw new Error(`PUT (ml1) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // (2) Set ai_state to "none"
-      const urlB = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
-      const formDataB = new FormData();
-      formDataB.append(
-        "custom_fields",
-        `{"ai_state":{"type":"singleline","value":"none"}}`
-      );
-
-      response = await fetch(urlB, {
-        method: "PUT",
-        headers: { "Authorization": `Basic ${authString}` },
-        body: formDataB
-      });
-
-      resultText = await response.text();
-      console.log("PUT /issues (ai_state=none) response:", resultText);
-
-      if (!response.ok) {
-        throw new Error(`PUT (ai_state=none) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // (3) POST private note
-      const urlC = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
-      const formDataC = new FormData();
-      formDataC.append("note-text", `AI Instructions from Agent: ${instructions}`);
-
-      response = await fetch(urlC, {
-        method: "POST",
-        headers: { "Authorization": `Basic ${authString}` },
-        body: formDataC
-      });
-
-      resultText = await response.text();
-      console.log("POST /issues/.../private-notes response:", resultText);
-
-      if (!response.ok) {
-        throw new Error(`POST (private note) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // If all 3 calls succeed, clear the box
-      document.getElementById("aiInstructions").value = "";
-
-    } catch (err) {
-      alert(`Failed to submit AI instructions: ${err.message}`);
+    if (!response.ok) {
+      throw new Error(`PUT ml1 failed: HTTP ${response.status} - ${response.statusText}\n${resultText}`);
     }
   }
+
+  // Helper: Step 2: PUT ai_state=none
+  async function putAiStateNone() {
+    const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+    const formData = new FormData();
+    formData.append(
+      "custom_fields",
+      `{"ai_state":{"type":"singleline","value":"none"}}`
+    );
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formData
+    });
+
+    const resultText = await response.text();
+    console.log("PUT ai_state=none =>", resultText);
+
+    if (!response.ok) {
+      throw new Error(`PUT ai_state=none failed: HTTP ${response.status} - ${response.statusText}\n${resultText}`);
+    }
+  }
+
+  // Helper: Step 3: POST private note
+  async function postPrivateNote(instructions) {
+    const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
+    const formData = new FormData();
+    formData.append("note-text", `AI Instructions from Agent: ${instructions}`);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formData
+    });
+
+    const resultText = await response.text();
+    console.log("POST private-note =>", resultText);
+
+    if (!response.ok) {
+      throw new Error(`POST private note failed: HTTP ${response.status} - ${response.statusText}\n${resultText}`);
+    }
+  }
+
 </script>
 </body>
 </html>
+
 
 
 
