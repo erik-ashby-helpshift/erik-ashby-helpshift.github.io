@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Helpshift Issues with AI Quick Actions</title>
+  <title>Helpshift Issues with Additional Quick Actions</title>
   <style>
     html, body {
       margin: 0;
@@ -245,14 +245,21 @@
       display: none;
     }
 
-    /* Style the quick actions row */
+    /* Quick actions row */
     .quick-actions {
+      display: flex;        /* put them in a row */
+      flex-wrap: wrap;      /* allow wrapping if needed */
       margin: 5px 0;
     }
 
     .quick-actions button {
       margin-right: 5px;
       margin-bottom: 5px;
+    }
+
+    /* Specifically right-justify the 'Close' button */
+    .close-button {
+      margin-left: auto; /* pushes it to the right side of the row */
     }
   </style>
 </head>
@@ -317,7 +324,10 @@
         <button data-ai="Offer the player anywhere between 1-5 star-tokens, then take the action: Credit-StarTokens">
           Gift
         </button>
-        <button data-ai="Thank the player, then close the issue">
+        <button data-ai="Tell the player that you are working with me, and that we are still looking into this.  We will provide additional information as soon as possible, and thank them for their patience">
+          Quick Update
+        </button>
+        <button data-ai="Thank the player, then close the issue" class="close-button">
           Close
         </button>
       </div>
@@ -351,7 +361,7 @@
 
   window.addEventListener("DOMContentLoaded", () => {
     fetchIssues();
-    setInterval(fetchIssues, 5000); // auto-refresh every 5 seconds
+    setInterval(fetchIssues, 5000); // auto-refresh
 
     // Hook up the 3 existing instruction buttons
     document.getElementById("submitInstructionsBtn")
@@ -377,7 +387,7 @@
       buildIssueList();
     });
 
-    // NEW: Quick action buttons => prepopulate aiInstructions
+    // Quick action buttons => prepopulate aiInstructions
     const quickButtons = document.querySelectorAll('.quick-actions button');
     quickButtons.forEach(btn => {
       btn.addEventListener("click", () => {
@@ -584,7 +594,6 @@
       return;
     }
 
-    // If action includes 'submit', we need instructions text
     const aiBox = document.getElementById("aiInstructions");
     const instructions = aiBox.value.trim();
     const mustHaveInstructions = (actionType === "submit" || actionType === "submitAndClear");
@@ -685,10 +694,10 @@
       throw new Error(`POST private note failed: HTTP ${response.status} - ${response.statusText}\n${resultText}`);
     }
   }
-
 </script>
 </body>
 </html>
+
 
 
 
