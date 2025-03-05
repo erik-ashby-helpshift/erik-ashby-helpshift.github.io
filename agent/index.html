@@ -291,12 +291,12 @@
 </div>
 
 <script>
-  const HELPSHIFT_DOMAIN = "YOUR_DOMAIN";  // e.g. "mycompany"
-  const HELPSHIFT_API_KEY = "YOUR_API_KEY";
+  const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
+  const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
   
-  // includes=private_notes & custom_fields
+  // Add the ?includes param to fetch private_notes
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
-  const authString = btoa(`${HELPSHIFT_DOMAIN}:${HELPSHIFT_API_KEY}`);
+  const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
 
   let issuesData = [];
   let selectedIssueId = null;
