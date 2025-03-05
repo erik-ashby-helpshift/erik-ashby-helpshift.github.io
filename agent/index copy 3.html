@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Helpshift Issues List with Private Notes</title>
+  <title>Helpshift Issues List with Resolved Highlight</title>
   <style>
+    /* Basic page styling */
     html, body {
       margin: 0;
       padding: 0;
@@ -176,16 +177,6 @@
       text-align: left;
     }
 
-    /* Private note styling:
-       left-aligned, medium grey text, 
-       "Private Note: " prefix.
-    */
-    .private-note {
-      color: #666;
-      margin: 5px 0;
-      white-space: pre-wrap; /* preserve newlines too */
-    }
-
     /* Chat controls pinned at the bottom */
     .chat-controls {
       position: sticky;
@@ -213,6 +204,7 @@
       margin-bottom: 5px;
     }
 
+    /* Optional: styling for any success/error feedback from the AI submit */
     #submitAiMessage {
       margin-top: 10px;
       color: #088;
@@ -252,7 +244,9 @@
     </div>
 
     <!-- Conversation -->
-    <div class="conversation" id="conversationArea"></div>
+    <div class="conversation" id="conversationArea">
+      <!-- Messages will be populated here -->
+    </div>
 
     <!-- Bottom controls -->
     <div class="chat-controls">
@@ -270,28 +264,29 @@
 </div>
 
 <script>
-  // Replace with real values or dynamic logic
-  const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
+ // Replace these with real values or dynamic logic
+ const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
   const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
-  
-  // Add the ?includes param to fetch private_notes
-  const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%5D`;
+  const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues`;
 
+  // For Basic Auth, Helpshift often uses "YOUR_DOMAIN:YOUR_API_KEY" (or just the key).
+  // Check Helpshift docs for the recommended approach. This is only a demonstration:
   const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
 
   let issuesData = [];
   let selectedIssueId = null;
 
   window.addEventListener("DOMContentLoaded", () => {
+    // 1) Fetch issues immediately
     fetchIssues();
-    // auto-refresh every 5 seconds
+    // 2) Auto-refresh every 5 seconds
     setInterval(fetchIssues, 5000);
-    // Hook up "Submit to AI" button
+    // 3) Hook up "Submit to AI" button
     document.getElementById("submitAiBtn").addEventListener("click", submitAiInstructions);
   });
 
   /**
-   * GET issues (including private notes) from Helpshift
+   * Fetch the list of issues from Helpshift
    */
   async function fetchIssues() {
     try {
@@ -349,7 +344,7 @@
 
       if (issue.state_data.state === 'resolved') {
         cssClass = "resolved-issue"; // entire list item text is grey
-        // highlight the word "resolved" with a green background
+        // highlight the word "resolved" with green
         statusHtml = `<span class="status-resolved">resolved</span>`;
       }
 
@@ -382,11 +377,9 @@
 
   /**
    * Show the detail for a single issue in the right pane
-   * - Merge messages & private_notes by timestamp
-   * - Display them in chronological order
    */
   function showIssueDetail(issue) {
-    // highlight in the list
+    // Highlight in list
     const issuesList = document.getElementById("issuesList");
     [...issuesList.children].forEach(li => {
       li.classList.remove("selected-issue");
@@ -398,7 +391,7 @@
       matchingLi.classList.add("selected-issue");
     }
 
-    // update header
+    // Update header
     const issueHeader = document.getElementById("issueHeader");
     issueHeader.innerHTML = `
       <h2>Issue #${issue.id}</h2>
@@ -406,119 +399,85 @@
       <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
     `;
 
-    // Build a combined list from messages & private_notes
-    const conversationItems = [];
-
-    // push messages
-    (issue.messages || []).forEach(msg => {
-      conversationItems.push({
-        type: 'message',
-        body: msg.body,
-        origin: msg.origin,  // "end-user" or "helpshift"
-        // message timestamps are numeric
-        timestamp: parseTimestamp(msg.created_at)
-      });
-    });
-
-    // push private notes
-    (issue.private_notes || []).forEach(note => {
-      conversationItems.push({
-        type: 'private_note',
-        body: note.body,
-        // private note timestamps are string (like "2025-03-05T00:07:18.742Z")
-        timestamp: parseTimestamp(note.created_at)
-      });
-    });
-
-    // Sort by timestamp ascending
-    conversationItems.sort((a, b) => a.timestamp - b.timestamp);
-
-    // Now display them in order
+    // Update conversation
     const conversationArea = document.getElementById("conversationArea");
     conversationArea.innerHTML = "";
 
-    conversationItems.forEach(item => {
-      if (item.type === 'message') {
-        // Normal message
-        const msgDiv = document.createElement("div");
-        if (item.origin === "end-user") {
-          msgDiv.classList.add("message-left");
-        } else {
-          msgDiv.classList.add("message-right");
-        }
-        msgDiv.textContent = item.body;
-        conversationArea.appendChild(msgDiv);
+    (issue.messages || []).forEach(msg => {
+      const msgDiv = document.createElement("div");
+
+      if (msg.origin === "end-user") {
+        msgDiv.classList.add("message-left");
       } else {
-        // Private note
-        const noteDiv = document.createElement("div");
-        noteDiv.classList.add("private-note");
-        noteDiv.textContent = "Private Note: " + item.body;
-        conversationArea.appendChild(noteDiv);
+        msgDiv.classList.add("message-right");
       }
+
+      // Using textContent + pre-wrap to preserve newlines
+      msgDiv.textContent = msg.body;
+      conversationArea.appendChild(msgDiv);
     });
   }
 
   /**
-   * Parse timestamps from either numeric or string date
+   * 4) Submit AI Instructions to Helpshift
+   * 
+   * We'll do a PUT to:
+   *   https://api.helpshift.com/v1/ashbys/issues/{selectedIssueId}
+   * with the payload:
+   * {
+   *   "custom_fields": "{\"ml1\":{\"type\":\"multiline\",\"value\":\"(AI instructions)\"}}"
+   * }
    */
-  function parseTimestamp(ts) {
-    if (typeof ts === "number") {
-      // Already a numeric epoch
-      return ts;
-    } else if (typeof ts === "string") {
-      // ISO date string, parse as Date
-      return new Date(ts).getTime();
-    } else {
-      return 0;
-    }
+   async function submitAiInstructions() {
+  if (!selectedIssueId) {
+    alert("No issue is currently selected!");
+    return;
   }
 
-  /**
-   * Submit AI Instructions (FormData approach)
-   */
-  async function submitAiInstructions() {
-    if (!selectedIssueId) {
-      alert("No issue is currently selected!");
-      return;
-    }
-
-    const instructions = document.getElementById("aiInstructions").value.trim();
-    if (!instructions) {
-      alert("Please enter AI instructions before submitting.");
-      return;
-    }
-
-    const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
-    const formData = new FormData();
-    formData.append(
-      "custom_fields",
-      `{"ml1":{"type":"multiline","value":"${instructions}"}}`
-    );
-
-    // We'll just clear the box on success, no message displayed
-    try {
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Basic ${authString}`
-        },
-        body: formData
-      });
-
-      const resultText = await response.text();
-      console.log("Full response:", resultText);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // Clear the text box on success
-      document.getElementById("aiInstructions").value = "";
-
-    } catch (err) {
-      alert(`Failed to submit AI instructions: ${err.message}`);
-    }
+  // Get the AI instructions from the textarea
+  const instructions = document.getElementById("aiInstructions").value.trim();
+  if (!instructions) {
+    alert("Please enter AI instructions before submitting.");
+    return;
   }
+
+  // The Helpshift endpoint
+  const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+
+  // Build FormData (mimicking Postman approach)
+  const formData = new FormData();
+  formData.append(
+    "custom_fields",
+    `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+  );
+
+  try {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Basic ${authString}`
+      },
+      body: formData
+    });
+
+    const resultText = await response.text();
+    console.log("Full response:", resultText);
+
+    if (!response.ok) {
+      throw new Error(
+        `HTTP ${response.status} – ${response.statusText}\n${resultText}`
+      );
+    }
+
+    // Clear the text box on success
+    document.getElementById("aiInstructions").value = "";
+
+  } catch (err) {
+    alert(`Failed to submit AI instructions: ${err.message}`);
+  }
+}
+
+
 </script>
 </body>
 </html>

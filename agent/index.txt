@@ -1,8 +1,8 @@
-  // Replace these with real values or dynamic logic
+  // Replace with real values or dynamic logic
   const HELPSHIFT_DOMAIN = "ashbys";         // e.g. "mycompany"
   const HELPSHIFT_API_KEY = "YOUR_API_KEY";       // e.g. "abc123456..."
-  const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues`;
+  
+  // Add the ?includes param to fetch private_notes
+  const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%5D`;
 
-  // For Basic Auth, Helpshift often uses "YOUR_DOMAIN:YOUR_API_KEY" (or just the key).
-  // Check Helpshift docs for the recommended approach. This is only a demonstration:
   const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
