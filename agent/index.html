@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Helpshift Issues with Multi-Button AI Instructions</title>
+  <title>Helpshift Issues with AI Quick Actions</title>
   <style>
     html, body {
       margin: 0;
@@ -115,7 +115,6 @@
       display: box;
       box-orient: vertical;
       line-clamp: 2;
-
       overflow: hidden;
       font-weight: bold;
       margin-bottom: 5px;
@@ -227,10 +226,6 @@
       padding: 20px;
     }
 
-    .chat-controls button {
-      margin-right: 5px;
-    }
-
     .chat-controls textarea {
       width: 100%;
       box-sizing: border-box;
@@ -239,10 +234,8 @@
       font-size: 14px;
     }
 
-    .chat-controls label {
-      font-weight: bold;
-      display: inline-block;
-      margin-bottom: 5px;
+    .instructions-buttons {
+      margin-bottom: 10px;
     }
 
     #submitAiMessage {
@@ -252,9 +245,14 @@
       display: none;
     }
 
-    /* Minor styling for the new 3 buttons row */
-    .instructions-buttons {
-      margin-bottom: 10px;
+    /* Style the quick actions row */
+    .quick-actions {
+      margin: 5px 0;
+    }
+
+    .quick-actions button {
+      margin-right: 5px;
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -303,22 +301,38 @@
 
     <!-- Bottom controls -->
     <div class="chat-controls">
-      <button id="yesButton">Yes</button>
-      <button id="noButton">No</button>
-      
-      <div style="margin-top:10px;">
-        <label for="aiInstructions">AI Instructions</label><br/>
-        <textarea id="aiInstructions" rows="3" placeholder="Enter instructions for AI here"></textarea>
+      <h3>AI Instructions</h3>
 
-        <!-- 3 new buttons row -->
-        <div class="instructions-buttons">
-          <button id="submitInstructionsBtn">Submit Instructions</button>
-          <button id="submitAndClearBtn">Submit Instructions &amp; Clear Alert</button>
-          <button id="clearAlertBtn">Clear Alert</button>
-        </div>
-
-        <div id="submitAiMessage">AI instructions submitted!</div>
+      <!-- Quick action buttons row -->
+      <div class="quick-actions">
+        <button data-ai="Yes this is approved, please proceed">
+          Approve
+        </button>
+        <button data-ai="No this is not approved, inform the player that you cannot proceed with this request.">
+          Decline
+        </button>
+        <button data-ai="This is a malicious conversation or a hacker, stop the conversation and immediately close this issue">
+          Block/Hacker
+        </button>
+        <button data-ai="Offer the player anywhere between 1-5 star-tokens, then take the action: Credit-StarTokens">
+          Gift
+        </button>
+        <button data-ai="Thank the player, then close the issue">
+          Close
+        </button>
       </div>
+
+      <!-- AI Instructions text area -->
+      <textarea id="aiInstructions" rows="3" placeholder="Enter instructions for AI here"></textarea>
+
+      <!-- The 3 “Submit”/“Clear” action buttons -->
+      <div class="instructions-buttons">
+        <button id="submitInstructionsBtn">Submit Instructions</button>
+        <button id="submitAndClearBtn">Submit Instructions &amp; Clear Alert</button>
+        <button id="clearAlertBtn">Clear Alert</button>
+      </div>
+
+      <div id="submitAiMessage">AI instructions submitted!</div>
     </div>
   </div>
 </div>
@@ -330,17 +344,16 @@
   // Add the ?includes param to fetch private_notes
   const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
   const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
-  
+
   let issuesData = [];
   let selectedIssueId = null;
   let focusModeOn = false; // "Focus" switch
 
   window.addEventListener("DOMContentLoaded", () => {
     fetchIssues();
-    // auto-refresh every 5 seconds
-    setInterval(fetchIssues, 5000);
+    setInterval(fetchIssues, 5000); // auto-refresh every 5 seconds
 
-    // Hook up the 3 new buttons
+    // Hook up the 3 existing instruction buttons
     document.getElementById("submitInstructionsBtn")
             .addEventListener("click", () => handleAiInstructions("submit"));
     document.getElementById("submitAndClearBtn")
@@ -352,7 +365,7 @@
     const aiBox = document.getElementById("aiInstructions");
     aiBox.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        e.preventDefault(); 
+        e.preventDefault();
         handleAiInstructions("submit");
       }
     });
@@ -361,12 +374,21 @@
     const focusSwitch = document.getElementById("focusSwitch");
     focusSwitch.addEventListener("change", () => {
       focusModeOn = focusSwitch.checked;
-      buildIssueList(); // re-filter the list
+      buildIssueList();
+    });
+
+    // NEW: Quick action buttons => prepopulate aiInstructions
+    const quickButtons = document.querySelectorAll('.quick-actions button');
+    quickButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const text = btn.getAttribute("data-ai") || "";
+        aiBox.value = text;
+      });
     });
   });
 
   /**
-   * GET issues (including private_notes & custom_fields) from Helpshift
+   * GET issues
    */
   async function fetchIssues() {
     try {
@@ -389,7 +411,6 @@
       issuesData = data.issues || [];
       buildIssueList();
 
-      // If we have a selected issue, refresh its details
       if (selectedIssueId !== null) {
         const updatedIssue = issuesData.find(i => i.id === selectedIssueId);
         if (updatedIssue) {
@@ -403,11 +424,6 @@
     }
   }
 
-  /**
-   * Build the left list of issues
-   * - If focusModeOn: skip issues with state 'resolved' or 'rejected'
-   * - Also highlight if 'ai_state' == 'help'
-   */
   function buildIssueList() {
     const issuesList = document.getElementById("issuesList");
     issuesList.innerHTML = "";
@@ -419,8 +435,9 @@
 
     issuesData.forEach(issue => {
       const issueState = issue.state_data?.state || "";
+      // Focus filter => hide resolved or rejected
       if (focusModeOn && (issueState === "resolved" || issueState === "rejected")) {
-        return; // skip
+        return;
       }
 
       const li = document.createElement("li");
@@ -430,11 +447,8 @@
       if (issueState === "resolved") {
         cssClass = "resolved-issue";
         statusHtml = `<span class="status-resolved">resolved</span>`;
-      } else if (issueState === "rejected") {
-        // no special styling for now
       }
 
-      // check ai_state == 'help'
       const aiStateValue = issue.custom_fields?.ai_state?.value || "";
       let warningEmoji = "";
       if (aiStateValue === "help") {
@@ -454,12 +468,10 @@
         </div>
       `;
 
-      // highlight if selected
       if (issue.id === selectedIssueId) {
         li.classList.add("selected-issue");
       }
 
-      // click to view
       li.addEventListener("click", () => {
         selectedIssueId = issue.id;
         showIssueDetail(issue);
@@ -468,9 +480,6 @@
     });
   }
 
-  /**
-   * Show detail for a single issue in the right pane
-   */
   function showIssueDetail(issue) {
     const issuesList = document.getElementById("issuesList");
     [...issuesList.children].forEach(li => {
@@ -490,7 +499,6 @@
       <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
     `;
 
-    // Combine messages & private_notes
     const conversationItems = [];
 
     (issue.messages || []).forEach(msg => {
@@ -511,7 +519,6 @@
       });
     });
 
-    // Sort by timestamp ascending
     conversationItems.sort((a, b) => a.timestamp - b.timestamp);
 
     const conversationArea = document.getElementById("conversationArea");
@@ -538,7 +545,7 @@
       }
     });
 
-    // scroll to bottom
+    // auto-scroll
     conversationArea.scrollTop = conversationArea.scrollHeight;
   }
 
@@ -569,10 +576,7 @@
 
   /**
    * handleAiInstructions(actionType)
-   * actionType can be:
-   *   - "submit" => step1 + step3
-   *   - "clear" => step2 only
-   *   - "submitAndClear" => step1, step2, step3
+   * actionType: "submit", "clear", or "submitAndClear"
    */
   async function handleAiInstructions(actionType) {
     if (!selectedIssueId) {
@@ -581,7 +585,8 @@
     }
 
     // If action includes 'submit', we need instructions text
-    const instructions = document.getElementById("aiInstructions").value.trim();
+    const aiBox = document.getElementById("aiInstructions");
+    const instructions = aiBox.value.trim();
     const mustHaveInstructions = (actionType === "submit" || actionType === "submitAndClear");
 
     if (mustHaveInstructions && !instructions) {
@@ -607,7 +612,7 @@
 
       // Clear the instructions if we did any "submit" action
       if (actionType === "submit" || actionType === "submitAndClear") {
-        document.getElementById("aiInstructions").value = "";
+        aiBox.value = "";
       }
 
     } catch (err) {
@@ -615,7 +620,7 @@
     }
   }
 
-  // Helper: Step 1: PUT ml1
+  // Step 1: PUT ml1
   async function putCustomFieldMl1(instructions) {
     const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
     const formData = new FormData();
@@ -638,7 +643,7 @@
     }
   }
 
-  // Helper: Step 2: PUT ai_state=none
+  // Step 2: PUT ai_state=none
   async function putAiStateNone() {
     const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
     const formData = new FormData();
@@ -661,7 +666,7 @@
     }
   }
 
-  // Helper: Step 3: POST private note
+  // Step 3: POST private note
   async function postPrivateNote(instructions) {
     const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
     const formData = new FormData();
@@ -684,6 +689,7 @@
 </script>
 </body>
 </html>
+
 
 
 
