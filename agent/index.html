@@ -534,65 +534,89 @@
    * 2) POST private note
    */
   async function submitAiInstructions() {
-    if (!selectedIssueId) {
-      alert("No issue is currently selected!");
-      return;
+  if (!selectedIssueId) {
+    alert("No issue is currently selected!");
+    return;
+  }
+
+  const instructions = document.getElementById("aiInstructions").value.trim();
+  if (!instructions) {
+    alert("Please enter AI instructions before submitting.");
+    return;
+  }
+
+  // Step A: PUT /issues/{id} with "ml1" custom_field
+  const urlA = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+  const formDataA = new FormData();
+  formDataA.append(
+    "custom_fields",
+    `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+  );
+
+  try {
+    // -- (1) Update custom_fields.ml1 with the AI instructions --
+    let response = await fetch(urlA, {
+      method: "PUT",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formDataA
+    });
+
+    let resultText = await response.text();
+    console.log("PUT /issues (ml1) response:", resultText);
+
+    if (!response.ok) {
+      throw new Error(`PUT (ml1) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
     }
 
-    const instructions = document.getElementById("aiInstructions").value.trim();
-    if (!instructions) {
-      alert("Please enter AI instructions before submitting.");
-      return;
-    }
-
-    // Step A: PUT /issues/{id} with custom_fields
-    const urlA = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
-    const formDataA = new FormData();
-    formDataA.append(
+    // Step B: PUT /issues/{id} again, setting ai_state = "none"
+    const urlB = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+    const formDataB = new FormData();
+    formDataB.append(
       "custom_fields",
-      `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+      `{"ai_state":{"type":"singleline","value":"none"}}`
     );
 
-    try {
-      // 1) Update custom fields
-      let response = await fetch(urlA, {
-        method: "PUT",
-        headers: { "Authorization": `Basic ${authString}` },
-        body: formDataA
-      });
+    // -- (2) Set ai_state to "none" --
+    response = await fetch(urlB, {
+      method: "PUT",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formDataB
+    });
 
-      let resultText = await response.text();
-      console.log("PUT /issues response:", resultText);
+    resultText = await response.text();
+    console.log("PUT /issues (ai_state=none) response:", resultText);
 
-      if (!response.ok) {
-        throw new Error(`PUT failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // 2) POST /issues/{id}/private-notes with note-text
-      const urlB = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
-      const formDataB = new FormData();
-      formDataB.append("note-text", `AI Instructions from Agent: ${instructions}`);
-
-      response = await fetch(urlB, {
-        method: "POST",
-        headers: { "Authorization": `Basic ${authString}` },
-        body: formDataB
-      });
-
-      resultText = await response.text();
-      console.log("POST /issues/.../private-notes response:", resultText);
-
-      if (!response.ok) {
-        throw new Error(`POST failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
-      }
-
-      // If both calls succeed, clear the box
-      document.getElementById("aiInstructions").value = "";
-
-    } catch (err) {
-      alert(`Failed to submit AI instructions: ${err.message}`);
+    if (!response.ok) {
+      throw new Error(`PUT (ai_state=none) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
     }
+
+    // Step C: POST /issues/{id}/private-notes with note-text
+    const urlC = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
+    const formDataC = new FormData();
+    formDataC.append("note-text", `AI Instructions from Agent: ${instructions}`);
+
+    // -- (3) Add private note referencing the instructions --
+    response = await fetch(urlC, {
+      method: "POST",
+      headers: { "Authorization": `Basic ${authString}` },
+      body: formDataC
+    });
+
+    resultText = await response.text();
+    console.log("POST /issues/.../private-notes response:", resultText);
+
+    if (!response.ok) {
+      throw new Error(`POST (private note) failed: HTTP ${response.status} – ${response.statusText}\n${resultText}`);
+    }
+
+    // If all 3 calls succeed, clear the box
+    document.getElementById("aiInstructions").value = "";
+
+  } catch (err) {
+    alert(`Failed to submit AI instructions: ${err.message}`);
   }
+}
+
 </script>
 </body>
 </html>
