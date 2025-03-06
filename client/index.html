@@ -15,143 +15,194 @@
       box-sizing: border-box;
     }
 
-    /* Top header bar (30px) */
+    /* Header bar (30px) */
     #headerBar {
       height: 30px;
       background-color: #444;
       color: #fff;
       display: flex;
-      align-items: center;  /* center text vertically */
+      align-items: center;  /* vertical center */
       padding: 0 10px;
       font-size: 0.9em;
       font-weight: bold;
     }
 
-    /*
-      Main container for the chat UI.
-      We use flex and ensure min-height: 0 so child can scroll if needed.
-    */
+    /* Main container (flex column), min-height=0 so child can scroll */
     #mainContainer {
       display: flex;
       flex-direction: column;
-      height: calc(100% - 30px); /* fill space below header */
-      min-height: 0;            /* crucial for scrolling in nested flex items */
+      height: calc(100% - 30px);
+      min-height: 0; /* Important to allow scrolling inside children */
     }
 
-    /*
-      Chat window:
-      - flex-direction: column
-      - align-items: flex-start (standard top-down stacking)
-      - overflow-y: auto
-      - after each message append, we do scrollTop=scrollHeight for 'pinned bottom'
-    */
+    /* Chat window with overflow scroll */
     #chat-window {
       flex: 1;
-      min-height: 0;             /* allow this to shrink and scroll */
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;    /* messages stack top-down */
+      min-height: 0;         /* Also important for nested flex scrolling */
+      overflow-y: auto;
       background: #f9f9f9;
-      padding: 15px;
-      overflow-y: auto;          /* show scrollbar if overflow */
+      padding: 10px;
     }
 
-    /* The input area at the bottom */
+    /* Chat form at the bottom */
     #chat-form {
       display: flex;
       padding: 10px;
       background: #fff;
       border-top: 1px solid #ccc;
     }
-
-    .error {
-      color: red;
-      font-weight: bold;
-      margin: 10px;
+    #message-input {
+      flex: 1;
       font-size: 0.9em;
+      padding: 6px;
+    }
+    #send-button {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      margin-left: 8px;
+      cursor: pointer;
     }
 
-    /* Message bubbles */
+    /* Normal message bubbles (agent/user) */
     .message {
       display: inline-block;
-      margin: 6px 0;
-      padding: 8px 12px;
+      margin: 4px 0;
+      padding: 6px 10px;
       border-radius: 4px;
-      max-width: 75%;
+      max-width: 70%;
       word-wrap: break-word;
       font-size: 0.9em;
     }
     .agent-msg {
       background: #f1f1f1;
-      margin-right: auto;  /* left-aligned */
+      margin-right: auto;
       margin-left: 0;
     }
     .user-msg {
       background: #DCF8C6;
-      margin-left: auto;   /* right-aligned */
+      margin-left: auto;
       margin-right: 0;
     }
 
-    /* Input and button: smaller font */
-    #message-input {
-      flex: 1;
-      padding: 6px;
-      font-size: 0.9em;
+    /* The Common Questions Card */
+    .card-message {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      padding: 16px;
+      margin: 8px 0;
+      width: 100%; /* fill chat width */
+      box-sizing: border-box;
     }
-    #send-button {
-      padding: 6px 12px;
+    .card-title {
+      font-weight: bold;
+      font-size: 1em;
+      margin-bottom: 6px;
+    }
+    .card-subtitle {
       font-size: 0.9em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .card-questions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .card-questions li {
+      padding: 8px;
       cursor: pointer;
-      margin-left: 8px;
+      border-radius: 4px;
+      margin-bottom: 5px;
+      background: #f9f9f9;
+      transition: background 0.2s;
+    }
+    .card-questions li:hover {
+      background: #eee;
+    }
+
+    /* Error text area */
+    #error-message {
+      color: red;
+      font-weight: bold;
+      margin: 10px;
+      font-size: 0.9em;
     }
   </style>
 </head>
 <body>
 
-  <!-- Header bar at top (30px) -->
+  <!-- Header bar -->
   <div id="headerBar">
     GG - Golden Games Player Support
   </div>
 
-  <!-- Main container (flex column) -->
+  <!-- Main container -->
   <div id="mainContainer">
 
-    <!-- Chat window with vertical scrolling -->
+    <!-- Chat window -->
     <div id="chat-window">
-      <!-- We'll insert the agent's greeting on load -->
+      <!-- Agent greeting as a normal message -->
+      <div class="message agent-msg">
+        👋 Hi! I’m your smart help assistant. How can I help you today?
+      </div>
+
+      <!-- Common Questions Card (Top 3) -->
+      <div class="card-message" id="commonQuestionsCard">
+        <div class="card-title">Top Questions</div>
+        <div class="card-subtitle">Pick one to get started quickly:</div>
+        <ul class="card-questions">
+          <li data-question="I need to recover my account">
+            I need to recover my account
+          </li>
+          <li data-question="What is war room?">
+            What is war room?
+          </li>
+          <li data-question="How do I purchase new ships?">
+            How do I purchase new ships?
+          </li>
+        </ul>
+      </div>
+
     </div>
 
-    <!-- Chat input area -->
+    <!-- Input form -->
     <form id="chat-form">
-      <input type="text" id="message-input" placeholder="Type your message..." required />
+      <input 
+        type="text" 
+        id="message-input" 
+        placeholder="Type your message..." 
+        autocomplete="off" 
+        required 
+      />
       <button type="submit" id="send-button">Send</button>
     </form>
-
   </div>
 
-  <!-- Error message area -->
-  <div id="error-message" class="error"></div>
+  <!-- Error messages, if any -->
+  <div id="error-message"></div>
 
   <script>
     /**************************************************************
      * Configuration
      **************************************************************/
-    // Pre-encoded Basic Auth
+    // Replace with your actual Helpshift Basic Auth (encoded)
     const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
+    // Helpshift domain
     const HELPSHIFT_DOMAIN = "ashbys";
 
-    // For creating the issue
+    // For createIssue
     const PLATFORM_TYPE = "webchat";
     const IDENTIFIER = "erikashby9900";
     const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
-
-    // The user’s email (used to filter out user messages in polling)
+    // The user’s email (for filtering user messages in poll)
     const userEmail = "erik99@ashbys.net";
 
     /**************************************************************
-     * DOM references
+     * DOM elements
      **************************************************************/
     const chatWindow = document.getElementById("chat-window");
+    const commonQuestionsCard = document.getElementById("commonQuestionsCard");
     const chatForm = document.getElementById("chat-form");
     const messageInput = document.getElementById("message-input");
     const errorMessageDiv = document.getElementById("error-message");
@@ -159,57 +210,56 @@
     /**************************************************************
      * State
      **************************************************************/
-    let issueId = null;        // Created on first user message
-    let messagesDisplayed = 0; // how many messages we've processed from polling
+    let issueId = null;         // Will set after first message
+    let messagesDisplayed = 0;  // how many messages we processed from poll
     let pollingIntervalId = null;
 
     /**************************************************************
-     * Helpers
+     * Helper: convert line feeds to <br>, escape HTML
      **************************************************************/
-
-    // Escape HTML special chars & convert line feeds to <br>
     function escapeAndFormatText(text) {
       const escaped = text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
-      // Replace newlines with <br>
       return escaped.replace(/(\r\n|\n|\r)/g, "<br>");
     }
 
-    // Append a message bubble with line-break conversion
-    // sender = 'agent' or 'user'
+    /**************************************************************
+     * Append a message bubble
+     * sender: 'agent' or 'user'
+     **************************************************************/
     function appendMessage(rawText, sender) {
-      const msgDiv = document.createElement("div");
-      msgDiv.classList.add("message");
-      msgDiv.classList.add(sender === "user" ? "user-msg" : "agent-msg");
-
-      // Convert linefeeds to <br>, also escape HTML
-      msgDiv.innerHTML = escapeAndFormatText(rawText);
-
-      chatWindow.appendChild(msgDiv);
-
-      // *** After appending, scroll to bottom ***
+      const div = document.createElement("div");
+      div.classList.add("message");
+      div.classList.add(sender === "user" ? "user-msg" : "agent-msg");
+      // Convert linefeeds to <br>
+      div.innerHTML = escapeAndFormatText(rawText);
+      chatWindow.appendChild(div);
+      // auto-scroll to bottom
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
-    function showError(text) {
-      errorMessageDiv.textContent = text;
+    /**************************************************************
+     * Show / clear error messages
+     **************************************************************/
+    function showError(msg) {
+      errorMessageDiv.textContent = msg;
     }
     function clearError() {
       errorMessageDiv.textContent = "";
     }
 
     /**************************************************************
-     * Create an issue with the user's first message
+     * Create a new Helpshift issue with the user's first message
      **************************************************************/
-    function createIssueWithMessage(firstUserMessage) {
+    function createIssueWithMessage(firstMessage) {
       const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
       const formdata = new FormData();
       formdata.append("platform-type", PLATFORM_TYPE);
       formdata.append("identifier", IDENTIFIER);
-      formdata.append("title", firstUserMessage);
-      formdata.append("message-body", firstUserMessage);
+      formdata.append("title", firstMessage);
+      formdata.append("message-body", firstMessage);
       formdata.append("platform-id", PLATFORM_ID);
       formdata.append("email", userEmail);
 
@@ -227,19 +277,19 @@
         return response.text();
       })
       .then(result => {
-        console.log("Issue creation (raw):", result);
+        console.log("Issue creation response:", result);
         let newIssueId = null;
         try {
           const data = JSON.parse(result);
           if (data && data.id) {
             newIssueId = data.id;
           }
-        } catch (e) {
-          console.warn("Not valid JSON or missing 'id':", e);
+        } catch(e) {
+          console.warn("Could not parse JSON or missing 'id':", e);
         }
         if (!newIssueId) {
-          showError("Could not retrieve issue ID. Chat may not function properly.");
-          throw new Error("No issue ID returned.");
+          showError("Could not retrieve issue ID. Chat may not work properly.");
+          throw new Error("No issue ID returned");
         }
         console.log("Issue created with ID:", newIssueId);
         return newIssueId;
@@ -247,19 +297,19 @@
     }
 
     /**************************************************************
-     * Send message to existing issue
+     * Send a message to an existing issue
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
-        console.warn("No issue yet. Can't send message.");
-        return Promise.reject("No issue ID.");
+        console.warn("No issue yet—can't send message");
+        return Promise.reject("No issue ID");
       }
+      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues/${issueId}/messages/user`;
       const formdata = new FormData();
       formdata.append("identifier", IDENTIFIER);
       formdata.append("message-body", text);
       formdata.append("message-type", "Text");
 
-      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues/${issueId}/messages/user`;
       return fetch(url, {
         method: "POST",
         headers: {
@@ -302,23 +352,15 @@
         .then(data => {
           const issueData = data.issues && data.issues.length > 0 ? data.issues[0] : null;
           if (!issueData) {
-            console.warn("No issue data in poll response:", data);
+            console.warn("No issue data in poll:", data);
             return;
           }
-
           const msgs = issueData.messages || [];
           for (let i = messagesDisplayed; i < msgs.length; i++) {
             const msg = msgs[i];
-            const isUserMsg =
-              msg.author &&
-              msg.author.emails &&
-              msg.author.emails.includes(userEmail);
-
-            if (isUserMsg) {
-              // skip user messages
-              continue;
-            } else {
-              // agent/bot message
+            // If authored by the user (matching userEmail), skip (avoid duplicates)
+            const isUserMsg = msg.author && msg.author.emails && msg.author.emails.includes(userEmail);
+            if (!isUserMsg) {
               appendMessage(msg.body, "agent");
             }
           }
@@ -331,9 +373,7 @@
     }
 
     /**************************************************************
-     * Submit handler
-     * - If no issue yet, create it with the first message
-     * - Otherwise, send message to existing issue
+     * Event: user sends a message
      **************************************************************/
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -341,45 +381,50 @@
       const text = messageInput.value.trim();
       if (!text) return;
 
-      // Show user's message in the UI
+      // Immediately show user's message in the UI
       appendMessage(text, "user");
+      messageInput.value = "";
 
       if (!issueId) {
-        // first message -> create issue
+        // First message -> create new issue, then poll
         createIssueWithMessage(text)
-          .then(newIssueId => {
-            issueId = newIssueId;
-            messagesDisplayed = 1; // we've effectively "used up" that user message
+          .then(newId => {
+            issueId = newId;
+            messagesDisplayed = 1;
             startPolling();
+            // Optionally hide the card once the user sends first message:
+            // commonQuestionsCard.style.display = "none";
           })
           .catch(err => {
             console.error("Error creating issue:", err);
             showError("Could not create chat session. Please try again.");
           });
       } else {
-        // subsequent messages -> send to existing issue
+        // Subsequent message -> send to existing issue
         sendMessageToIssue(text)
           .catch(err => {
             console.error("Failed to send message:", err);
             showError("Failed to send message. Please try again.");
           });
       }
-
-      messageInput.value = "";
     });
 
     /**************************************************************
-     * Initial local agent greeting (no Helpshift issue yet)
+     * For the Common Questions Card
+     * Clicking an item populates the message input
      **************************************************************/
-    (function showInitialGreeting() {
-      appendMessage(
-        "👋 Hi, I am your smart help assistant. Tell me your problem and I can get you help.",
-        "agent"
-      );
-    })();
+    document.querySelectorAll(".card-questions li").forEach(li => {
+      li.addEventListener("click", () => {
+        const question = li.getAttribute("data-question");
+        messageInput.value = question;
+        // Optionally auto-send upon click:
+        // chatForm.requestSubmit();
+      });
+    });
   </script>
 </body>
 </html>
+
 
 
 
