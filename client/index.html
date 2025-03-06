@@ -2,382 +2,196 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GG - Golden Games Player Support</title>
+  <title>Chat with First-Message Common Questions</title>
   <style>
-    /* System font stack */
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; 
+      padding: 0; 
       height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: sans-serif;
     }
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-
-    /* Top header bar (30px) */
     #headerBar {
-      height: 30px;
+      height: 40px;
       background-color: #444;
       color: #fff;
       display: flex;
-      align-items: center;  /* center text vertically */
+      align-items: center;
       padding: 0 10px;
       font-size: 0.9em;
       font-weight: bold;
     }
-
-    /*
-      Main container for the chat UI.
-      We use flex and ensure min-height: 0 so child can scroll if needed.
-    */
     #mainContainer {
       display: flex;
       flex-direction: column;
-      height: calc(100% - 30px); /* fill space below header */
-      min-height: 0;            /* crucial for scrolling in nested flex items */
+      height: calc(100% - 40px);
     }
-
-    /*
-      Chat window:
-      - flex-direction: column
-      - align-items: flex-start (standard top-down stacking)
-      - overflow-y: auto
-      - after each message append, we do scrollTop=scrollHeight for 'pinned bottom'
-    */
     #chat-window {
       flex: 1;
-      min-height: 0;             /* allow this to shrink and scroll */
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;    /* messages stack top-down */
+      overflow-y: auto;
       background: #f9f9f9;
-      padding: 15px;
-      overflow-y: auto;          /* show scrollbar if overflow */
+      padding: 10px;
     }
-
-    /* The input area at the bottom */
+    /* Common questions panel */
+    #common-questions {
+      background: #fffbe2;
+      padding: 8px 10px;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
+    .common-question-chip {
+      display: inline-block;
+      background: #efefef;
+      margin: 5px 8px 5px 0;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    /* Chat form */
     #chat-form {
       display: flex;
       padding: 10px;
       background: #fff;
       border-top: 1px solid #ccc;
     }
-
-    .error {
-      color: red;
-      font-weight: bold;
-      margin: 10px;
-      font-size: 0.9em;
-    }
-
-    /* Message bubbles */
-    .message {
-      display: inline-block;
-      margin: 6px 0;
-      padding: 8px 12px;
-      border-radius: 4px;
-      max-width: 75%;
-      word-wrap: break-word;
-      font-size: 0.9em;
-    }
-    .agent-msg {
-      background: #f1f1f1;
-      margin-right: auto;  /* left-aligned */
-      margin-left: 0;
-    }
-    .user-msg {
-      background: #DCF8C6;
-      margin-left: auto;   /* right-aligned */
-      margin-right: 0;
-    }
-
-    /* Input and button: smaller font */
     #message-input {
       flex: 1;
-      padding: 6px;
       font-size: 0.9em;
+      padding: 6px;
     }
     #send-button {
       padding: 6px 12px;
       font-size: 0.9em;
-      cursor: pointer;
       margin-left: 8px;
+      cursor: pointer;
+    }
+    /* Bubbles */
+    .message {
+      display: inline-block;
+      margin: 4px 0;
+      padding: 6px 10px;
+      border-radius: 4px;
+      max-width: 70%;
+      word-wrap: break-word;
+      font-size: 0.9em;
+    }
+    .agent-msg { 
+      background: #f1f1f1; 
+      margin-right: auto; 
+      margin-left: 0;
+    }
+    .user-msg { 
+      background: #DCF8C6; 
+      margin-left: auto; 
+      margin-right: 0;
     }
   </style>
 </head>
 <body>
 
-  <!-- Header bar at top (30px) -->
-  <div id="headerBar">
-    GG - Golden Games Player Support
-  </div>
+<div id="headerBar">Chat - Golden Games Support</div>
 
-  <!-- Main container (flex column) -->
-  <div id="mainContainer">
+<div id="mainContainer">
 
-    <!-- Chat window with vertical scrolling -->
-    <div id="chat-window">
-      <!-- We'll insert the agent's greeting on load -->
+  <!-- Chat window -->
+  <div id="chat-window">
+    <!-- initial greeting by an agent or system -->
+    <div class="message agent-msg">
+      👋 Hi! I am your smart help assistant.
+      Select or type your question below to get started.
     </div>
-
-    <!-- Chat input area -->
-    <form id="chat-form">
-      <input type="text" id="message-input" placeholder="Type your message..." required />
-      <button type="submit" id="send-button">Send</button>
-    </form>
-
   </div>
 
-  <!-- Error message area -->
-  <div id="error-message" class="error"></div>
+  <!-- Common questions panel (for the very first message only) -->
+  <div id="common-questions">
+    <span class="common-question-chip" data-question="Where can I view my order history?">
+      Where can I view my order history?
+    </span>
+    <span class="common-question-chip" data-question="I forgot my password.">
+      I forgot my password.
+    </span>
+    <span class="common-question-chip" data-question="How do I request a refund?">
+      How do I request a refund?
+    </span>
+  </div>
 
-  <script>
-    /**************************************************************
-     * Configuration
-     **************************************************************/
-    // Pre-encoded Basic Auth
-    const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
-    const HELPSHIFT_DOMAIN = "ashbys";
+  <!-- Chat form -->
+  <form id="chat-form">
+    <!-- Optional: use a datalist for subsequent messages -->
+    <input 
+      type="text" 
+      id="message-input" 
+      placeholder="Type your message..." 
+      list="subsequentSuggestions" 
+      autocomplete="off" 
+      required 
+    />
+    <!-- This datalist is used as an example only for subsequent messages -->
+    <datalist id="subsequentSuggestions">
+      <option value="I have a billing question."></option>
+      <option value="Where is my purchase?"></option>
+      <option value="I need technical support."></option>
+    </datalist>
 
-    // For creating the issue
-    const PLATFORM_TYPE = "webchat";
-    const IDENTIFIER = "erikashby9900";
-    const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
+    <button type="submit" id="send-button">Send</button>
+  </form>
 
-    // The user’s email (used to filter out user messages in polling)
-    const userEmail = "erik99@ashbys.net";
+</div>
 
-    /**************************************************************
-     * DOM references
-     **************************************************************/
-    const chatWindow = document.getElementById("chat-window");
-    const chatForm = document.getElementById("chat-form");
-    const messageInput = document.getElementById("message-input");
-    const errorMessageDiv = document.getElementById("error-message");
+<script>
+  // Basic chat example state
+  let issueId = null; // only set after first message
+  const chatWindow = document.getElementById("chat-window");
+  const commonQuestionsDiv = document.getElementById("common-questions");
+  const chatForm = document.getElementById("chat-form");
+  const messageInput = document.getElementById("message-input");
 
-    /**************************************************************
-     * State
-     **************************************************************/
-    let issueId = null;        // Created on first user message
-    let messagesDisplayed = 0; // how many messages we've processed from polling
-    let pollingIntervalId = null;
+  // Example: append a message bubble
+  function appendMessage(text, sender) {
+    const div = document.createElement("div");
+    div.classList.add("message");
+    div.classList.add(sender === "user" ? "user-msg" : "agent-msg");
+    div.textContent = text;
+    chatWindow.appendChild(div);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
 
-    /**************************************************************
-     * Helpers
-     **************************************************************/
-
-    // Escape HTML special chars & convert line feeds to <br>
-    function escapeAndFormatText(text) {
-      const escaped = text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-      // Replace newlines with <br>
-      return escaped.replace(/(\r\n|\n|\r)/g, "<br>");
-    }
-
-    // Append a message bubble with line-break conversion
-    // sender = 'agent' or 'user'
-    function appendMessage(rawText, sender) {
-      const msgDiv = document.createElement("div");
-      msgDiv.classList.add("message");
-      msgDiv.classList.add(sender === "user" ? "user-msg" : "agent-msg");
-
-      // Convert linefeeds to <br>, also escape HTML
-      msgDiv.innerHTML = escapeAndFormatText(rawText);
-
-      chatWindow.appendChild(msgDiv);
-
-      // *** After appending, scroll to bottom ***
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-
-    function showError(text) {
-      errorMessageDiv.textContent = text;
-    }
-    function clearError() {
-      errorMessageDiv.textContent = "";
-    }
-
-    /**************************************************************
-     * Create an issue with the user's first message
-     **************************************************************/
-    function createIssueWithMessage(firstUserMessage) {
-      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
-      const formdata = new FormData();
-      formdata.append("platform-type", PLATFORM_TYPE);
-      formdata.append("identifier", IDENTIFIER);
-      formdata.append("title", firstUserMessage);
-      formdata.append("message-body", firstUserMessage);
-      formdata.append("platform-id", PLATFORM_ID);
-      formdata.append("email", userEmail);
-
-      return fetch(url, {
-        method: "POST",
-        headers: {
-          "Authorization": authHeaderValue
-        },
-        body: formdata
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Issue creation failed. Status: ${response.status}`);
-        }
-        return response.text();
-      })
-      .then(result => {
-        console.log("Issue creation (raw):", result);
-        let newIssueId = null;
-        try {
-          const data = JSON.parse(result);
-          if (data && data.id) {
-            newIssueId = data.id;
-          }
-        } catch (e) {
-          console.warn("Not valid JSON or missing 'id':", e);
-        }
-        if (!newIssueId) {
-          showError("Could not retrieve issue ID. Chat may not function properly.");
-          throw new Error("No issue ID returned.");
-        }
-        console.log("Issue created with ID:", newIssueId);
-        return newIssueId;
-      });
-    }
-
-    /**************************************************************
-     * Send message to existing issue
-     **************************************************************/
-    function sendMessageToIssue(text) {
-      if (!issueId) {
-        console.warn("No issue yet. Can't send message.");
-        return Promise.reject("No issue ID.");
-      }
-      const formdata = new FormData();
-      formdata.append("identifier", IDENTIFIER);
-      formdata.append("message-body", text);
-      formdata.append("message-type", "Text");
-
-      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues/${issueId}/messages/user`;
-      return fetch(url, {
-        method: "POST",
-        headers: {
-          "Authorization": authHeaderValue
-        },
-        body: formdata
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Send message failed. Status: ${response.status}`);
-        }
-        console.log("Message sent:", text);
-      });
-    }
-
-    /**************************************************************
-     * Poll for new agent messages
-     * skip user-authored messages to avoid double display
-     **************************************************************/
-    function startPolling() {
-      if (pollingIntervalId) {
-        clearInterval(pollingIntervalId);
-      }
-      pollingIntervalId = setInterval(() => {
-        if (!issueId) return;
-
-        const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues/${issueId}`;
-        fetch(url, {
-          method: "GET",
-          headers: {
-            "Authorization": authHeaderValue
-          }
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Polling failed. Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          const issueData = data.issues && data.issues.length > 0 ? data.issues[0] : null;
-          if (!issueData) {
-            console.warn("No issue data in poll response:", data);
-            return;
-          }
-
-          const msgs = issueData.messages || [];
-          for (let i = messagesDisplayed; i < msgs.length; i++) {
-            const msg = msgs[i];
-            const isUserMsg =
-              msg.author &&
-              msg.author.emails &&
-              msg.author.emails.includes(userEmail);
-
-            if (isUserMsg) {
-              // skip user messages
-              continue;
-            } else {
-              // agent/bot message
-              appendMessage(msg.body, "agent");
-            }
-          }
-          messagesDisplayed = msgs.length;
-        })
-        .catch(err => {
-          console.error("Polling error:", err);
-        });
-      }, 1000);
-    }
-
-    /**************************************************************
-     * Submit handler
-     * - If no issue yet, create it with the first message
-     * - Otherwise, send message to existing issue
-     **************************************************************/
-    chatForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      clearError();
-      const text = messageInput.value.trim();
-      if (!text) return;
-
-      // Show user's message in the UI
-      appendMessage(text, "user");
-
-      if (!issueId) {
-        // first message -> create issue
-        createIssueWithMessage(text)
-          .then(newIssueId => {
-            issueId = newIssueId;
-            messagesDisplayed = 1; // we've effectively "used up" that user message
-            startPolling();
-          })
-          .catch(err => {
-            console.error("Error creating issue:", err);
-            showError("Could not create chat session. Please try again.");
-          });
-      } else {
-        // subsequent messages -> send to existing issue
-        sendMessageToIssue(text)
-          .catch(err => {
-            console.error("Failed to send message:", err);
-            showError("Failed to send message. Please try again.");
-          });
-      }
-
-      messageInput.value = "";
+  // Attach click event to common-question chips
+  const questionChips = document.querySelectorAll(".common-question-chip");
+  questionChips.forEach(chip => {
+    chip.addEventListener("click", () => {
+      const qText = chip.getAttribute("data-question");
+      messageInput.value = qText;
     });
+  });
 
-    /**************************************************************
-     * Initial local agent greeting (no Helpshift issue yet)
-     **************************************************************/
-    (function showInitialGreeting() {
-      appendMessage(
-        "👋 Hi, I am your smart help assistant. Tell me your problem and I can get you help.",
-        "agent"
-      );
-    })();
-  </script>
+  // Handling form submission
+  chatForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = messageInput.value.trim();
+    if (!text) return;
+
+    // Display the user’s message
+    appendMessage(text, "user");
+
+    if (!issueId) {
+      // FIRST message -> create new Helpshift issue
+      // (Pseudo code, you’d use your actual createIssueWithMessage() logic)
+      issueId = "12345"; 
+      console.log("First message. Created Helpshift issue with ID=12345");
+      // Hide the common questions panel
+      commonQuestionsDiv.style.display = "none";
+      // Start your polling, etc.
+    } else {
+      // Subsequent message
+      console.log("Subsequent message to existing issue ID=", issueId);
+      // send to Helpshift ...
+    }
+
+    messageInput.value = "";
+  });
+</script>
+
 </body>
 </html>
 
