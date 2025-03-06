@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Helpshift Chat Prototype (Updated Auth & Send Message)</title>
+  <title>Helpshift Chat Prototype (Skip User Messages in Poll)</title>
   <style>
     body {
       margin: 0;
@@ -79,8 +79,8 @@
   /**************************************************************
    * Configuration
    **************************************************************/
-  // Already base64-encoded auth string (from your Postman / working example)
-  // "Basic " prefix + your encoded credentials
+  // This example uses an already Base64-encoded auth string
+  // "Basic " + your encoded credentials
   const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
   
   // Helpshift domain
@@ -210,10 +210,7 @@
     // Append the message immediately to the UI (optimistic)
     appendMessage(text, "user");
     
-    // Build the FormData with the required fields:
-    //  - identifier (same as issue creation)
-    //  - message-body
-    //  - message-type (Text)
+    // Build the FormData with the required fields
     const formdata = new FormData();
     formdata.append("identifier", IDENTIFIER);
     formdata.append("message-body", text);
@@ -224,7 +221,6 @@
       method: "POST",
       headers: {
         "Authorization": authHeaderValue
-        // Do not set Content-Type; fetch will handle multipart/form-data
       },
       body: formdata
     })
@@ -242,8 +238,7 @@
   
   /**************************************************************
    * Poll for messages (GET the issue) every 1 second
-   * (Currently using JSON-based approach; 
-   *  adapt similarly if form-data is required)
+   * *** Filter out user-authored messages to avoid duplicates ***
    **************************************************************/
   function startPolling() {
     if (pollingIntervalId) {
@@ -267,26 +262,31 @@
         return response.json();
       })
       .then(data => {
-        // The "issues" array is typically returned with 1 item
         const issueData = data.issues && data.issues.length > 0 ? data.issues[0] : null;
         if (!issueData) {
           console.warn("No issue data in response:", data);
           return;
         }
         
-        // The "messages" array contains the conversation
         const msgs = issueData.messages || [];
         
-        // Append any new messages that haven't been displayed
+        // Append only new messages that haven't been displayed
         for (let i = messagesDisplayed; i < msgs.length; i++) {
           const msg = msgs[i];
-          let senderType = "agent";
-          // If the author's email matches userEmail, treat as user
-          if (msg.author && msg.author.emails && msg.author.emails.includes(userEmail)) {
-            senderType = "user";
+          
+          // Check if message is from the user (by email)
+          const isUserMsg = msg.author &&
+                            msg.author.emails &&
+                            msg.author.emails.includes(userEmail);
+          if (isUserMsg) {
+            // Skip user-authored messages to avoid duplication
+            continue;
+          } else {
+            // Treat all others as "agent" messages
+            appendMessage(msg.body, "agent");
           }
-          appendMessage(msg.body, senderType);
         }
+        // Update total messages displayed
         messagesDisplayed = msgs.length;
       })
       .catch(err => {
@@ -319,4 +319,5 @@
 
 </body>
 </html>
+
 
