@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Helpshift Chat Prototype</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      background: #f9f9f9;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #chat-window {
+      width: 100%;
+      max-width: 500px;
+      height: 400px;
+      border: 1px solid #ccc;
+      background: #fff;
+      padding: 10px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .message {
+      display: block;
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-radius: 4px;
+      max-width: 75%;
+      word-wrap: break-word; /* ensure long text wraps */
+    }
+    .user-msg {
+      background: #DCF8C6; /* a light greenish bubble color */
+      margin-left: auto;   /* push it to the right side */
+    }
+    .agent-msg {
+      background: #f1f1f1; /* light gray bubble color */
+      margin-right: auto;  /* push it to the left side */
+    }
+    #chat-form {
+      max-width: 500px;
+      display: flex;
+    }
+    #message-input {
+      flex: 1;
+      padding: 8px;
+      font-size: 1em;
+    }
+    #send-button {
+      padding: 8px 16px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Helpshift Chat Prototype</h1>
+
+<div id="chat-window">
+  <!-- Messages will appear here -->
+</div>
+
+<form id="chat-form">
+  <input type="text" id="message-input" placeholder="Type your message..." required />
+  <button type="submit" id="send-button">Send</button>
+</form>
+
+<div id="error-message" class="error"></div>
+
+<script>
+  /**************************************************************
+   * Configuration
+   **************************************************************/
+  const HELPSHIFT_DOMAIN = "ashbys";    // e.g. "exampledomain"
+  const HELPSHIFT_API_KEY = "ashbys_api_20170621182353461-dd4f011a033bb77";            // e.g. "abcd1234"
+  
+  // Hard-coded user info (in a real app, collect from user)
+  const userEmail = "user@example.com";
+  const userName = "John Doe";
+  const initialMessage = "Hello, I need help with ...";
+  
+  // Construct Basic Auth header
+  // For Helpshift, the 'username' in basic auth is just the API key, and the password is empty.
+  const authHeaderValue = "Basic " + btoa(HELPSHIFT_API_KEY);
+  
+  /**************************************************************
+   * DOM references
+   **************************************************************/
+  const chatWindow = document.getElementById("chat-window");
+  const chatForm = document.getElementById("chat-form");
+  const messageInput = document.getElementById("message-input");
+  const errorMessageDiv = document.getElementById("error-message");
+  
+  /**************************************************************
+   * State variables
+   **************************************************************/
+  let issueId = null;
+  let messagesDisplayed = 0;
+  let pollingIntervalId = null;
+  
+  /**************************************************************
+   * Utility / Helper functions
+   **************************************************************/
+  
+  // Append a message to the chat window UI
+  // sender can be 'user' or 'agent'
+  function appendMessage(text, sender) {
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("message");
+    msgDiv.classList.add(sender === "user" ? "user-msg" : "agent-msg");
+    msgDiv.textContent = text;
+    chatWindow.appendChild(msgDiv);
+    // Auto-scroll to bottom
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+  
+  // Show an error to the user
+  function showError(text) {
+    errorMessageDiv.textContent = text;
+  }
+  
+  // Clear error message
+  function clearError() {
+    errorMessageDiv.textContent = "";
+  }
+  
+  /**************************************************************
+   * Initialize chat session (Issue creation)
+   **************************************************************/
+  function createIssue() {
+    clearError();
+    const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
+    
+    const payload = {
+      email: userEmail,
+      "message-body": initialMessage,
+      name: userName
+    };
+    
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": authHeaderValue,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Issue creation failed. Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Helpshift returns an object with an "id" for the new issue
+      issueId = data.id;
+      console.log("Issue created with ID:", issueId);
+      
+      // Display the initial message in the chat UI as user message
+      appendMessage(initialMessage, "user");
+      
+      // Start polling for new messages
+      startPolling();
+    })
+    .catch(err => {
+      console.error("Error creating issue:", err);
+      showError("Failed to start chat. Please refresh or try again.");
+    });
+  }
+  
+  /**************************************************************
+   * Send a message (User -> Helpshift)
+   **************************************************************/
+  function sendMessage(text) {
+    if (!issueId) {
+      console.warn("No issue ID yet. Cannot send message.");
+      return;
+    }
+    
+    // Append the message immediately to UI
+    appendMessage(text, "user");
+    
+    const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues/${issueId}/messages/user`;
+    const payload = {
+      "message-body": text
+    };
+    
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": authHeaderValue,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Send message failed. Status: ${response.status}`);
+      }
+      // Response likely doesn't need to be processed, since we'll
+      // poll the messages anyway
+      console.log("Message sent:", text);
+    })
+    .catch(err => {
+      console.error("Failed to send message:", err);
+      showError("Failed to send message. Please try again.");
+    });
+  }
+  
+  /**************************************************************
+   * Poll for messages (GET the issue) every 1 second
+   **************************************************************/
+  function startPolling() {
+    // If there's already a polling interval, clear it first
+    if (pollingIntervalId) {
+      clearInterval(pollingIntervalId);
+    }
+    
+    pollingIntervalId = setInterval(() => {
+      if (!issueId) return;
+      
+      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues/${issueId}`;
+      fetch(url, {
+        method: "GET",
+        headers: {
+          "Authorization": authHeaderValue
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Polling failed. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // The "issues" array is typically returned with 1 item
+        const issueData = data.issues && data.issues.length > 0 ? data.issues[0] : null;
+        if (!issueData) {
+          console.warn("No issue data in response:", data);
+          return;
+        }
+        
+        // The "messages" array contains the conversation
+        const msgs = issueData.messages || [];
+        
+        // Append any new messages that haven't been displayed
+        for (let i = messagesDisplayed; i < msgs.length; i++) {
+          const msg = msgs[i];
+          // Check if the author is the user's email or not
+          const author = msg.author;
+          // Helpshift's message object might differ, but typically we can
+          // compare the user's email to see if it's a user or an agent/bot
+          let senderType = "agent";
+          
+          if (author && author.emails && author.emails.includes(userEmail)) {
+            senderType = "user";
+          }
+          appendMessage(msg.body, senderType);
+        }
+        
+        // Update the count of messages displayed
+        messagesDisplayed = msgs.length;
+      })
+      .catch(err => {
+        console.error("Polling error:", err);
+        // We'll keep polling despite the error
+      });
+      
+    }, 1000); // 1-second interval
+  }
+  
+  /**************************************************************
+   * DOM event listeners
+   **************************************************************/
+  // Form submission handler for sending messages
+  chatForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    clearError();
+    const text = messageInput.value.trim();
+    if (text === "") return;
+    
+    sendMessage(text);
+    messageInput.value = "";
+  });
+  
+  /**************************************************************
+   * On page load: create a new Helpshift issue
+   **************************************************************/
+  createIssue();
+</script>
+
+</body>
+</html>
