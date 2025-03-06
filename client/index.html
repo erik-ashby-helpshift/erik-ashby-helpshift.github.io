@@ -4,11 +4,7 @@
   <meta charset="UTF-8" />
   <title>GG - Golden Games Player Support</title>
   <style>
-    /* 
-      Use system fonts:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif 
-      (this covers Mac, Windows, etc. gracefully)
-    */
+    /* System font stack */
     html, body {
       margin: 0;
       padding: 0;
@@ -19,33 +15,40 @@
       box-sizing: border-box;
     }
 
-    /* Header bar (30px tall) */
+    /* Top header bar (30px) */
     #headerBar {
       height: 30px;
       background-color: #444;
       color: #fff;
       display: flex;
-      align-items: center;      /* vertical center in the bar */
-      padding: 0 10px;          /* small horizontal padding */
-      font-size: 0.9em;         /* smaller text */
+      align-items: center;  /* center text vertically */
+      padding: 0 10px;
+      font-size: 0.9em;
       font-weight: bold;
     }
 
-    /* The main container below the header (flex column) */
+    /* Main container for the chat UI */
     #mainContainer {
       display: flex;
       flex-direction: column;
-      height: calc(100% - 30px); /* fill the rest of the page below the header */
+      height: calc(100% - 30px); /* fill space below header */
     }
 
-    /* Chat window takes all remaining space, scrolls if needed */
+    /*
+      Chat window:
+      - Flexible vertical space (flex:1)
+      - Display messages at the bottom (flex-end)
+      - Overflow scroll for tall content
+      - We remove the old "scrollTop = scrollHeight" approach
+    */
     #chat-window {
-      flex: 1;            /* fill available vertical space */
-      padding: 15px;      /* spacing around messages */
-      background: #f9f9f9;
-      overflow-y: auto;   /* scroll if messages overflow */
-      display: flex;      /* to enable alignment of user/agent messages with margin auto */
+      flex: 1;
+      display: flex;
       flex-direction: column;
+      justify-content: flex-end; /* pin content to bottom */
+      background: #f9f9f9;
+      padding: 15px;
+      overflow-y: auto;
     }
 
     /* The input area at the bottom */
@@ -63,26 +66,24 @@
       font-size: 0.9em;
     }
 
-    /* Messages: smaller font size, some margin, bubble style */
+    /* Message bubbles */
     .message {
-      display: block;     /* block-level for margin auto to work properly */
+      display: inline-block; /* or block, but inline-block is okay here */
       margin: 6px 0;
       padding: 8px 12px;
       border-radius: 4px;
       max-width: 75%;
       word-wrap: break-word;
-      font-size: 0.9em;   /* slightly smaller than normal */
+      font-size: 0.9em;      /* slightly smaller than normal */
     }
-    /* Agent message on the left */
     .agent-msg {
       background: #f1f1f1;
-      margin-right: auto; /* push left, i.e. the left side */
+      margin-right: auto;  /* on the left side */
       margin-left: 0;
     }
-    /* User message on the right */
     .user-msg {
       background: #DCF8C6;
-      margin-left: auto;  /* push to the right */
+      margin-left: auto;   /* on the right side */
       margin-right: 0;
     }
 
@@ -107,15 +108,15 @@
     GG - Golden Games Player Support
   </div>
 
-  <!-- Main container for chat -->
+  <!-- Main container (flex column) -->
   <div id="mainContainer">
 
-    <!-- Chat window area (fills the page) -->
+    <!-- Chat window pinned to bottom -->
     <div id="chat-window">
-      <!-- We will insert an agent greeting on page load (static). -->
+      <!-- We'll insert the agent's greeting at load -->
     </div>
 
-    <!-- Form for user input -->
+    <!-- Chat input area -->
     <form id="chat-form">
       <input type="text" id="message-input" placeholder="Type your message..." required />
       <button type="submit" id="send-button">Send</button>
@@ -134,11 +135,12 @@
     const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
     const HELPSHIFT_DOMAIN = "ashbys";
 
-    // For issue creation
+    // For creating the issue
     const PLATFORM_TYPE = "webchat";
     const IDENTIFIER = "erikashby9900";
     const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
 
+    // The user’s email (used to filter out user messages in polling)
     const userEmail = "erik99@ashbys.net";
 
     /**************************************************************
@@ -152,22 +154,38 @@
     /**************************************************************
      * State
      **************************************************************/
-    let issueId = null;        // No issue until first user message
-    let messagesDisplayed = 0;
+    let issueId = null;        // Created on first user message
+    let messagesDisplayed = 0; // how many messages we've processed from polling
     let pollingIntervalId = null;
 
     /**************************************************************
-     * Helper: Append a message bubble
-     * sender: 'agent' or 'user'
+     * Helpers
      **************************************************************/
-    function appendMessage(text, sender) {
+
+    // Escape HTML special chars & convert line feeds to <br>
+    function escapeAndFormatText(text) {
+      // Minimal HTML escaping
+      const escaped = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      // Replace newlines with <br>
+      return escaped.replace(/(\r\n|\n|\r)/g, "<br>");
+    }
+
+    // Appends a message bubble with optional line-break conversion
+    // sender = 'agent' or 'user'
+    function appendMessage(rawText, sender) {
       const msgDiv = document.createElement("div");
       msgDiv.classList.add("message");
       msgDiv.classList.add(sender === "user" ? "user-msg" : "agent-msg");
-      msgDiv.textContent = text;
+
+      // Convert linefeeds to <br>, also escape HTML
+      msgDiv.innerHTML = escapeAndFormatText(rawText);
+
       chatWindow.appendChild(msgDiv);
-      // scroll to bottom
-      chatWindow.scrollTop = chatWindow.scrollHeight;
+      // Notice we do NOT manually force scrollTop = scrollHeight,
+      // because our flex layout keeps content pinned to bottom.
     }
 
     function showError(text) {
@@ -178,7 +196,7 @@
     }
 
     /**************************************************************
-     * Create issue with user's first message
+     * Create an issue with the user's first message
      **************************************************************/
     function createIssueWithMessage(firstUserMessage) {
       const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
@@ -212,11 +230,11 @@
             newIssueId = data.id;
           }
         } catch (e) {
-          console.warn("Issue creation not valid JSON or missing 'id':", e);
+          console.warn("Not valid JSON or missing 'id':", e);
         }
         if (!newIssueId) {
           showError("Could not retrieve issue ID. Chat may not function properly.");
-          throw new Error("No issue ID returned");
+          throw new Error("No issue ID returned.");
         }
         console.log("Issue created with ID:", newIssueId);
         return newIssueId;
@@ -228,10 +246,9 @@
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
-        console.warn("No issue yet. Cannot send message.");
+        console.warn("No issue yet. Can't send message.");
         return Promise.reject("No issue ID.");
       }
-
       const formdata = new FormData();
       formdata.append("identifier", IDENTIFIER);
       formdata.append("message-body", text);
@@ -254,8 +271,8 @@
     }
 
     /**************************************************************
-     * Poll every 1s for agent messages
-     * Skip user-authored messages to avoid double display
+     * Poll for new agent messages
+     * skip user-authored messages to avoid double display
      **************************************************************/
     function startPolling() {
       if (pollingIntervalId) {
@@ -287,12 +304,16 @@
           const msgs = issueData.messages || [];
           for (let i = messagesDisplayed; i < msgs.length; i++) {
             const msg = msgs[i];
-            const isUserMsg = msg.author &&
-                              msg.author.emails &&
-                              msg.author.emails.includes(userEmail);
+            const isUserMsg =
+              msg.author &&
+              msg.author.emails &&
+              msg.author.emails.includes(userEmail);
+
             if (isUserMsg) {
-              continue; // skip user's own messages
+              // skip user messages, we already display them on send
+              continue;
             } else {
+              // agent/bot message
               appendMessage(msg.body, "agent");
             }
           }
@@ -305,8 +326,8 @@
     }
 
     /**************************************************************
-     * On form submit:
-     * - If no issueId yet, create it with user's message
+     * Submit handler
+     * - If no issue yet, create it with the first message
      * - Otherwise, send message to existing issue
      **************************************************************/
     chatForm.addEventListener("submit", (e) => {
@@ -315,15 +336,15 @@
       const text = messageInput.value.trim();
       if (!text) return;
 
-      // Display user's message immediately
+      // Show user's message in the UI
       appendMessage(text, "user");
 
       if (!issueId) {
-        // First message -> create an issue
+        // first message -> create issue
         createIssueWithMessage(text)
           .then(newIssueId => {
             issueId = newIssueId;
-            messagesDisplayed = 1;
+            messagesDisplayed = 1; // we've effectively "used up" one user message
             startPolling();
           })
           .catch(err => {
@@ -331,7 +352,7 @@
             showError("Could not create chat session. Please try again.");
           });
       } else {
-        // Subsequent messages -> send to existing issue
+        // subsequent messages -> send to existing issue
         sendMessageToIssue(text)
           .catch(err => {
             console.error("Failed to send message:", err);
@@ -343,7 +364,7 @@
     });
 
     /**************************************************************
-     * Initial static agent greeting (no issue yet)
+     * Initial local agent greeting (no Helpshift issue yet)
      **************************************************************/
     (function showInitialGreeting() {
       appendMessage(
@@ -354,6 +375,7 @@
   </script>
 </body>
 </html>
+
 
 
 
