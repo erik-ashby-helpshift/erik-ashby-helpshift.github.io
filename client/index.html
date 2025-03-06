@@ -4,42 +4,48 @@
   <meta charset="UTF-8" />
   <title>GG - Golden Games Player Support</title>
   <style>
-    /* Reset and full-height setup */
+    /* 
+      Use system fonts:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif 
+      (this covers Mac, Windows, etc. gracefully)
+    */
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     *, *::before, *::after {
-      box-sizing: inherit;
+      box-sizing: border-box;
     }
 
-    /* Top bar (header) */
+    /* Header bar (30px tall) */
     #headerBar {
-      height: 75px;
+      height: 30px;
       background-color: #444;
       color: #fff;
       display: flex;
-      align-items: center;
-      padding: 0 20px; /* some horizontal padding */
-      font-size: 0.9em; /* slightly smaller text */
+      align-items: center;      /* vertical center in the bar */
+      padding: 0 10px;          /* small horizontal padding */
+      font-size: 0.9em;         /* smaller text */
       font-weight: bold;
     }
 
-    /* Main container filling the rest of the page below header */
+    /* The main container below the header (flex column) */
     #mainContainer {
       display: flex;
       flex-direction: column;
-      height: calc(100% - 75px); /* fill remaining space */
+      height: calc(100% - 30px); /* fill the rest of the page below the header */
     }
 
-    /* The chat window grows and scrolls */
+    /* Chat window takes all remaining space, scrolls if needed */
     #chat-window {
-      flex: 1;              /* take all remaining vertical space */
-      overflow-y: auto;     /* scroll if overflow */
-      padding: 15px;        /* spacing for messages */
+      flex: 1;            /* fill available vertical space */
+      padding: 15px;      /* spacing around messages */
       background: #f9f9f9;
+      overflow-y: auto;   /* scroll if messages overflow */
+      display: flex;      /* to enable alignment of user/agent messages with margin auto */
+      flex-direction: column;
     }
 
     /* The input area at the bottom */
@@ -50,68 +56,66 @@
       border-top: 1px solid #ccc;
     }
 
-    /* Smaller text for messages, input, button */
-    .small-text {
-      font-size: 0.9em;
-    }
-
-    /* Chat bubble styles */
-    .message {
-      display: inline-block;
-      margin: 6px 0;
-      padding: 8px 12px;
-      border-radius: 4px;
-      max-width: 75%;
-      word-wrap: break-word;
-      font-size: 0.9em; /* smaller than 1em */
-    }
-    .user-msg {
-      background: #DCF8C6;  /* light green bubble */
-      margin-left: auto;    /* push to the right */
-      margin-right: 0;
-    }
-    .agent-msg {
-      background: #f1f1f1; /* light gray bubble */
-      margin-right: auto;  /* push to the left */
-      margin-left: 0;
-    }
-
-    #message-input {
-      flex: 1;                /* take remaining width */
-      padding: 8px;
-      font-size: 0.9em;
-    }
-    #send-button {
-      padding: 8px 16px;
-      font-size: 0.9em;
-      cursor: pointer;
-      margin-left: 8px;
-    }
-
     .error {
       color: red;
       font-weight: bold;
       margin: 10px;
       font-size: 0.9em;
     }
+
+    /* Messages: smaller font size, some margin, bubble style */
+    .message {
+      display: block;     /* block-level for margin auto to work properly */
+      margin: 6px 0;
+      padding: 8px 12px;
+      border-radius: 4px;
+      max-width: 75%;
+      word-wrap: break-word;
+      font-size: 0.9em;   /* slightly smaller than normal */
+    }
+    /* Agent message on the left */
+    .agent-msg {
+      background: #f1f1f1;
+      margin-right: auto; /* push left, i.e. the left side */
+      margin-left: 0;
+    }
+    /* User message on the right */
+    .user-msg {
+      background: #DCF8C6;
+      margin-left: auto;  /* push to the right */
+      margin-right: 0;
+    }
+
+    /* Input and button: smaller font */
+    #message-input {
+      flex: 1;
+      padding: 6px;
+      font-size: 0.9em;
+    }
+    #send-button {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      cursor: pointer;
+      margin-left: 8px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Header bar -->
+  <!-- Header bar at top (30px) -->
   <div id="headerBar">
     GG - Golden Games Player Support
   </div>
 
-  <!-- Main container (flex) -->
+  <!-- Main container for chat -->
   <div id="mainContainer">
 
-    <!-- Chat window (flex:1) -->
-    <div id="chat-window" class="small-text">
-      <!-- We will insert the default agent greeting immediately on page load. -->
+    <!-- Chat window area (fills the page) -->
+    <div id="chat-window">
+      <!-- We will insert an agent greeting on page load (static). -->
     </div>
 
-    <!-- Chat input area -->
+    <!-- Form for user input -->
     <form id="chat-form">
       <input type="text" id="message-input" placeholder="Type your message..." required />
       <button type="submit" id="send-button">Send</button>
@@ -126,16 +130,15 @@
     /**************************************************************
      * Configuration
      **************************************************************/
-    // Auth header (already Base64-encoded)
+    // Pre-encoded Basic Auth
     const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
-
     const HELPSHIFT_DOMAIN = "ashbys";
-    // For /chat/issues creation:
+
+    // For issue creation
     const PLATFORM_TYPE = "webchat";
     const IDENTIFIER = "erikashby9900";
     const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
 
-    // The user’s email (used to filter out user messages in poll)
     const userEmail = "erik99@ashbys.net";
 
     /**************************************************************
@@ -147,14 +150,15 @@
     const errorMessageDiv = document.getElementById("error-message");
 
     /**************************************************************
-     * State variables
+     * State
      **************************************************************/
-    let issueId = null;        // set after creating an issue
+    let issueId = null;        // No issue until first user message
     let messagesDisplayed = 0;
     let pollingIntervalId = null;
 
     /**************************************************************
-     * Utility / Helper functions
+     * Helper: Append a message bubble
+     * sender: 'agent' or 'user'
      **************************************************************/
     function appendMessage(text, sender) {
       const msgDiv = document.createElement("div");
@@ -162,21 +166,19 @@
       msgDiv.classList.add(sender === "user" ? "user-msg" : "agent-msg");
       msgDiv.textContent = text;
       chatWindow.appendChild(msgDiv);
-
-      // Auto-scroll to bottom
+      // scroll to bottom
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
     function showError(text) {
       errorMessageDiv.textContent = text;
     }
-
     function clearError() {
       errorMessageDiv.textContent = "";
     }
 
     /**************************************************************
-     * Create an issue with the user's first message
+     * Create issue with user's first message
      **************************************************************/
     function createIssueWithMessage(firstUserMessage) {
       const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
@@ -202,7 +204,7 @@
         return response.text();
       })
       .then(result => {
-        console.log("Issue creation response (raw):", result);
+        console.log("Issue creation (raw):", result);
         let newIssueId = null;
         try {
           const data = JSON.parse(result);
@@ -210,12 +212,11 @@
             newIssueId = data.id;
           }
         } catch (e) {
-          console.warn("Response is not valid JSON or missing 'id':", e);
+          console.warn("Issue creation not valid JSON or missing 'id':", e);
         }
-
         if (!newIssueId) {
           showError("Could not retrieve issue ID. Chat may not function properly.");
-          throw new Error("No issue ID returned.");
+          throw new Error("No issue ID returned");
         }
         console.log("Issue created with ID:", newIssueId);
         return newIssueId;
@@ -223,11 +224,11 @@
     }
 
     /**************************************************************
-     * Send a message to an existing issue
+     * Send message to existing issue
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
-        console.warn("No issue ID yet. Cannot send message.");
+        console.warn("No issue yet. Cannot send message.");
         return Promise.reject("No issue ID.");
       }
 
@@ -253,14 +254,13 @@
     }
 
     /**************************************************************
-     * Poll for messages every 1 second
-     * Filter out user messages so they don't appear twice
+     * Poll every 1s for agent messages
+     * Skip user-authored messages to avoid double display
      **************************************************************/
     function startPolling() {
       if (pollingIntervalId) {
         clearInterval(pollingIntervalId);
       }
-
       pollingIntervalId = setInterval(() => {
         if (!issueId) return;
 
@@ -280,7 +280,7 @@
         .then(data => {
           const issueData = data.issues && data.issues.length > 0 ? data.issues[0] : null;
           if (!issueData) {
-            console.warn("No issue data in response:", data);
+            console.warn("No issue data in poll response:", data);
             return;
           }
 
@@ -291,10 +291,8 @@
                               msg.author.emails &&
                               msg.author.emails.includes(userEmail);
             if (isUserMsg) {
-              // Skip user-authored messages to avoid duplication
-              continue;
+              continue; // skip user's own messages
             } else {
-              // agent (or bot) message
               appendMessage(msg.body, "agent");
             }
           }
@@ -307,8 +305,8 @@
     }
 
     /**************************************************************
-     * Event listener for sending messages
-     * - If no issueId, create an issue using the user's message
+     * On form submit:
+     * - If no issueId yet, create it with user's message
      * - Otherwise, send message to existing issue
      **************************************************************/
     chatForm.addEventListener("submit", (e) => {
@@ -317,23 +315,23 @@
       const text = messageInput.value.trim();
       if (!text) return;
 
-      // Show user's message right away
+      // Display user's message immediately
       appendMessage(text, "user");
 
       if (!issueId) {
-        // first message -> create a new issue
+        // First message -> create an issue
         createIssueWithMessage(text)
           .then(newIssueId => {
             issueId = newIssueId;
-            messagesDisplayed = 1; // we've effectively "used up" one user msg
+            messagesDisplayed = 1;
             startPolling();
           })
           .catch(err => {
-            console.error("Error during initial issue creation:", err);
+            console.error("Error creating issue:", err);
             showError("Could not create chat session. Please try again.");
           });
       } else {
-        // subsequent messages -> send to existing issue
+        // Subsequent messages -> send to existing issue
         sendMessageToIssue(text)
           .catch(err => {
             console.error("Failed to send message:", err);
@@ -345,10 +343,8 @@
     });
 
     /**************************************************************
-     * On page load
-     * 1) Insert the default agent greeting (no issue yet)
+     * Initial static agent greeting (no issue yet)
      **************************************************************/
-    // Just show a static agent message in the chat window to prompt the user
     (function showInitialGreeting() {
       appendMessage(
         "👋 Hi, I am your smart help assistant. Tell me your problem and I can get you help.",
@@ -356,9 +352,9 @@
       );
     })();
   </script>
-
 </body>
 </html>
+
 
 
 
