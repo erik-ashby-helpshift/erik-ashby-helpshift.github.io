@@ -1,0 +1,2 @@
+  // Construct Basic Auth header (API key as username, empty password)
+  const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
