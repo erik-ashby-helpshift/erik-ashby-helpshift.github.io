@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Helpshift Chat Prototype (Skip User Messages in Poll)</title>
+  <title>Helpshift Chat Prototype (Deferred Issue Creation)</title>
   <style>
     body {
       margin: 0;
@@ -79,21 +79,18 @@
   /**************************************************************
    * Configuration
    **************************************************************/
-  // This example uses an already Base64-encoded auth string
-  // "Basic " + your encoded credentials
+  // Uses an already Base64-encoded auth string ("Basic xyz...")
   const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
   
   // Helpshift domain
   const HELPSHIFT_DOMAIN = "ashbys";
 
-  // For the /chat/issues creation:
+  // Fields needed if/when we create an issue
   const PLATFORM_TYPE = "webchat";
   const IDENTIFIER = "erikashby9900";
   const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
-  
-  // Issue creation fields
-  const ISSUE_TITLE = "Test";
-  const ISSUE_MESSAGE_BODY = "this is a test";
+
+  // The user’s email (used to filter out user messages in the poll)
   const userEmail = "erik99@ashbys.net";
 
   /**************************************************************
@@ -107,8 +104,8 @@
   /**************************************************************
    * State variables
    **************************************************************/
-  let issueId = null;
-  let messagesDisplayed = 0;
+  let issueId = null;          // Will be set once we create an issue
+  let messagesDisplayed = 0;   // For tracking how many messages we've shown in the UI
   let pollingIntervalId = null;
   
   /**************************************************************
@@ -138,23 +135,25 @@
   }
   
   /**************************************************************
-   * Initialize chat session (Issue creation) - Using FormData
+   * Create an issue on the first user message
+   * Using the user’s typed text as both "title" and "message-body"
    **************************************************************/
-  function createIssue() {
-    clearError();
-    
+  function createIssueWithMessage(firstUserMessage) {
     const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
     
     // Build the FormData with all required fields
     const formdata = new FormData();
     formdata.append("platform-type", PLATFORM_TYPE);
     formdata.append("identifier", IDENTIFIER);
-    formdata.append("title", ISSUE_TITLE);
-    formdata.append("message-body", ISSUE_MESSAGE_BODY);
+    
+    // For this first message, use it as the "title" and "message-body"
+    formdata.append("title", firstUserMessage);
+    formdata.append("message-body", firstUserMessage);
+    
     formdata.append("platform-id", PLATFORM_ID);
     formdata.append("email", userEmail);
     
-    fetch(url, {
+    return fetch(url, {
       method: "POST",
       headers: {
         "Authorization": authHeaderValue
@@ -170,54 +169,44 @@
     .then(result => {
       console.log("Issue creation response (raw):", result);
       // Attempt to parse JSON if it is JSON
+      let newIssueId = null;
       try {
         const data = JSON.parse(result);
         if (data && data.id) {
-          issueId = data.id;
+          newIssueId = data.id;
         }
       } catch (e) {
         console.warn("Response is not valid JSON or missing 'id':", e);
       }
       
-      if (!issueId) {
+      if (!newIssueId) {
         showError("Could not retrieve issue ID. Chat may not function properly.");
-        return;
+        throw new Error("No issue ID returned.");
       }
-      console.log("Issue created with ID:", issueId);
       
-      // Display the initial message in the chat UI as user
-      appendMessage(ISSUE_MESSAGE_BODY, "user");
-      
-      // Start polling for new messages
-      startPolling();
-    })
-    .catch(err => {
-      console.error("Error creating issue:", err);
-      showError("Failed to start chat. Please refresh or try again.");
+      console.log("Issue created with ID:", newIssueId);
+      return newIssueId;
     });
   }
   
   /**************************************************************
-   * Send a message (User -> Helpshift) 
-   * Using FormData with identifier, message-body, message-type
+   * Send a message to Helpshift for an existing issue
+   * Using FormData with identifier, message-body, message-type=Text
    **************************************************************/
-  function sendMessage(text) {
+  function sendMessageToIssue(text) {
     if (!issueId) {
       console.warn("No issue ID yet. Cannot send message.");
-      return;
+      return Promise.reject("No issue ID.");
     }
     
-    // Append the message immediately to the UI (optimistic)
-    appendMessage(text, "user");
-    
-    // Build the FormData with the required fields
+    // Build the FormData
     const formdata = new FormData();
     formdata.append("identifier", IDENTIFIER);
     formdata.append("message-body", text);
     formdata.append("message-type", "Text");
     
     const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues/${issueId}/messages/user`;
-    fetch(url, {
+    return fetch(url, {
       method: "POST",
       headers: {
         "Authorization": authHeaderValue
@@ -229,16 +218,12 @@
         throw new Error(`Send message failed. Status: ${response.status}`);
       }
       console.log("Message sent:", text);
-    })
-    .catch(err => {
-      console.error("Failed to send message:", err);
-      showError("Failed to send message. Please try again.");
     });
   }
   
   /**************************************************************
    * Poll for messages (GET the issue) every 1 second
-   * *** Filter out user-authored messages to avoid duplicates ***
+   * Filter out user messages to avoid duplicates
    **************************************************************/
   function startPolling() {
     if (pollingIntervalId) {
@@ -274,50 +259,78 @@
         for (let i = messagesDisplayed; i < msgs.length; i++) {
           const msg = msgs[i];
           
-          // Check if message is from the user (by email)
+          // Check if message is from the user
           const isUserMsg = msg.author &&
                             msg.author.emails &&
                             msg.author.emails.includes(userEmail);
           if (isUserMsg) {
-            // Skip user-authored messages to avoid duplication
+            // Skip user-authored messages (avoid double display)
             continue;
           } else {
             // Treat all others as "agent" messages
             appendMessage(msg.body, "agent");
           }
         }
-        // Update total messages displayed
         messagesDisplayed = msgs.length;
       })
       .catch(err => {
         console.error("Polling error:", err);
         // We'll keep polling even if one request fails
       });
-      
-    }, 1000); // 1-second interval
+    }, 1000); // poll every 1 second
   }
   
   /**************************************************************
-   * DOM event listeners
+   * Form submission handler
+   *  - If no issue yet, create one with the first message
+   *  - Otherwise, send message to existing issue
    **************************************************************/
-  // Form submission handler for sending messages
   chatForm.addEventListener("submit", (e) => {
     e.preventDefault();
     clearError();
     const text = messageInput.value.trim();
     if (text === "") return; // no empty message
     
-    sendMessage(text);
+    // Immediately display the user's message in UI (optimistic)
+    appendMessage(text, "user");
+    
+    if (!issueId) {
+      // First message: create a new issue with this message
+      createIssueWithMessage(text)
+      .then(newIssueId => {
+        issueId = newIssueId;
+        messagesDisplayed = 1; // We effectively have 1 user message in the conversation
+        // Start polling for agent messages
+        startPolling();
+      })
+      .catch(err => {
+        console.error("Error during initial issue creation:", err);
+        showError("Could not create chat session. Please try again.");
+      });
+    } else {
+      // Subsequent messages: send to existing issue
+      sendMessageToIssue(text)
+      .catch(err => {
+        console.error("Failed to send message:", err);
+        showError("Failed to send message. Please try again.");
+      });
+    }
+    
+    // Clear the input
     messageInput.value = "";
   });
   
   /**************************************************************
-   * On page load: create a new Helpshift issue
+   * On page load:
+   * We do NOT create any issue automatically.
+   * The user must type a message to create an issue.
    **************************************************************/
-  createIssue();
+  // (No call to createIssue() here. Everything is triggered on first send.)
+
 </script>
 
 </body>
 </html>
+
 
 
