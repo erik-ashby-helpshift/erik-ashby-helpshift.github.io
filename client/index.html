@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Helpshift Chat Prototype</title>
+  <title>Helpshift Chat Prototype (Updated Issue Creation)</title>
   <style>
     body {
       margin: 0;
@@ -33,11 +33,11 @@
     }
     .user-msg {
       background: #DCF8C6; /* a light greenish bubble color */
-      margin-left: auto;   /* push it to the right side */
+      margin-left: auto;   /* push to the right */
     }
     .agent-msg {
-      background: #f1f1f1; /* light gray bubble color */
-      margin-right: auto;  /* push it to the left side */
+      background: #f1f1f1; /* light gray bubble */
+      margin-right: auto;  /* push to the left */
     }
     #chat-form {
       max-width: 500px;
@@ -62,7 +62,7 @@
 </head>
 <body>
 
-<h1>Helpshift Chat Prototype</h1>
+<h1>Helpshift Chat Prototype (Updated Issue Creation)</h1>
 
 <div id="chat-window">
   <!-- Messages will appear here -->
@@ -79,17 +79,27 @@
   /**************************************************************
    * Configuration
    **************************************************************/
-  const HELPSHIFT_DOMAIN = "ashbys";    // e.g. "exampledomain"
-  const HELPSHIFT_API_KEY = "ashbys_api_20170621182353461-dd4f011a033bb77";            // e.g. "abcd1234"
+  // Replace these with your actual Helpshift domain and API key.
+  // Example domain: "ashbys" if your base URL is https://ashbys.helpshift.com
+  // Example API key: "abcd1234..."
+  const HELPSHIFT_DOMAIN = "ashbys";
+  const HELPSHIFT_API_KEY = "<YOUR_API_KEY>";
   
-  // Hard-coded user info (in a real app, collect from user)
-  const userEmail = "user@example.com";
+  // Helpshift requires additional fields for /chat/issues:
+  // platform-type, identifier, platform-id, etc.
+  // Use your real values here:
+  const PLATFORM_TYPE = "webchat";                    // required, per your example
+  const IDENTIFIER = "erikashby9900";                 // a unique user ID
+  const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb"; // your Helpshift platform ID
+  
+  // Hard-coded user info (or prompt user if desired)
+  const userEmail = "erik99@ashbys.net";
   const userName = "John Doe";
-  const initialMessage = "Hello, I need help with ...";
+  // We'll use the same text for both "title" and "message-body" in this prototype
+  const initialMessage = "This is a test (initial chat message)";
   
-  // Construct Basic Auth header
-  // For Helpshift, the 'username' in basic auth is just the API key, and the password is empty.
-  const authHeaderValue = "Basic " + btoa(HELPSHIFT_API_KEY);
+  // Construct Basic Auth header (API key as username, empty password)
+  const authHeaderValue = "Basic " + btoa(HELPSHIFT_API_KEY + ":");
   
   /**************************************************************
    * DOM references
@@ -133,35 +143,57 @@
   }
   
   /**************************************************************
-   * Initialize chat session (Issue creation)
+   * Initialize chat session (Issue creation) - Using FormData
    **************************************************************/
   function createIssue() {
     clearError();
+    
     const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
     
-    const payload = {
-      email: userEmail,
-      "message-body": initialMessage,
-      name: userName
-    };
+    // Build the FormData with all required fields from your Postman working example
+    const formdata = new FormData();
+    formdata.append("platform-type", PLATFORM_TYPE);
+    formdata.append("identifier", IDENTIFIER);
+    formdata.append("title", initialMessage);
+    formdata.append("message-body", initialMessage);
+    formdata.append("platform-id", PLATFORM_ID);
+    formdata.append("email", userEmail);
+    // name is not strictly needed if your platform doesn't require it,
+    // but if you want to pass it as well, Helpshift sometimes calls it "author-name":
+    // formdata.append("author-name", userName);
     
     fetch(url, {
       method: "POST",
       headers: {
-        "Authorization": authHeaderValue,
-        "Content-Type": "application/json"
+        "Authorization": authHeaderValue
+        // Don't manually set Content-Type; fetch will set the correct multipart/form-data
       },
-      body: JSON.stringify(payload)
+      body: formdata,
+      redirect: "follow"
     })
     .then(response => {
       if (!response.ok) {
         throw new Error(`Issue creation failed. Status: ${response.status}`);
       }
-      return response.json();
+      return response.text(); // The response may or may not be valid JSON
     })
-    .then(data => {
-      // Helpshift returns an object with an "id" for the new issue
-      issueId = data.id;
+    .then(result => {
+      console.log("Issue creation response (raw):", result);
+      
+      // Try to parse JSON to extract issue ID
+      try {
+        const data = JSON.parse(result);
+        if (data && data.id) {
+          issueId = data.id;
+        }
+      } catch (e) {
+        console.warn("Response is not valid JSON or has no 'id' field.");
+      }
+      
+      if (!issueId) {
+        showError("Could not retrieve issue ID from server response. Chat will not function properly.");
+        return;
+      }
       console.log("Issue created with ID:", issueId);
       
       // Display the initial message in the chat UI as user message
@@ -178,6 +210,8 @@
   
   /**************************************************************
    * Send a message (User -> Helpshift)
+   * NOTE: This still uses JSON payload. If your endpoint also 
+   * needs FormData with extra fields, you will adapt similarly.
    **************************************************************/
   function sendMessage(text) {
     if (!issueId) {
@@ -191,6 +225,8 @@
     const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues/${issueId}/messages/user`;
     const payload = {
       "message-body": text
+      // If your platform also needs "platform-type", "platform-id", etc. for sending user messages,
+      // you'll have to use FormData again. We'll wait for your confirmation about that.
     };
     
     fetch(url, {
@@ -205,9 +241,8 @@
       if (!response.ok) {
         throw new Error(`Send message failed. Status: ${response.status}`);
       }
-      // Response likely doesn't need to be processed, since we'll
-      // poll the messages anyway
       console.log("Message sent:", text);
+      // The GET poll will eventually return this message in the conversation as well
     })
     .catch(err => {
       console.error("Failed to send message:", err);
@@ -217,6 +252,9 @@
   
   /**************************************************************
    * Poll for messages (GET the issue) every 1 second
+   * NOTE: This still uses JSON-based approach from older doc.
+   * If your platform also needs custom parameters for GET, 
+   * update accordingly once we confirm the correct format.
    **************************************************************/
   function startPolling() {
     // If there's already a polling interval, clear it first
@@ -254,24 +292,22 @@
         // Append any new messages that haven't been displayed
         for (let i = messagesDisplayed; i < msgs.length; i++) {
           const msg = msgs[i];
-          // Check if the author is the user's email or not
-          const author = msg.author;
-          // Helpshift's message object might differ, but typically we can
-          // compare the user's email to see if it's a user or an agent/bot
+          // Determine if this is user or agent message
           let senderType = "agent";
           
-          if (author && author.emails && author.emails.includes(userEmail)) {
+          // If the author's email matches our userEmail, treat it as user
+          if (msg.author && msg.author.emails && msg.author.emails.includes(userEmail)) {
             senderType = "user";
           }
           appendMessage(msg.body, senderType);
         }
         
-        // Update the count of messages displayed
+        // Update how many messages we've displayed
         messagesDisplayed = msgs.length;
       })
       .catch(err => {
         console.error("Polling error:", err);
-        // We'll keep polling despite the error
+        // We'll keep polling even if one request fails
       });
       
     }, 1000); // 1-second interval
@@ -285,7 +321,7 @@
     e.preventDefault();
     clearError();
     const text = messageInput.value.trim();
-    if (text === "") return;
+    if (text === "") return;  // no empty message
     
     sendMessage(text);
     messageInput.value = "";
