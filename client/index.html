@@ -27,28 +27,33 @@
       font-weight: bold;
     }
 
-    /* Main container for the chat UI */
+    /*
+      Main container for the chat UI.
+      We use flex and ensure min-height: 0 so child can scroll.
+    */
     #mainContainer {
       display: flex;
       flex-direction: column;
       height: calc(100% - 30px); /* fill space below header */
+      min-height: 0;            /* critical for nested flex scrolling */
     }
 
     /*
-      Chat window:
-      - Flexible vertical space (flex:1)
-      - Display messages at the bottom (flex-end)
-      - Overflow scroll for tall content
-      - We remove the old "scrollTop = scrollHeight" approach
+      Chat window pinned to bottom:
+      - flex-direction: column
+      - justify-content: flex-end
+      - overflow-y: auto
+      - min-height: 0 again
     */
     #chat-window {
       flex: 1;
+      min-height: 0;             /* allow this to shrink and scroll */
       display: flex;
       flex-direction: column;
       justify-content: flex-end; /* pin content to bottom */
       background: #f9f9f9;
       padding: 15px;
-      overflow-y: auto;
+      overflow-y: auto;          /* show scrollbar if overflow */
     }
 
     /* The input area at the bottom */
@@ -68,13 +73,13 @@
 
     /* Message bubbles */
     .message {
-      display: inline-block; /* or block, but inline-block is okay here */
+      display: inline-block;
       margin: 6px 0;
       padding: 8px 12px;
       border-radius: 4px;
       max-width: 75%;
       word-wrap: break-word;
-      font-size: 0.9em;      /* slightly smaller than normal */
+      font-size: 0.9em;
     }
     .agent-msg {
       background: #f1f1f1;
@@ -111,7 +116,7 @@
   <!-- Main container (flex column) -->
   <div id="mainContainer">
 
-    <!-- Chat window pinned to bottom -->
+    <!-- Chat window pinned to bottom, scrollable -->
     <div id="chat-window">
       <!-- We'll insert the agent's greeting at load -->
     </div>
@@ -164,7 +169,6 @@
 
     // Escape HTML special chars & convert line feeds to <br>
     function escapeAndFormatText(text) {
-      // Minimal HTML escaping
       const escaped = text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -173,7 +177,7 @@
       return escaped.replace(/(\r\n|\n|\r)/g, "<br>");
     }
 
-    // Appends a message bubble with optional line-break conversion
+    // Append a message bubble with line-break conversion
     // sender = 'agent' or 'user'
     function appendMessage(rawText, sender) {
       const msgDiv = document.createElement("div");
@@ -184,8 +188,8 @@
       msgDiv.innerHTML = escapeAndFormatText(rawText);
 
       chatWindow.appendChild(msgDiv);
-      // Notice we do NOT manually force scrollTop = scrollHeight,
-      // because our flex layout keeps content pinned to bottom.
+      // With flex + justify-content: flex-end, new messages appear at bottom.
+      // The scrollbar will show if content exceeds container height.
     }
 
     function showError(text) {
@@ -310,7 +314,7 @@
               msg.author.emails.includes(userEmail);
 
             if (isUserMsg) {
-              // skip user messages, we already display them on send
+              // skip user messages
               continue;
             } else {
               // agent/bot message
@@ -375,6 +379,7 @@
   </script>
 </body>
 </html>
+
 
 
 
