@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat with Common Questions Card</title>
+  <style>
+    /* Basic reset and layout */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    /* Header bar */
+    #headerBar {
+      height: 40px;
+      background-color: #444;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+
+    /* Main container (flex) */
+    #mainContainer {
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 40px);
+    }
+
+    /* Chat window area */
+    #chat-window {
+      flex: 1;
+      overflow-y: auto;
+      background: #f9f9f9;
+      padding: 10px;
+    }
+
+    /* Chat form at bottom */
+    #chat-form {
+      display: flex;
+      padding: 10px;
+      background: #fff;
+      border-top: 1px solid #ccc;
+    }
+    #message-input {
+      flex: 1;
+      font-size: 0.9em;
+      padding: 6px;
+    }
+    #send-button {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+
+    /* Regular chat messages (agent / user) */
+    .message {
+      display: inline-block;
+      margin: 4px 0;
+      padding: 6px 10px;
+      border-radius: 4px;
+      max-width: 70%;
+      word-wrap: break-word;
+      font-size: 0.9em;
+    }
+    .agent-msg {
+      background: #f1f1f1;
+      margin-right: auto;
+      margin-left: 0;
+    }
+    .user-msg {
+      background: #DCF8C6;
+      margin-left: auto;
+      margin-right: 0;
+    }
+
+    /* 
+      The Common Questions "Card" 
+      A bigger, more styled container that can appear in the chat stream
+    */
+    .card-message {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      padding: 16px;
+      margin: 8px 0;
+      width: 100%;  /* let it stretch across */
+      box-sizing: border-box;
+    }
+    .card-title {
+      font-weight: bold;
+      font-size: 1em;
+      margin-bottom: 6px;
+    }
+    .card-subtitle {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .card-questions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .card-questions li {
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-bottom: 5px;
+      background: #f9f9f9;
+      transition: background 0.2s;
+    }
+    .card-questions li:hover {
+      background: #eee;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="headerBar">GG - Golden Games Player Support</div>
+
+  <div id="mainContainer">
+    <div id="chat-window">
+      <!-- Example agent greeting -->
+      <div class="message agent-msg">
+        👋 Hi! I’m your smart help assistant. How can I help you today?
+      </div>
+
+      <!-- Our "Common Questions" card -->
+      <div class="card-message" id="commonQuestionsCard">
+        <div class="card-title">Top Questions</div>
+        <div class="card-subtitle">Pick one to get started quickly:</div>
+        <ul class="card-questions">
+          <li data-question="I need to recover my account">
+            I need to recover my account
+          </li>
+          <li data-question="What is war room?">
+            What is war room?
+          </li>
+          <li data-question="How do I purchase new ships?">
+            How do I purchase new ships?
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Chat input area -->
+    <form id="chat-form">
+      <input 
+        type="text" 
+        id="message-input" 
+        placeholder="Type your message..." 
+        autocomplete="off" 
+        required 
+      />
+      <button type="submit" id="send-button">Send</button>
+    </form>
+  </div>
+
+  <script>
+    // Basic chat logic (this is a simple front-end example)
+
+    let issueId = null;  // we'll set this once the first message is sent
+    const chatWindow = document.getElementById("chat-window");
+    const commonQuestionsCard = document.getElementById("commonQuestionsCard");
+    const chatForm = document.getElementById("chat-form");
+    const messageInput = document.getElementById("message-input");
+
+    // Function to append a chat bubble (agent or user)
+    function appendMessage(text, sender) {
+      const div = document.createElement("div");
+      div.classList.add("message");
+      div.classList.add(sender === "user" ? "user-msg" : "agent-msg");
+      div.textContent = text;
+      chatWindow.appendChild(div);
+      // Scroll to bottom
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // Attach click listeners to the items in the card
+    document.querySelectorAll(".card-questions li").forEach(item => {
+      item.addEventListener("click", () => {
+        const q = item.getAttribute("data-question");
+        messageInput.value = q;
+        // Optionally auto-send when user clicks:
+        // chatForm.requestSubmit(); // triggers form submission
+      });
+    });
+
+    // Form submission
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      // Show user's message in the chat
+      appendMessage(text, "user");
+      messageInput.value = "";
+
+      if (!issueId) {
+        // FIRST message -> create new issue
+        // (Pseudo code: you'd call your createIssueWithMessage(text) logic here)
+        issueId = "12345"; 
+        console.log("Created new Helpshift issue, ID=", issueId);
+        
+        // If you want the card to vanish after first message, do:
+        // commonQuestionsCard.style.display = "none";
+        
+      } else {
+        // Subsequent message -> send to existing issue
+        // (Your logic: sendMessageToIssue(text))
+        console.log("Subsequent message to existing issue, ID=", issueId);
+      }
+    });
+  </script>
+
+</body>
+</html>
