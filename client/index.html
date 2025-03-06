@@ -29,28 +29,28 @@
 
     /*
       Main container for the chat UI.
-      We use flex and ensure min-height: 0 so child can scroll.
+      We use flex and ensure min-height: 0 so child can scroll if needed.
     */
     #mainContainer {
       display: flex;
       flex-direction: column;
       height: calc(100% - 30px); /* fill space below header */
-      min-height: 0;            /* critical for nested flex scrolling */
+      min-height: 0;            /* crucial for scrolling in nested flex items */
     }
 
     /*
-      Chat window pinned to bottom:
+      Chat window:
       - flex-direction: column
-      - justify-content: flex-end
+      - align-items: flex-start (standard top-down stacking)
       - overflow-y: auto
-      - min-height: 0 again
+      - after each message append, we do scrollTop=scrollHeight for 'pinned bottom'
     */
     #chat-window {
       flex: 1;
       min-height: 0;             /* allow this to shrink and scroll */
       display: flex;
       flex-direction: column;
-      justify-content: flex-end; /* pin content to bottom */
+      align-items: flex-start;    /* messages stack top-down */
       background: #f9f9f9;
       padding: 15px;
       overflow-y: auto;          /* show scrollbar if overflow */
@@ -83,12 +83,12 @@
     }
     .agent-msg {
       background: #f1f1f1;
-      margin-right: auto;  /* on the left side */
+      margin-right: auto;  /* left-aligned */
       margin-left: 0;
     }
     .user-msg {
       background: #DCF8C6;
-      margin-left: auto;   /* on the right side */
+      margin-left: auto;   /* right-aligned */
       margin-right: 0;
     }
 
@@ -116,9 +116,9 @@
   <!-- Main container (flex column) -->
   <div id="mainContainer">
 
-    <!-- Chat window pinned to bottom, scrollable -->
+    <!-- Chat window with vertical scrolling -->
     <div id="chat-window">
-      <!-- We'll insert the agent's greeting at load -->
+      <!-- We'll insert the agent's greeting on load -->
     </div>
 
     <!-- Chat input area -->
@@ -188,8 +188,9 @@
       msgDiv.innerHTML = escapeAndFormatText(rawText);
 
       chatWindow.appendChild(msgDiv);
-      // With flex + justify-content: flex-end, new messages appear at bottom.
-      // The scrollbar will show if content exceeds container height.
+
+      // *** After appending, scroll to bottom ***
+      chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
     function showError(text) {
@@ -348,7 +349,7 @@
         createIssueWithMessage(text)
           .then(newIssueId => {
             issueId = newIssueId;
-            messagesDisplayed = 1; // we've effectively "used up" one user message
+            messagesDisplayed = 1; // we've effectively "used up" that user message
             startPolling();
           })
           .catch(err => {
@@ -379,6 +380,7 @@
   </script>
 </body>
 </html>
+
 
 
 
