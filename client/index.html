@@ -2,17 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GG - Golden Games Player Support (Link Detection Demo)</title>
+  <title>GG - Golden Games Player Support (Full-Screen Overlay for Links)</title>
+
+  <!-- Responsive meta to ensure good mobile scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    /* System font stack, basic resets */
+    /* Basic resets */
     html, body {
-      margin: 0; 
-      padding: 0; 
+      margin: 0;
+      padding: 0;
       height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 15px; /* you can adjust this base size */
+      font-size: 15px;
     }
     *, *::before, *::after {
       box-sizing: border-box;
@@ -35,10 +37,10 @@
       display: flex;
       flex-direction: column;
       height: calc(100% - 30px);
-      min-height: 0; /* allow child to scroll if needed */
+      min-height: 0; /* enable scrolling in child if needed */
     }
 
-    /* Chat window as flex column to align agent vs user w/ align-self */
+    /* Chat window as flex column for agent vs. user alignment */
     #chat-window {
       flex: 1;
       min-height: 0;
@@ -50,7 +52,7 @@
       font-size: 0.9em;
     }
 
-    /* Input area at bottom */
+    /* Input at bottom */
     #chat-form {
       display: flex;
       padding: 10px;
@@ -77,7 +79,7 @@
       font-size: 0.9em;
     }
 
-    /* MESSAGE BUBBLES w/ shadows */
+    /* Message bubbles with shadows */
     .message {
       margin: 8px 0;
       padding: 8px 12px;
@@ -96,6 +98,20 @@
       align-self: flex-end;
     }
 
+    /* “Open Link” line under agent messages */
+    .agent-link-line {
+      text-align: center;
+      margin: 4px 0;
+      color: #007bff; /* link color; adjust as needed */
+      cursor: pointer;
+      font-size: 0.85em;
+      text-decoration: underline;
+    }
+
+    /* Quickstart card smaller font, etc. */
+    #quickstartCard {
+      font-size: 0.8em;
+    }
     .card-message {
       background: #fff;
       border-radius: 8px;
@@ -106,56 +122,55 @@
       box-sizing: border-box;
       align-self: stretch;
     }
-
-    /* Quickstart card smaller font */
-    #quickstartCard {
-      font-size: 0.8em;
-    }
     .card-title {
       font-weight: bold;
       font-size: 1em;
       margin-bottom: 8px;
     }
 
-    .card-questions {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+    /* Fullscreen overlay for iframe browsing */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .card-questions li {
-      padding: 8px;
-      cursor: pointer;
+    .overlay .modal {
+      background: #fff;
+      width: 80%;
+      height: 80%;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .overlay .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      padding: 6px 10px;
+      background: #444;
+      color: #fff;
+      border: none;
       border-radius: 4px;
-      margin-bottom: 5px;
-      background: #f9f9f9;
-      transition: background 0.2s;
-    }
-    .card-questions li:hover {
-      background: #eee;
-    }
-
-    /* Centered link line for agent messages */
-    .agent-link-line {
-      text-align: center;
-      margin: 4px 0;
-      color: #007bff; /* link color, adjust as you like */
       cursor: pointer;
-      font-size: 0.85em;
-      text-decoration: underline;
+      font-size: 0.9em;
+    }
+    .overlay iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      z-index: 1;
     }
 
-    /* The “iframe card” w/ 600px height and its own scroll bar. 
-       We'll create them dynamically. 
-    */
-    .iframe-card {
-      height: 600px;
-      /*overflow-y: auto;*/
-    }
-
-    /* 
-      Example welcome card image 
-      (You can remove or keep as you want) 
-    */
+    /* Example “Welcome” image in a card */
     .welcome-image {
       width: 100%;
       max-width: 300px; 
@@ -169,7 +184,7 @@
       margin-top: 10px;
     }
 
-    /* Media query: bigger text on small screens (optional) */
+    /* Media query for bigger text on small screens */
     @media (max-width: 600px) {
       html, body {
         font-size: 18px;
@@ -190,19 +205,17 @@
   </div>
 
   <div id="mainContainer">
-
     <div id="chat-window">
-
       <!-- Example welcome card -->
-      <div class="card-message" id="welcomeCard">
+      <div class="card-message">
         <img src="gold-digger.png" alt="Gold Digger" class="welcome-image" />
         <div class="welcome-text">Welcome to Golden Games Player Support</div>
       </div>
 
       <!-- Example agent bubble -->
       <div class="message agent-msg">
-        👋 Hi! I’m your player support AI Agent. 
-        I am here to help, and have tools and knowledge to help.
+        👋 Hi! I’m your player support AI Agent.
+        I am here to help, and have tools and knowledge to help. 
         So, how can I help you today?
       </div>
 
@@ -221,7 +234,6 @@
           </li>
         </ul>
       </div>
-
     </div>
 
     <!-- Input form -->
@@ -237,12 +249,12 @@
     </form>
   </div>
 
-  <!-- Error message area -->
+  <!-- Error area -->
   <div id="error-message"></div>
 
   <script>
     /**************************************************************
-     * Configuration
+     * Config for Helpshift
      **************************************************************/
     const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
     const HELPSHIFT_DOMAIN = "ashbys";
@@ -252,8 +264,8 @@
     const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
     const userEmail = "erik99@ashbys.net";
 
-    let issueId = null;       
-    let messagesDisplayed = 0;  
+    let issueId = null;
+    let messagesDisplayed = 0;
     let pollingIntervalId = null;
 
     const chatWindow = document.getElementById("chat-window");
@@ -263,7 +275,7 @@
     const errorMessageDiv = document.getElementById("error-message");
 
     /**************************************************************
-     * Utility: Escape & convert line breaks
+     * Utility: Escape + convert newlines
      **************************************************************/
     function escapeAndFormatText(text) {
       const escaped = text
@@ -274,10 +286,7 @@
     }
 
     /**************************************************************
-     * Detect links in plain text
-     * We'll look for http:// or https:// plus some non-space characters.
-     * This returns an array of matches. 
-     * e.g. ["https://example.com","http://foo.bar"]
+     * Link detection in agent text
      **************************************************************/
     function findLinksInText(text) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -286,57 +295,69 @@
 
     /**************************************************************
      * Append a message bubble
-     * If it's an agent message, we also check for links
+     * If agent, look for links, show "Open Link" lines
      **************************************************************/
     function appendMessage(rawText, sender) {
-      // 1) Create the bubble
-      const div = document.createElement("div");
-      div.classList.add("message", sender === "user" ? "user-msg" : "agent-msg");
-      div.innerHTML = escapeAndFormatText(rawText);
-      chatWindow.appendChild(div);
+      const bubble = document.createElement("div");
+      bubble.classList.add("message", sender === "agent" ? "agent-msg" : "user-msg");
+      bubble.innerHTML = escapeAndFormatText(rawText);
+      chatWindow.appendChild(bubble);
 
-      // 2) If agent message, detect links
       if (sender === "agent") {
-        const foundLinks = findLinksInText(rawText);
-        foundLinks.forEach(link => {
-          // Create a line below the bubble 
+        const links = findLinksInText(rawText);
+        links.forEach(link => {
           const linkLine = document.createElement("div");
           linkLine.className = "agent-link-line";
           linkLine.textContent = `Open Link: ${link}`;
-          // On click => create a new card with an iframe
           linkLine.addEventListener("click", () => {
-            createIframeCard(link);
+            openLinkOverlay(link);
           });
           chatWindow.appendChild(linkLine);
         });
       }
 
-      // 3) Auto-scroll
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
     /**************************************************************
-     * Create an iframe card 
-     * - 600px tall, scrollable overflow, loads the given link
+     * Show / clear errors
      **************************************************************/
-    function createIframeCard(linkUrl) {
-      // A card container
-      const card = document.createElement("div");
-      card.classList.add("card-message", "iframe-card"); 
-      // height: 600px; overflow-y: auto in CSS
-      // We'll embed an iframe inside it
-      card.innerHTML = `
-        <iframe src="${linkUrl}" style="width: 100%; height: 600px; border: 0;"></iframe>
-      `;
-      chatWindow.appendChild(card);
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-
     function showError(msg) {
       errorMessageDiv.textContent = msg;
     }
     function clearError() {
       errorMessageDiv.textContent = "";
+    }
+
+    /**************************************************************
+     * Full-screen overlay approach for link
+     **************************************************************/
+    function openLinkOverlay(linkUrl) {
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+
+      // Modal box
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+
+      // Close button
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-btn';
+      closeBtn.textContent = 'Close';
+      closeBtn.onclick = () => {
+        document.body.removeChild(overlay);
+      };
+
+      // Iframe
+      const iframe = document.createElement('iframe');
+      iframe.src = linkUrl;
+
+      // Compose
+      modal.appendChild(iframe);
+      modal.appendChild(closeBtn);
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
     }
 
     /**************************************************************
@@ -354,9 +375,7 @@
 
       return fetch(url, {
         method: "POST",
-        headers: {
-          "Authorization": authHeaderValue
-        },
+        headers: { "Authorization": authHeaderValue },
         body: formdata
       })
       .then(response => {
@@ -384,7 +403,7 @@
     }
 
     /**************************************************************
-     * Send message to existing issue
+     * Send user message to existing issue
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
@@ -436,7 +455,6 @@
             const msg = msgs[i];
             const isUser = msg.author && msg.author.emails && msg.author.emails.includes(userEmail);
             if (!isUser) {
-              // Agent message => append, check for links
               appendMessage(msg.body, "agent");
             }
           }
@@ -454,11 +472,11 @@
       const cleaned = text.trim();
       if (!cleaned) return;
 
-      // Show the user message bubble on the right
+      // Show user bubble
       appendMessage(cleaned, "user");
 
       if (!issueId) {
-        // first message -> create new issue
+        // first message => create issue
         createIssueWithMessage(cleaned)
           .then(newId => {
             issueId = newId;
@@ -470,7 +488,7 @@
             showError("Could not create chat session. Please try again.");
           });
       } else {
-        // subsequent message -> send to existing
+        // subsequent message => send
         sendMessageToIssue(cleaned)
           .catch(err => {
             console.error("Failed to send message:", err);
@@ -480,7 +498,7 @@
     }
 
     /**************************************************************
-     * Form submission: user typed & clicked Send
+     * Form submission
      **************************************************************/
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -502,6 +520,7 @@
   </script>
 </body>
 </html>
+
 
 
 
