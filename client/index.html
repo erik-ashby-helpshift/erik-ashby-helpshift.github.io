@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GG - Golden Games Player Support (Agent Names in Title)</title>
+  <title>GG - Golden Games Player Support (Agent Names on One Line, Smaller Font)</title>
 
   <!-- Ensures proper scaling on mobile -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,49 +13,48 @@
       padding: 0;
       height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 15px;
+      font-size: 15px;  /* Base font */
     }
     *, *::before, *::after {
       box-sizing: border-box;
     }
 
-    /* Title bar: now contains a main title plus a sub-line for agent names */
+    /* Title bar container is 50px tall */
     #headerBar {
       background-color: #444;
       color: #fff;
       padding: 0 10px;
-    }
-    /* A small container so we can stack lines easily */
-    #headerBarInner {
+      height: 50px;
       display: flex;
-      flex-direction: column;  /* stack the main title and the agent sub-line */
-      align-items: flex-start; /* left-align */
-      justify-content: center;
-      height: 50px;            /* slightly taller than before to fit 2 lines comfortably */
+      align-items: center;
     }
-    /* The main title (top line) */
+    /* The main heading inside the bar */
     #mainTitle {
-      font-size: 0.9em;
+      font-size: 0.9em;  /* slightly smaller than base, but bold */
       font-weight: bold;
-      line-height: 1.2;
+      margin-right: 15px; /* space between main title and sub-line */
     }
-    /* The sub-line for agent names in smaller text */
+    /* The sub-line for agent names on same line as mainTitle, smaller font (0.7em) */
     #agentNames {
-      font-size: 0.8em;
-      line-height: 1.2;
-      color: #ccc; /* a bit lighter */
-      margin-top: 2px;
+      font-size: 0.7em;
+      color: #ccc; 
     }
 
-    /* The main container for chat (below title bar) */
+    /* We place #mainTitle and #agentNames on the same row, so the bar is a single-line layout. */
+    #headerBarInner {
+      display: flex;
+      align-items: baseline; /* align them along the text baseline */
+    }
+
+    /* Main container under the title bar */
     #mainContainer {
       display: flex;
       flex-direction: column;
-      height: calc(100% - 50px); /* subtract the title bar height */
+      height: calc(100% - 50px); /* substract 50px for the headerBar */
       min-height: 0;
     }
 
-    /* Chat window as a flex column for messages */
+    /* Chat window (flex column for messages) */
     #chat-window {
       flex: 1;
       min-height: 0;
@@ -67,7 +66,7 @@
       font-size: 0.9em;
     }
 
-    /* The input form at bottom */
+    /* Input form at bottom */
     #chat-form {
       display: flex;
       padding: 10px;
@@ -86,7 +85,7 @@
       cursor: pointer;
     }
 
-    /* Error message area */
+    /* Error display */
     #error-message {
       color: red;
       font-weight: bold;
@@ -113,7 +112,7 @@
       align-self: flex-end;
     }
 
-    /* Link removal + pill button logic container */
+    /* Link detection -> pill buttons container */
     .agent-link-buttons {
       display: flex;
       gap: 8px;
@@ -136,7 +135,7 @@
       background: #777;
     }
 
-    /* Card style (quickstart, etc.) */
+    /* Quickstart card styling */
     #quickstartCard {
       font-size: 0.8em;
     }
@@ -244,7 +243,7 @@
 </head>
 <body>
 
-  <!-- Title bar with two lines: mainTitle + sub-line (agentNames) -->
+  <!-- Title bar w/ mainTitle + agentNames on same line -->
   <div id="headerBar">
     <div id="headerBarInner">
       <div id="mainTitle">GG - Golden Games Player Support</div>
@@ -312,11 +311,6 @@
     const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
     const userEmail = "erik99@ashbys.net";
 
-    // The default text to display for the AI agent
-    // We'll always show "🟢 Scopely AI Agent"
-    // If we detect ai_state='help', we add "🟢 Erik Ashby" too
-    const agentNamesEl = document.getElementById("agentNames");
-
     let issueId = null;
     let messagesDisplayed = 0;
     let pollingIntervalId = null;
@@ -327,11 +321,12 @@
     const messageInput = document.getElementById("message-input");
     const errorMessageDiv = document.getElementById("error-message");
 
-    // Start off displaying only the AI Agent
-    agentNamesEl.innerHTML = "🟢 Scopely AI Agent";
+    // The sub-line where we display agent names
+    const agentNamesEl = document.getElementById("agentNames");
+    agentNamesEl.textContent = "🟢 Scopely AI Agent"; // default
 
     /**************************************************************
-     * Utility: escape + convert newlines
+     * Utility: Escape & convert newlines
      **************************************************************/
     function escapeAndFormatText(text) {
       const escaped = text
@@ -369,7 +364,6 @@
       bubble.innerHTML = escapeAndFormatText(displayText);
       chatWindow.appendChild(bubble);
 
-      // if agent had links
       if (sender === "agent" && links.length > 0) {
         const btnContainer = document.createElement("div");
         btnContainer.className = "agent-link-buttons";
@@ -388,7 +382,6 @@
         chatWindow.appendChild(btnContainer);
       }
 
-      // scroll to bottom
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
@@ -497,30 +490,26 @@
     }
 
     /**************************************************************
-     * updateAgentNames - checks custom_fields.ai_state
-     *  - if "help", show both AI + Erik
-     *  - else show just AI
+     * Update agent names logic
+     *  - If ai_state='help', show AI + human
+     *  - Otherwise show just AI
+     *  All on same line
      **************************************************************/
     function updateAgentNames(issueData) {
       if (!issueData || !issueData.custom_fields || !issueData.custom_fields.ai_state) {
-        // no ai_state => just AI
-        agentNamesEl.innerHTML = "🟢 Scopely AI Agent";
+        agentNamesEl.textContent = "🟢 Scopely AI Agent";
         return;
       }
-
       const aiStateVal = issueData.custom_fields.ai_state.value;
       if (aiStateVal === "help") {
-        // AI + human
-        agentNamesEl.innerHTML = "🟢 Scopely AI Agent<br>🟢 Erik Ashby";
+        agentNamesEl.textContent = "🟢 Scopely AI Agent, 🟢 Erik Ashby";
       } else {
-        // Just AI
-        agentNamesEl.innerHTML = "🟢 Scopely AI Agent";
+        agentNamesEl.textContent = "🟢 Scopely AI Agent";
       }
     }
 
     /**************************************************************
-     * Poll for agent messages
-     * also check custom_fields.ai_state => update agentNames
+     * Poll for agent messages & update agent names
      **************************************************************/
     function startPolling() {
       if (pollingIntervalId) {
@@ -534,25 +523,22 @@
           headers: { "Authorization": authHeaderValue }
         })
         .then(res => {
-          if (!res.ok) {
-            throw new Error(`Polling failed. Status: ${res.status}`);
-          }
+          if (!res.ok) throw new Error(`Polling failed. Status: ${res.status}`);
           return res.json();
         })
         .then(data => {
           const issueData = (data.issues && data.issues.length > 0) ? data.issues[0] : null;
           if (!issueData) return;
 
-          // update agent names
+          // update agent names from ai_state
           updateAgentNames(issueData);
 
-          // messages
+          // handle messages
           const msgs = issueData.messages || [];
           for (let i = messagesDisplayed; i < msgs.length; i++) {
             const msg = msgs[i];
             const isUser = msg.author && msg.author.emails && msg.author.emails.includes(userEmail);
             if (!isUser) {
-              // agent
               appendMessage(msg.body, "agent");
             }
           }
@@ -618,6 +604,7 @@
   </script>
 </body>
 </html>
+
 
 
 
