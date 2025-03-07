@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GG - Golden Games Player Support</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 15px;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    /* Title bar with two lines */
+    #headerBar {
+      width: 100%;
+      height: 60px;
+      background-color: #333;
+      color: #fff;
+      padding: 0 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #mainTitle {
+      font-size: 0.9em;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+
+    #agentNames {
+      font-size: 0.7em;
+      color: #ccc;
+      line-height: 1.2;
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    /* Main container */
+    #mainContainer {
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 60px);
+      min-height: 0;
+    }
+
+    /* Chat window */
+    #chat-window {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: #f5f5f5;
+      padding: 10px;
+      font-size: 0.9em;
+    }
+
+    /* Chat form at bottom */
+    #chat-form {
+      display: flex;
+      padding: 10px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+    }
+    #message-input {
+      flex: 1;
+      font-size: 0.9em;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      outline: none;
+    }
+    #message-input:focus {
+      border-color: #2196F3;
+    }
+    #send-button {
+      padding: 8px 16px;
+      font-size: 0.9em;
+      margin-left: 8px;
+      cursor: pointer;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    #send-button:hover {
+      background: #e0e0e0;
+    }
+
+    /* Error message */
+    #error-message {
+      color: red;
+      font-weight: bold;
+      margin: 10px;
+      font-size: 0.9em;
+    }
+
+    /* Messages styling */
+    .message {
+      margin: 8px 0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      max-width: 85%;
+      word-wrap: break-word;
+      font-size: 0.9em;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .agent-msg {
+      background: #fff;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+    .user-msg {
+      background: #DCF8C6;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    
+    /* Welcome card with image and overlay */
+    .welcome-card {
+      position: relative;
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .welcome-image {
+      width: 100%;
+      display: block;
+    }
+    .welcome-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      padding: 16px 8px 8px;
+    }
+    .welcome-text {
+      color: white;
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* Quickstart card */
+    .card-message {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      padding: 16px;
+      margin: 8px 0;
+      width: 100%;
+      box-sizing: border-box;
+      align-self: stretch;
+    }
+    .card-title {
+      font-weight: bold;
+      font-size: 1em;
+      margin-bottom: 8px;
+    }
+    .card-questions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .card-questions li {
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      background: #f5f5f5;
+      transition: background 0.2s;
+    }
+    .card-questions li:hover {
+      background: #e8e8e8;
+    }
+
+    /* Agent link buttons */
+    .agent-link-buttons {
+      display: flex;
+      gap: 8px;
+      margin: 4px 0 8px 0;
+      align-items: center;
+    }
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      background: #6c757d;
+      border-radius: 9999px;
+      color: #fff;
+      font-size: 0.7em;
+      cursor: pointer;
+      user-select: none;
+    }
+    .pill-btn:hover {
+      background: #5a6268;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      align-self: flex-start;
+      background: #f0f0f0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: #888;
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typing-dot 1.4s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typing-dot {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-4px); }
+    }
+
+    /* Media query for bigger text on small screens */
+    @media (max-width: 600px) {
+      html, body {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Title bar with two lines -->
+  <div id="headerBar">
+    <div id="mainTitle">GG - Golden Games Player Support</div>
+    <div id="agentNames">🟢 Scopely AI Agent</div>
+  </div>
+
+  <div id="mainContainer">
+    <div id="chat-window">
+      <!-- Messages will be added here by JavaScript -->
+    </div>
+
+    <!-- Chat input form -->
+    <form id="chat-form">
+      <input 
+        type="text" 
+        id="message-input" 
+        placeholder="Type your message..." 
+        autocomplete="off" 
+        required 
+      />
+      <button type="submit" id="send-button">Send</button>
+    </form>
+  </div>
+
+  <!-- Error message area -->
+  <div id="error-message"></div>
+
+  <script>
+    /**************************************************************
+     * Helpshift Config
+     **************************************************************/
+    const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
+    const HELPSHIFT_DOMAIN = "ashbys";
+
+    const PLATFORM_TYPE = "webchat";
+    const IDENTIFIER = "erikashby9900";
+    const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
+    const userEmail = "erik99@ashbys.net";
+    
+    // Add safety check for API calls
+    const MAX_API_RETRIES = 3;
+    let apiRetryCount = 0;
+
+    let issueId = null;
+    let messagesDisplayed = 0;
+    let pollingIntervalId = null;
+    let typingIndicatorShown = false;
+    let typingTimeoutId = null;
+
+    const chatWindow = document.getElementById("chat-window");
+    const chatForm = document.getElementById("chat-form");
+    const messageInput = document.getElementById("message-input");
+    const errorMessageDiv = document.getElementById("error-message");
+    const agentNamesEl = document.getElementById("agentNames");
+
+    /**************************************************************
+     * Utility functions
+     **************************************************************/
+    function escapeAndFormatText(text) {
+      const escaped = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      return escaped.replace(/(\r\n|\n|\r)/g, "<br>");
+    }
+
+    function findLinks(text) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return text.match(urlRegex) || [];
+    }
+
+    function removeLinksFromText(text) {
+      return text.replace(/https?:\/\/[^\s]+/g, "");
+    }
+
+    /**************************************************************
+     * Add welcome card and initial messages
+     **************************************************************/
+    function addWelcomeElements() {
+      // Add welcome card with image and overlay text
+      const welcomeCard = document.createElement("div");
+      welcomeCard.className = "welcome-card";
+      welcomeCard.innerHTML = `
+        <img src="https://erik-ashby-helpshift.github.io/client/gold-digger.png" alt="Gold Digger" class="welcome-image" onerror="this.src='/api/placeholder/600/300'; this.onerror=null;">
+        <div class="welcome-overlay">
+          <div class="welcome-text">Welcome to Golden Games Player Support</div>
+        </div>
+      `;
+      chatWindow.appendChild(welcomeCard);
+
+      // Add initial agent message
+      const initialMessage = document.createElement("div");
+      initialMessage.className = "message agent-msg";
+      initialMessage.innerHTML = escapeAndFormatText("👋 Hi! I'm your personal player support AI Agent. I have the tools and knowledge to help, plus I work directly with live human counterparts to help you get back to playing the game. So, how can I help you today?");
+      chatWindow.appendChild(initialMessage);
+
+      // Add quickstart card
+      const quickstartCard = document.createElement("div");
+      quickstartCard.id = "quickstartCard";
+      quickstartCard.className = "card-message";
+      quickstartCard.innerHTML = `
+        <div class="card-title">Quickstart</div>
+        <ul class="card-questions">
+          <li data-question="I need to recover my account">
+            I need to recover my account
+          </li>
+          <li data-question="What is war room?">
+            What is war room?
+          </li>
+          <li data-question="How do I purchase new ships?">
+            How do I purchase new ships?
+          </li>
+        </ul>
+      `;
+      chatWindow.appendChild(quickstartCard);
+
+      // Add event listeners to quickstart options
+      quickstartCard.querySelectorAll(".card-questions li").forEach(li => {
+        li.addEventListener("click", () => {
+          const question = li.getAttribute("data-question");
+          quickstartCard.remove(); // Remove the quickstart card
+          messageInput.focus(); // Focus on input after selection
+          postMessageFlow(question);
+        });
+      });
+
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+    
+    // Add error handling for the welcome image
+    window.addEventListener('error', function(e) {
+      // Check if it's the welcome image that failed
+      if (e.target.tagName === 'IMG' && e.target.className === 'welcome-image') {
+        e.target.src = '/api/placeholder/600/300';
+      }
+    }, true); // Capture phase to catch the error before it bubbles
+
+    // Add welcome elements immediately when page loads
+    addWelcomeElements();
+
+    /**************************************************************
+     * Show/hide typing indicator
+     **************************************************************/
+    function showTypingIndicator() {
+      if (typingIndicatorShown) return;
+      
+      const typingIndicator = document.createElement("div");
+      typingIndicator.id = "typing-indicator";
+      typingIndicator.className = "typing-indicator";
+      typingIndicator.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      `;
+      chatWindow.appendChild(typingIndicator);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+      typingIndicatorShown = true;
+    }
+
+    function hideTypingIndicator() {
+      const indicator = document.getElementById("typing-indicator");
+      if (indicator) {
+        indicator.remove();
+        typingIndicatorShown = false;
+      }
+    }
+
+    /**************************************************************
+     * Append messages to chat
+     **************************************************************/
+    function appendMessage(rawText, sender) {
+      // Hide typing indicator if showing
+      hideTypingIndicator();
+      
+      let displayText = rawText;
+      let links = [];
+
+      if (sender === "agent") {
+        links = findLinks(rawText);
+        displayText = removeLinksFromText(rawText).trim();
+      }
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("message", sender === "agent" ? "agent-msg" : "user-msg");
+      bubble.innerHTML = escapeAndFormatText(displayText);
+      chatWindow.appendChild(bubble);
+
+      if (sender === "agent" && links.length > 0) {
+        const btnContainer = document.createElement("div");
+        btnContainer.className = "agent-link-buttons";
+
+        links.forEach((url, i) => {
+          const index = i + 1;
+          const pill = document.createElement("div");
+          pill.className = "pill-btn";
+          pill.textContent = `(More ${index})`;
+          pill.addEventListener("click", () => {
+            openLinkOverlay(url);
+          });
+          btnContainer.appendChild(pill);
+        });
+
+        chatWindow.appendChild(btnContainer);
+      }
+
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    /**************************************************************
+     * Show/clear error
+     **************************************************************/
+    function showError(msg) {
+      errorMessageDiv.textContent = msg;
+      errorMessageDiv.style.display = "block";
+    }
+
+    function clearError() {
+      errorMessageDiv.textContent = "";
+      errorMessageDiv.style.display = "none";
+    }
+
+    /**************************************************************
+     * Link overlay
+     **************************************************************/
+    function openLinkOverlay(linkUrl) {
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:flex; align-items:center; justify-content:center;";
+
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.style.cssText = "background:#fff; width:90%; height:80%; position:relative; border-radius:8px; overflow:hidden;";
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-btn';
+      closeBtn.textContent = 'Close';
+      closeBtn.style.cssText = "position:absolute; top:10px; right:10px; z-index:2; padding:6px 10px; background:#444; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:0.9em;";
+      closeBtn.onclick = () => {
+        document.body.removeChild(overlay);
+      };
+
+      const iframe = document.createElement('iframe');
+      iframe.src = linkUrl;
+      iframe.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; border:0; z-index:1;";
+
+      modal.appendChild(iframe);
+      modal.appendChild(closeBtn);
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+    }
+
+    /**************************************************************
+     * Create Helpshift issue
+     **************************************************************/
+    function createIssueWithMessage(firstMsg) {
+      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
+      const formdata = new FormData();
+      formdata.append("platform-type", PLATFORM_TYPE);
+      formdata.append("identifier", IDENTIFIER);
+      formdata.append("title", firstMsg);
+      formdata.append("message-body", firstMsg);
+      formdata.append("platform-id", PLATFORM_ID);
+      formdata.append("email", userEmail);
+
+      return fetch(url, {
+        method: "POST",
+        headers: { "Authorization": authHeaderValue },
+        body: formdata
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Issue creation failed. Status: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then(result => {
+        let newId = null;
+        try {
+          const data = JSON.parse(result);
+          if (data && data.id) {
+            newId = data.id;
+          }
+        } catch(e) {
+          console.warn("Could not parse JSON or missing 'id':", e);
+        }
+        if (!newId) {
+          showError("Could not retrieve issue ID. Chat may not function properly.");
+          throw new Error("No issue ID returned");
+        }
+        return newId;
+      });
+    }
+
+    /**************************************************************
+     * Send user message to existing issue
+     **************************************************************/
+    function sendMessageToIssue(text) {
+      if (!issueId) {
+        console.warn("No issue yet, can't send message");
+        return Promise.reject("No issue ID");
+      }
+      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues/${issueId}/messages/user`;
+      const formdata = new FormData();
+      formdata.append("identifier", IDENTIFIER);
+      formdata.append("message-body", text);
+      formdata.append("message-type", "Text");
+
+      return fetch(url, {
+        method: "POST",
+        headers: { "Authorization": authHeaderValue },
+        body: formdata
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Send message failed. Status: ${response.status}`);
+        }
+      });
+    }
+
+    /**************************************************************
+     * Update agent names based on AI state
+     **************************************************************/
+    function updateAgentNames(issueData) {
+      if (!issueData || !issueData.custom_fields || !issueData.custom_fields.ai_state) {
+        agentNamesEl.textContent = "🟢 Scopely AI Agent";
+        return;
+      }
+      const aiStateVal = issueData.custom_fields.ai_state.value;
+      if (aiStateVal === "help") {
+        agentNamesEl.textContent = "🟢 Scopely AI Agent, 🟢 Erik Ashby";
+      } else {
+        agentNamesEl.textContent = "🟢 Scopely AI Agent";
+      }
+    }
+
+    /**************************************************************
+     * Poll for agent messages
+     **************************************************************/
+    function startPolling() {
+      if (pollingIntervalId) {
+        clearInterval(pollingIntervalId);
+      }
+      
+      // Show typing indicator initially when starting to poll
+      // This gives visual feedback that we're waiting for a response
+      showTypingIndicator();
+      
+      pollingIntervalId = setInterval(() => {
+        if (!issueId) return;
+        const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues/${issueId}`;
+        fetch(url, {
+          method: "GET",
+          headers: { "Authorization": authHeaderValue }
+        })
+        .then(res => {
+          if (!res.ok) throw new Error(`Polling failed. Status: ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          const issueData = (data.issues && data.issues.length > 0) ? data.issues[0] : null;
+          if (!issueData) return;
+
+          // Update agent names from custom_fields
+          updateAgentNames(issueData);
+
+          // Check for new messages
+          const msgs = issueData.messages || [];
+          let foundNewMessages = false;
+          
+          for (let i = messagesDisplayed; i < msgs.length; i++) {
+            const msg = msgs[i];
+            const isUser = msg.author && msg.author.emails && msg.author.emails.includes(userEmail);
+            if (!isUser) {
+              appendMessage(msg.body, "agent");
+              foundNewMessages = true;
+            }
+          }
+          
+          // Update message count
+          if (msgs.length > messagesDisplayed) {
+            messagesDisplayed = msgs.length;
+          }
+          
+          // Hide typing indicator if we got at least one new message
+          if (foundNewMessages) {
+            hideTypingIndicator();
+          }
+        })
+        .catch(err => {
+          console.error("Polling error:", err);
+          // Don't hide typing indicator on error - keep trying
+        });
+      }, 1000);
+    }
+
+    /**************************************************************
+     * Simulate predefined responses (fallback for demo or API errors)
+     **************************************************************/
+    function simulateAgentResponse(userMessage) {
+      // Show typing indicator
+      showTypingIndicator();
+      
+      // Clear any existing typing timeout
+      if (typingTimeoutId) clearTimeout(typingTimeoutId);
+      
+      // Determine response based on message content
+      let response;
+      let delay = 1000 + Math.random() * 1000;
+      
+      if (userMessage.toLowerCase().includes("recover my account")) {
+        response = "OK, you will need to provide me with some information to recover your account.";
+      } 
+      else if (userMessage.toLowerCase().includes("what information") || 
+               userMessage.toLowerCase().includes("let's proceed")) {
+        response = "To recover your account, I'll need the following information:\n\n1. Your in-game username or player ID\n2. The email address associated with your account\n3. Approximate date when you last accessed your account\n4. Any purchases you may have made in the game\n\nCould you provide these details?";
+        
+        // Also update agent names to simulate human agent joining
+        agentNamesEl.textContent = "🟢 Scopely AI Agent, 🟢 Erik Ashby";
+        delay = 2000; // Longer delay for longer message
+      }
+      else if (userMessage.toLowerCase().includes("war room")) {
+        response = "The War Room is a strategic planning area in our game where you can coordinate with your alliance members, plan attacks, and view battle reports. Would you like more specific information about any War Room features?";
+      }
+      else if (userMessage.toLowerCase().includes("purchase") && userMessage.toLowerCase().includes("ship")) {
+        response = "To purchase new ships, you'll need to go to the Shipyard in the game. From there, you can browse available ships and use your resources or premium currency to make purchases. Different ships have different requirements and costs. Do you need help with a specific type of ship?";
+      }
+      else {
+        response = "I understand you need help. Could you please provide more details about your issue so I can assist you better?";
+      }
+      
+      // Send the response after a delay to simulate typing
+      typingTimeoutId = setTimeout(() => {
+        appendMessage(response, "agent");
+        hideTypingIndicator();
+      }, delay);
+    }
+
+    /**************************************************************
+     * Message flow handling
+     **************************************************************/
+    function postMessageFlow(text) {
+      clearError();
+      const cleaned = text.trim();
+      if (!cleaned) return;
+
+      // Add user bubble
+      appendMessage(cleaned, "user");
+
+      // Connect to actual Helpshift API
+      if (!issueId) {
+        // First message - create issue
+        showTypingIndicator(); // Show typing while waiting for API
+        
+        createIssueWithMessage(cleaned)
+          .then(newId => {
+            issueId = newId;
+            messagesDisplayed = 1;
+            startPolling();
+          })
+          .catch(err => {
+            console.error("Error creating issue:", err);
+            hideTypingIndicator();
+            showError("Could not create chat session. Please try again.");
+            
+            // Fallback to simulation if API fails
+            simulateAgentResponse(cleaned);
+          });
+      } else {
+        // Subsequent messages - send to existing issue
+        showTypingIndicator(); // Show typing while waiting for API
+        
+        sendMessageToIssue(cleaned)
+          .catch(err => {
+            console.error("Failed to send message:", err);
+            hideTypingIndicator();
+            showError("Failed to send message. Please try again.");
+            
+            // Fallback to simulation if API fails
+            simulateAgentResponse(cleaned);
+          });
+      }
+    }
+
+    /**************************************************************
+     * Form submission
+     **************************************************************/
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = messageInput.value;
+      messageInput.value = "";
+      if (text.trim()) {
+        postMessageFlow(text);
+      }
+    });
+
+  </script>
+</body>
+</html>
