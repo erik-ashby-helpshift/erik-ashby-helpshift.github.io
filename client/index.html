@@ -80,17 +80,16 @@
       max-width: 70%;
       word-wrap: break-word;
       font-size: 0.9em;
-      /* Shadow to mimic a card style */
       box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
     .agent-msg {
       background: #f1f1f1;
       margin-right: auto;
-      margin-left: 0;
+      margin-left: 0;     /* keep on the left */
     }
     .user-msg {
       background: #DCF8C6;
-      margin-left: auto;
+      margin-left: auto;  /* push to the right */
       margin-right: 0;
     }
 
@@ -156,7 +155,6 @@
     <div id="chat-window">
       <!-- 1) The welcome card with image -->
       <div class="card-message" id="welcomeCard">
-        <!-- gold-digger.png image -->
         <img src="gold-digger.png" alt="Gold Digger" class="welcome-image" />
         <div class="welcome-text">Welcome to Golden Games Player Support</div>
       </div>
@@ -376,21 +374,22 @@
     }
 
     /**************************************************************
-     * Submit event: user sends a message
+     * Core: postMessageFlow
+     *   - If no issue, create it with this message
+     *   - If existing issue, send to it
+     *   - Then show user's bubble in UI
      **************************************************************/
-    chatForm.addEventListener("submit", (e) => {
-      e.preventDefault();
+    function postMessageFlow(text) {
       clearError();
-      const text = messageInput.value.trim();
-      if (!text) return;
+      const cleaned = text.trim();
+      if (!cleaned) return;
 
-      // Display user message immediately
-      appendMessage(text, "user");
-      messageInput.value = "";
+      // Immediately show user bubble
+      appendMessage(cleaned, "user");
 
       if (!issueId) {
         // first message -> create issue
-        createIssueWithMessage(text)
+        createIssueWithMessage(cleaned)
           .then(newId => {
             issueId = newId;
             messagesDisplayed = 1;
@@ -402,28 +401,42 @@
           });
       } else {
         // subsequent message
-        sendMessageToIssue(text)
+        sendMessageToIssue(cleaned)
           .catch(err => {
             console.error("Failed to send message:", err);
             showError("Failed to send message. Please try again.");
           });
       }
+    }
+
+    /**************************************************************
+     * Submit event: user manually types & sends
+     **************************************************************/
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = messageInput.value;
+      messageInput.value = "";
+      postMessageFlow(text);
     });
 
     /**************************************************************
-     * Quickstart card: click -> populate input
+     * Quickstart card: one-click => vanish => auto post
      **************************************************************/
     document.querySelectorAll(".card-questions li").forEach(li => {
       li.addEventListener("click", () => {
         const q = li.getAttribute("data-question");
-        messageInput.value = q;
-        // Optionally auto-send:
-        // chatForm.requestSubmit();
+        
+        // Hide the quickstart card
+        quickstartCard.style.display = "none";
+
+        // Immediately post that message
+        postMessageFlow(q);
       });
     });
   </script>
 </body>
 </html>
+
 
 
 
