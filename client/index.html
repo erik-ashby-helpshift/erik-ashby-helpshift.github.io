@@ -2,16 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GG - Golden Games Player Support (Full-Screen Overlay, Quickstart Hover Fix)</title>
-
-  <!-- Ensure responsive scaling on mobile -->
+  <title>GG - Golden Games Player Support (Links as Circle Buttons)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <style>
-    /* Base styling */
+    /* Base resets and flex layout */
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; 
+      padding: 0; 
       height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 15px;
@@ -37,10 +34,10 @@
       display: flex;
       flex-direction: column;
       height: calc(100% - 30px);
-      min-height: 0; /* so child can scroll */
+      min-height: 0; 
     }
 
-    /* Chat window as a flex column for message alignment */
+    /* Chat window (flex column for messages) */
     #chat-window {
       flex: 1;
       min-height: 0;
@@ -52,7 +49,7 @@
       font-size: 0.9em;
     }
 
-    /* Input form */
+    /* Form at bottom */
     #chat-form {
       display: flex;
       padding: 10px;
@@ -71,7 +68,7 @@
       cursor: pointer;
     }
 
-    /* Error area */
+    /* Error message area */
     #error-message {
       color: red;
       font-weight: bold;
@@ -98,17 +95,34 @@
       align-self: flex-end;
     }
 
-    /* “Open Link” line (below agent messages if link found) */
-    .agent-link-line {
-      text-align: center;
-      margin: 4px 0;
-      color: #007bff; /* link color */
+    /* 
+      The small circle buttons for each link
+      We'll display them in a row under the agent message
+    */
+    .agent-link-buttons {
+      display: flex;
+      gap: 8px; /* spacing between buttons */
+      margin: 4px 0 8px 0;
+      align-items: center;
+    }
+    .circle-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #888;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 0.7em;
       cursor: pointer;
-      font-size: 0.85em;
-      text-decoration: underline;
+      user-select: none;
+    }
+    .circle-btn:hover {
+      background: #777;
     }
 
-    /* Quickstart card, smaller font */
+    /* Quickstart card smaller font, hover effect on li, etc. */
     #quickstartCard {
       font-size: 0.8em;
     }
@@ -127,10 +141,6 @@
       font-size: 1em;
       margin-bottom: 8px;
     }
-    /* 
-      Restore the highlight on hover 
-      (hover effect for quickstart items)
-    */
     .card-questions {
       list-style: none;
       padding: 0;
@@ -148,7 +158,7 @@
       background: #eee;
     }
 
-    /* Fullscreen overlay for link, 90% wide / 80% tall modal */
+    /* Fullscreen overlay for link (90% wide, 80% tall) */
     .overlay {
       position: fixed;
       top: 0; left: 0;
@@ -162,8 +172,8 @@
     }
     .overlay .modal {
       background: #fff;
-      width: 90%;     /* was 80%; now 90% for more side-to-side room */
-      height: 80%;    /* keep 80% height as requested */
+      width: 90%;
+      height: 80%;
       position: relative;
       border-radius: 8px;
       overflow: hidden;
@@ -190,7 +200,7 @@
       z-index: 1;
     }
 
-    /* Example welcome image / text */
+    /* Example welcome image/text styling */
     .welcome-image {
       width: 100%;
       max-width: 300px; 
@@ -204,7 +214,7 @@
       margin-top: 10px;
     }
 
-    /* Media query for bigger text on small screens */
+    /* Media query: bigger text on small screens */
     @media (max-width: 600px) {
       html, body {
         font-size: 18px;
@@ -219,13 +229,13 @@
   </style>
 </head>
 <body>
-
   <div id="headerBar">
     GG - Golden Games Player Support
   </div>
 
   <div id="mainContainer">
     <div id="chat-window">
+
       <!-- Example welcome card -->
       <div class="card-message">
         <img src="gold-digger.png" alt="Gold Digger" class="welcome-image" />
@@ -254,9 +264,10 @@
           </li>
         </ul>
       </div>
+
     </div>
 
-    <!-- Input form -->
+    <!-- Form for user input -->
     <form id="chat-form">
       <input 
         type="text" 
@@ -274,7 +285,7 @@
 
   <script>
     /**************************************************************
-     * Config (Helpshift)
+     * Helpshift Config
      **************************************************************/
     const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
     const HELPSHIFT_DOMAIN = "ashbys";
@@ -295,7 +306,7 @@
     const errorMessageDiv = document.getElementById("error-message");
 
     /**************************************************************
-     * Utility: Escape + convert newlines
+     * Utility: Escape & convert line breaks
      **************************************************************/
     function escapeAndFormatText(text) {
       const escaped = text
@@ -306,36 +317,65 @@
     }
 
     /**************************************************************
-     * Link detection in agent text
+     * Find all URLs in the text (simple regex)
      **************************************************************/
-    function findLinksInText(text) {
+    function findLinks(text) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       return text.match(urlRegex) || [];
     }
 
     /**************************************************************
-     * Append a message bubble
-     * If agent, detect link => add "Open Link" line
+     * Remove URLs from text
+     * Return the "cleaned text" with URLs removed
+     **************************************************************/
+    function removeLinksFromText(text) {
+      return text.replace(/https?:\/\/[^\s]+/g, "");
+    }
+
+    /**************************************************************
+     * Append a message bubble to the chat
+     * If it's an agent message, 
+     *  - detect links 
+     *  - remove them from the displayed text
+     *  - create circle buttons below the bubble
      **************************************************************/
     function appendMessage(rawText, sender) {
-      const bubble = document.createElement("div");
-      bubble.classList.add("message", sender === "agent" ? "agent-msg" : "user-msg");
-      bubble.innerHTML = escapeAndFormatText(rawText);
-      chatWindow.appendChild(bubble);
+      let displayText = rawText;
+      let links = [];
 
       if (sender === "agent") {
-        const links = findLinksInText(rawText);
-        links.forEach(link => {
-          const linkLine = document.createElement("div");
-          linkLine.className = "agent-link-line";
-          linkLine.textContent = `Open Link: ${link}`;
-          linkLine.addEventListener("click", () => {
-            openLinkOverlay(link);
-          });
-          chatWindow.appendChild(linkLine);
-        });
+        // detect links
+        links = findLinks(rawText);
+        // remove them from the displayed text
+        displayText = removeLinksFromText(rawText).trim();
       }
 
+      // create bubble
+      const bubble = document.createElement("div");
+      bubble.classList.add("message", sender === "agent" ? "agent-msg" : "user-msg");
+      bubble.innerHTML = escapeAndFormatText(displayText);
+      chatWindow.appendChild(bubble);
+
+      // if agent had links, show circle buttons below bubble
+      if (sender === "agent" && links.length > 0) {
+        const btnContainer = document.createElement("div");
+        btnContainer.className = "agent-link-buttons";
+
+        links.forEach((url, i) => {
+          const index = i + 1;
+          const circle = document.createElement("div");
+          circle.className = "circle-btn";
+          circle.textContent = `(More ${index})`;
+          circle.addEventListener("click", () => {
+            openLinkOverlay(url);
+          });
+          btnContainer.appendChild(circle);
+        });
+
+        chatWindow.appendChild(btnContainer);
+      }
+
+      // auto-scroll
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
@@ -350,31 +390,25 @@
     }
 
     /**************************************************************
-     * Full-screen overlay approach for link
-     * Now 90% wide, 80% tall
+     * Full-screen overlay for links
      **************************************************************/
     function openLinkOverlay(linkUrl) {
-      // Create overlay
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay';
+      const overlay = document.createElement("div");
+      overlay.className = "overlay";
 
-      // Modal box
-      const modal = document.createElement('div');
-      modal.className = 'modal'; // 90% width, 80% height
+      const modal = document.createElement("div");
+      modal.className = "modal";
 
-      // Close button
-      const closeBtn = document.createElement('button');
-      closeBtn.className = 'close-btn';
-      closeBtn.textContent = 'Close';
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "close-btn";
+      closeBtn.textContent = "Close";
       closeBtn.onclick = () => {
         document.body.removeChild(overlay);
       };
 
-      // Iframe
-      const iframe = document.createElement('iframe');
+      const iframe = document.createElement("iframe");
       iframe.src = linkUrl;
 
-      // Compose
       modal.appendChild(iframe);
       modal.appendChild(closeBtn);
       overlay.appendChild(modal);
@@ -382,7 +416,7 @@
     }
 
     /**************************************************************
-     * Create Helpshift issue (first message)
+     * Create Helpshift issue
      **************************************************************/
     function createIssueWithMessage(firstMsg) {
       const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
@@ -413,7 +447,7 @@
             newId = data.id;
           }
         } catch(e) {
-          console.warn("Could not parse JSON or missing 'id':", e);
+          console.warn("No valid JSON or missing 'id':", e);
         }
         if (!newId) {
           showError("Could not retrieve issue ID. Chat may not function properly.");
@@ -424,7 +458,7 @@
     }
 
     /**************************************************************
-     * Send user message to existing issue
+     * Send message to existing issue
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
@@ -468,7 +502,7 @@
           return res.json();
         })
         .then(data => {
-          const issueData = (data.issues && data.issues.length > 0) ? data.issues[0] : null;
+          const issueData = data.issues && data.issues.length > 0 ? data.issues[0] : null;
           if (!issueData) return;
           const msgs = issueData.messages || [];
 
@@ -486,18 +520,18 @@
     }
 
     /**************************************************************
-     * postMessageFlow: user sends a message
+     * postMessageFlow
      **************************************************************/
     function postMessageFlow(text) {
       clearError();
       const cleaned = text.trim();
       if (!cleaned) return;
 
-      // Show user bubble
+      // user bubble
       appendMessage(cleaned, "user");
 
       if (!issueId) {
-        // first message => create issue
+        // first => create
         createIssueWithMessage(cleaned)
           .then(newId => {
             issueId = newId;
@@ -509,7 +543,7 @@
             showError("Could not create chat session. Please try again.");
           });
       } else {
-        // subsequent message => send
+        // subsequent => send
         sendMessageToIssue(cleaned)
           .catch(err => {
             console.error("Failed to send message:", err);
@@ -529,7 +563,7 @@
     });
 
     /**************************************************************
-     * Quickstart card: one-click => vanish => auto post
+     * Quickstart card
      **************************************************************/
     document.querySelectorAll(".card-questions li").forEach(li => {
       li.addEventListener("click", () => {
@@ -541,6 +575,7 @@
   </script>
 </body>
 </html>
+
 
 
 
