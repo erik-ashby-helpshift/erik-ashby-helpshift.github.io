@@ -15,7 +15,7 @@
       box-sizing: border-box;
     }
 
-    /* Header bar (30px) */
+    /* Top header bar (30px) */
     #headerBar {
       height: 30px;
       background-color: #444;
@@ -27,24 +27,24 @@
       font-weight: bold;
     }
 
-    /* Main container (flex column), min-height=0 so child can scroll */
+    /* Main container (flex) */
     #mainContainer {
       display: flex;
       flex-direction: column;
       height: calc(100% - 30px);
-      min-height: 0; /* Important to allow scrolling inside children */
+      min-height: 0; /* ensure child can scroll */
     }
 
-    /* Chat window with overflow scroll */
+    /* Scrollable chat window */
     #chat-window {
       flex: 1;
-      min-height: 0;         /* Also important for nested flex scrolling */
+      min-height: 0; /* necessary for nested flex scrolling */
       overflow-y: auto;
       background: #f9f9f9;
       padding: 10px;
     }
 
-    /* Chat form at the bottom */
+    /* Input area at bottom */
     #chat-form {
       display: flex;
       padding: 10px;
@@ -63,15 +63,25 @@
       cursor: pointer;
     }
 
-    /* Normal message bubbles (agent/user) */
+    /* Error message area */
+    #error-message {
+      color: red;
+      font-weight: bold;
+      margin: 10px;
+      font-size: 0.9em;
+    }
+
+    /* MESSAGE BUBBLES (agent / user) with shadows */
     .message {
       display: inline-block;
-      margin: 4px 0;
-      padding: 6px 10px;
-      border-radius: 4px;
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-radius: 6px;
       max-width: 70%;
       word-wrap: break-word;
       font-size: 0.9em;
+      /* Shadow to mimic a card style */
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
     .agent-msg {
       background: #f1f1f1;
@@ -84,26 +94,23 @@
       margin-right: 0;
     }
 
-    /* The Common Questions Card */
+    /* A generic card-message style (like the quickstart or welcome) */
     .card-message {
       background: #fff;
       border-radius: 8px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.2);
       padding: 16px;
       margin: 8px 0;
-      width: 100%; /* fill chat width */
+      width: 100%;
       box-sizing: border-box;
     }
     .card-title {
       font-weight: bold;
       font-size: 1em;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
-    .card-subtitle {
-      font-size: 0.9em;
-      color: #666;
-      margin-bottom: 10px;
-    }
+
+    /* Quickstart questions list */
     .card-questions {
       list-style: none;
       padding: 0;
@@ -121,12 +128,18 @@
       background: #eee;
     }
 
-    /* Error text area */
-    #error-message {
-      color: red;
+    /* Image styling in welcome card (optional) */
+    .welcome-image {
+      width: 100%;
+      max-width: 300px; /* adjust as needed */
+      display: block;
+      margin: 0 auto;
+    }
+    .welcome-text {
+      text-align: center;
+      font-size: 1em;
       font-weight: bold;
-      margin: 10px;
-      font-size: 0.9em;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -137,20 +150,27 @@
     GG - Golden Games Player Support
   </div>
 
-  <!-- Main container -->
+  <!-- Main container (chat area + form) -->
   <div id="mainContainer">
 
-    <!-- Chat window -->
     <div id="chat-window">
-      <!-- Agent greeting as a normal message -->
-      <div class="message agent-msg">
-        👋 Hi! I’m your smart help assistant. How can I help you today?
+      <!-- 1) The welcome card with image -->
+      <div class="card-message" id="welcomeCard">
+        <!-- gold-digger.png image -->
+        <img src="gold-digger.png" alt="Gold Digger" class="welcome-image" />
+        <div class="welcome-text">Welcome to Golden Games Player Support</div>
       </div>
 
-      <!-- Common Questions Card (Top 3) -->
-      <div class="card-message" id="commonQuestionsCard">
-        <div class="card-title">Top Questions</div>
-        <div class="card-subtitle">Pick one to get started quickly:</div>
+      <!-- 2) The first agent message bubble -->
+      <div class="message agent-msg">
+        👋 Hi! I’m your player support AI Agent. I am here to help, and have tools and knowledge to help.
+        In addition, I have access to the entire customer support team if needed to get you back into the game.
+        So, how can I help you today?
+      </div>
+
+      <!-- 3) Quickstart card (no subtitle) -->
+      <div class="card-message" id="quickstartCard">
+        <div class="card-title">Quickstart</div>
         <ul class="card-questions">
           <li data-question="I need to recover my account">
             I need to recover my account
@@ -163,10 +183,9 @@
           </li>
         </ul>
       </div>
-
     </div>
 
-    <!-- Input form -->
+    <!-- The user input area -->
     <form id="chat-form">
       <input 
         type="text" 
@@ -179,30 +198,28 @@
     </form>
   </div>
 
-  <!-- Error messages, if any -->
+  <!-- Error message area -->
   <div id="error-message"></div>
 
   <script>
     /**************************************************************
-     * Configuration
+     * Configuration (edit these for your Helpshift domain/API)
      **************************************************************/
-    // Replace with your actual Helpshift Basic Auth (encoded)
-    const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
-    // Helpshift domain
+    // Base64-encoded Basic auth
+    const authHeaderValue = "Basic " + "<YOUR_HELP_SHIFT_AUTH>";
     const HELPSHIFT_DOMAIN = "ashbys";
 
     // For createIssue
     const PLATFORM_TYPE = "webchat";
     const IDENTIFIER = "erikashby9900";
     const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
-    // The user’s email (for filtering user messages in poll)
-    const userEmail = "erik99@ashbys.net";
+    const userEmail = "erik99@ashbys.net"; // used to filter user messages from poll
 
     /**************************************************************
-     * DOM elements
+     * DOM references
      **************************************************************/
     const chatWindow = document.getElementById("chat-window");
-    const commonQuestionsCard = document.getElementById("commonQuestionsCard");
+    const quickstartCard = document.getElementById("quickstartCard");
     const chatForm = document.getElementById("chat-form");
     const messageInput = document.getElementById("message-input");
     const errorMessageDiv = document.getElementById("error-message");
@@ -210,12 +227,12 @@
     /**************************************************************
      * State
      **************************************************************/
-    let issueId = null;         // Will set after first message
-    let messagesDisplayed = 0;  // how many messages we processed from poll
+    let issueId = null;         // set after first user message
+    let messagesDisplayed = 0;  // how many messages polled from helpshift
     let pollingIntervalId = null;
 
     /**************************************************************
-     * Helper: convert line feeds to <br>, escape HTML
+     * Utility: escape & convert line feeds to <br>
      **************************************************************/
     function escapeAndFormatText(text) {
       const escaped = text
@@ -227,21 +244,19 @@
 
     /**************************************************************
      * Append a message bubble
-     * sender: 'agent' or 'user'
      **************************************************************/
     function appendMessage(rawText, sender) {
       const div = document.createElement("div");
       div.classList.add("message");
       div.classList.add(sender === "user" ? "user-msg" : "agent-msg");
-      // Convert linefeeds to <br>
       div.innerHTML = escapeAndFormatText(rawText);
       chatWindow.appendChild(div);
-      // auto-scroll to bottom
+      // auto-scroll
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
     /**************************************************************
-     * Show / clear error messages
+     * Show / clear error
      **************************************************************/
     function showError(msg) {
       errorMessageDiv.textContent = msg;
@@ -251,15 +266,15 @@
     }
 
     /**************************************************************
-     * Create a new Helpshift issue with the user's first message
+     * Create Helpshift issue w/ user's first message
      **************************************************************/
-    function createIssueWithMessage(firstMessage) {
+    function createIssueWithMessage(firstMsg) {
       const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
       const formdata = new FormData();
       formdata.append("platform-type", PLATFORM_TYPE);
       formdata.append("identifier", IDENTIFIER);
-      formdata.append("title", firstMessage);
-      formdata.append("message-body", firstMessage);
+      formdata.append("title", firstMsg);
+      formdata.append("message-body", firstMsg);
       formdata.append("platform-id", PLATFORM_ID);
       formdata.append("email", userEmail);
 
@@ -278,30 +293,30 @@
       })
       .then(result => {
         console.log("Issue creation response:", result);
-        let newIssueId = null;
+        let newId = null;
         try {
           const data = JSON.parse(result);
           if (data && data.id) {
-            newIssueId = data.id;
+            newId = data.id;
           }
         } catch(e) {
           console.warn("Could not parse JSON or missing 'id':", e);
         }
-        if (!newIssueId) {
-          showError("Could not retrieve issue ID. Chat may not work properly.");
+        if (!newId) {
+          showError("Could not retrieve issue ID. Chat may not function properly.");
           throw new Error("No issue ID returned");
         }
-        console.log("Issue created with ID:", newIssueId);
-        return newIssueId;
+        console.log("Issue created with ID:", newId);
+        return newId;
       });
     }
 
     /**************************************************************
-     * Send a message to an existing issue
+     * Send user message to existing issue
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
-        console.warn("No issue yet—can't send message");
+        console.warn("No issue yet, can't send message");
         return Promise.reject("No issue ID");
       }
       const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues/${issueId}/messages/user`;
@@ -312,9 +327,7 @@
 
       return fetch(url, {
         method: "POST",
-        headers: {
-          "Authorization": authHeaderValue
-        },
+        headers: { "Authorization": authHeaderValue },
         body: formdata
       })
       .then(response => {
@@ -326,8 +339,7 @@
     }
 
     /**************************************************************
-     * Poll for new agent messages
-     * skip user-authored messages to avoid double display
+     * Poll for agent messages
      **************************************************************/
     function startPolling() {
       if (pollingIntervalId) {
@@ -335,32 +347,23 @@
       }
       pollingIntervalId = setInterval(() => {
         if (!issueId) return;
-
         const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues/${issueId}`;
         fetch(url, {
           method: "GET",
-          headers: {
-            "Authorization": authHeaderValue
-          }
+          headers: { "Authorization": authHeaderValue }
         })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Polling failed. Status: ${response.status}`);
-          }
-          return response.json();
+        .then(res => {
+          if (!res.ok) throw new Error(`Polling failed. Status: ${res.status}`);
+          return res.json();
         })
         .then(data => {
-          const issueData = data.issues && data.issues.length > 0 ? data.issues[0] : null;
-          if (!issueData) {
-            console.warn("No issue data in poll:", data);
-            return;
-          }
+          const issueData = (data.issues && data.issues.length > 0) ? data.issues[0] : null;
+          if (!issueData) return;
           const msgs = issueData.messages || [];
           for (let i = messagesDisplayed; i < msgs.length; i++) {
             const msg = msgs[i];
-            // If authored by the user (matching userEmail), skip (avoid duplicates)
-            const isUserMsg = msg.author && msg.author.emails && msg.author.emails.includes(userEmail);
-            if (!isUserMsg) {
+            const isUser = msg.author && msg.author.emails && msg.author.emails.includes(userEmail);
+            if (!isUser) {
               appendMessage(msg.body, "agent");
             }
           }
@@ -373,7 +376,7 @@
     }
 
     /**************************************************************
-     * Event: user sends a message
+     * Submit event: user sends a message
      **************************************************************/
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -381,26 +384,24 @@
       const text = messageInput.value.trim();
       if (!text) return;
 
-      // Immediately show user's message in the UI
+      // Display user message immediately
       appendMessage(text, "user");
       messageInput.value = "";
 
       if (!issueId) {
-        // First message -> create new issue, then poll
+        // first message -> create issue
         createIssueWithMessage(text)
           .then(newId => {
             issueId = newId;
             messagesDisplayed = 1;
             startPolling();
-            // Optionally hide the card once the user sends first message:
-            // commonQuestionsCard.style.display = "none";
           })
           .catch(err => {
             console.error("Error creating issue:", err);
             showError("Could not create chat session. Please try again.");
           });
       } else {
-        // Subsequent message -> send to existing issue
+        // subsequent message
         sendMessageToIssue(text)
           .catch(err => {
             console.error("Failed to send message:", err);
@@ -410,20 +411,20 @@
     });
 
     /**************************************************************
-     * For the Common Questions Card
-     * Clicking an item populates the message input
+     * Quickstart card: click -> populate input
      **************************************************************/
     document.querySelectorAll(".card-questions li").forEach(li => {
       li.addEventListener("click", () => {
-        const question = li.getAttribute("data-question");
-        messageInput.value = question;
-        // Optionally auto-send upon click:
+        const q = li.getAttribute("data-question");
+        messageInput.value = q;
+        // Optionally auto-send:
         // chatForm.requestSubmit();
       });
     });
   </script>
 </body>
 </html>
+
 
 
 
