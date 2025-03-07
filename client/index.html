@@ -2,30 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Ensures the viewport matches the device width and doesn't shrink text on mobile -->
+  <title>GG - Golden Games Player Support (Link Detection Demo)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GG - Golden Games Player Support</title>
-  <style>
-    /* 
-      1) Base styling (desktop defaults).
-      2) We'll use a media query to adjust for smaller screens.
-    */
 
-    /* System font stack + full-height body */
+  <style>
+    /* System font stack, basic resets */
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; 
+      padding: 0; 
       height: 100%;
-      /* We'll start with a typical base font-size. 
-         If you prefer bigger text by default, you could do 16px or 14px etc. */
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 15px;
+      font-size: 15px; /* you can adjust this base size */
     }
     *, *::before, *::after {
       box-sizing: border-box;
     }
 
-    /* Top header bar (30px) */
+    /* Header bar */
     #headerBar {
       height: 30px;
       background-color: #444;
@@ -33,7 +26,7 @@
       display: flex;
       align-items: center;
       padding: 0 10px;
-      font-size: 0.9em; /* slightly smaller than base */
+      font-size: 0.9em;
       font-weight: bold;
     }
 
@@ -42,24 +35,18 @@
       display: flex;
       flex-direction: column;
       height: calc(100% - 30px);
-      min-height: 0; /* ensure child can scroll if needed */
+      min-height: 0; /* allow child to scroll if needed */
     }
 
-    /*
-      Chat window as a flex column.
-      We'll use flex-direction: column so each .message is placed top to bottom.
-      Then we can align agent vs user with align-self: flex-start or flex-end.
-    */
+    /* Chat window as flex column to align agent vs user w/ align-self */
     #chat-window {
       flex: 1;
       min-height: 0;
-      display: flex;            
-      flex-direction: column;   
+      display: flex;
+      flex-direction: column;
       overflow-y: auto;
       background: #f9f9f9;
       padding: 10px;
-      /* We'll keep the text size around 0.9em as a baseline; 
-         it inherits from html's 15px base. So 0.9em ~ 13.5px. */
       font-size: 0.9em;
     }
 
@@ -90,7 +77,7 @@
       font-size: 0.9em;
     }
 
-    /* MESSAGE BUBBLES (agent / user) with shadows */
+    /* MESSAGE BUBBLES w/ shadows */
     .message {
       margin: 8px 0;
       padding: 8px 12px;
@@ -102,14 +89,13 @@
     }
     .agent-msg {
       background: #f1f1f1;
-      align-self: flex-start; /* pinned to left */
+      align-self: flex-start;
     }
     .user-msg {
       background: #DCF8C6;
-      align-self: flex-end;   /* pinned to right */
+      align-self: flex-end;
     }
 
-    /* Card-message style (welcome / quickstart) */
     .card-message {
       background: #fff;
       border-radius: 8px;
@@ -120,19 +106,15 @@
       box-sizing: border-box;
       align-self: stretch;
     }
+
+    /* Quickstart card smaller font */
+    #quickstartCard {
+      font-size: 0.8em;
+    }
     .card-title {
       font-weight: bold;
       font-size: 1em;
       margin-bottom: 8px;
-    }
-
-    /* 
-       Quickstart card: 
-       We'll keep it smaller (0.8em). 
-       Or you can keep it at 0.9em if you prefer. 
-    */
-    #quickstartCard {
-      font-size: 0.8em;
     }
 
     .card-questions {
@@ -152,7 +134,28 @@
       background: #eee;
     }
 
-    /* Image styling in welcome card (optional) */
+    /* Centered link line for agent messages */
+    .agent-link-line {
+      text-align: center;
+      margin: 4px 0;
+      color: #007bff; /* link color, adjust as you like */
+      cursor: pointer;
+      font-size: 0.85em;
+      text-decoration: underline;
+    }
+
+    /* The “iframe card” w/ 600px height and its own scroll bar. 
+       We'll create them dynamically. 
+    */
+    .iframe-card {
+      height: 600px;
+      overflow-y: auto;
+    }
+
+    /* 
+      Example welcome card image 
+      (You can remove or keep as you want) 
+    */
     .welcome-image {
       width: 100%;
       max-width: 300px; 
@@ -166,20 +169,16 @@
       margin-top: 10px;
     }
 
-    /* 
-      MEDIA QUERY:
-      Increase the base font or bubble sizes if screen width <= 600px 
-      so that text isn't too tiny on phones.
-    */
+    /* Media query: bigger text on small screens (optional) */
     @media (max-width: 600px) {
       html, body {
-        font-size: 18px; /* bigger base for small screens */
+        font-size: 18px;
       }
       #chat-window {
-        font-size: 0.95em; /* slightly bigger relative to that base */
+        font-size: 0.95em;
       }
       #quickstartCard {
-        font-size: 0.85em; /* still a bit smaller than chat, but bigger than 0.8em on large screens */
+        font-size: 0.85em;
       }
     }
   </style>
@@ -193,20 +192,21 @@
   <div id="mainContainer">
 
     <div id="chat-window">
-      <!-- 1) The welcome card with image -->
+
+      <!-- Example welcome card -->
       <div class="card-message" id="welcomeCard">
         <img src="gold-digger.png" alt="Gold Digger" class="welcome-image" />
         <div class="welcome-text">Welcome to Golden Games Player Support</div>
       </div>
 
-      <!-- 2) The first agent message bubble -->
+      <!-- Example agent bubble -->
       <div class="message agent-msg">
-        👋 Hi! I’m your player support AI Agent. I am here to help, and have tools and knowledge to help.
-        In addition, I have access to the entire customer support team if needed to get you back into the game.
+        👋 Hi! I’m your player support AI Agent. 
+        I am here to help, and have tools and knowledge to help.
         So, how can I help you today?
       </div>
 
-      <!-- 3) Quickstart card (no subtitle) -->
+      <!-- Quickstart card -->
       <div class="card-message" id="quickstartCard">
         <div class="card-title">Quickstart</div>
         <ul class="card-questions">
@@ -221,9 +221,10 @@
           </li>
         </ul>
       </div>
+
     </div>
 
-    <!-- The user input area -->
+    <!-- Input form -->
     <form id="chat-form">
       <input 
         type="text" 
@@ -241,20 +242,20 @@
 
   <script>
     /**************************************************************
-     * Configuration (edit these for your Helpshift domain/API)
+     * Configuration
      **************************************************************/
     const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
     const HELPSHIFT_DOMAIN = "ashbys";
 
-    // For createIssue
     const PLATFORM_TYPE = "webchat";
     const IDENTIFIER = "erikashby9900";
     const PLATFORM_ID = "ashbys_platform_20200902211516079-488178b85eeeceb";
-    const userEmail = "erik99@ashbys.net"; // used to filter user messages from poll
+    const userEmail = "erik99@ashbys.net";
 
-    /**************************************************************
-     * DOM references
-     **************************************************************/
+    let issueId = null;       
+    let messagesDisplayed = 0;  
+    let pollingIntervalId = null;
+
     const chatWindow = document.getElementById("chat-window");
     const quickstartCard = document.getElementById("quickstartCard");
     const chatForm = document.getElementById("chat-form");
@@ -262,14 +263,7 @@
     const errorMessageDiv = document.getElementById("error-message");
 
     /**************************************************************
-     * State
-     **************************************************************/
-    let issueId = null;         // set after first user message
-    let messagesDisplayed = 0;  // how many messages polled from helpshift
-    let pollingIntervalId = null;
-
-    /**************************************************************
-     * Utility: escape & convert line feeds to <br>
+     * Utility: Escape & convert line breaks
      **************************************************************/
     function escapeAndFormatText(text) {
       const escaped = text
@@ -280,17 +274,61 @@
     }
 
     /**************************************************************
+     * Detect links in plain text
+     * We'll look for http:// or https:// plus some non-space characters.
+     * This returns an array of matches. 
+     * e.g. ["https://example.com","http://foo.bar"]
+     **************************************************************/
+    function findLinksInText(text) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return text.match(urlRegex) || [];
+    }
+
+    /**************************************************************
      * Append a message bubble
-     * - sender is 'user' or 'agent'
-     * - #chat-window is a flex container
+     * If it's an agent message, we also check for links
      **************************************************************/
     function appendMessage(rawText, sender) {
+      // 1) Create the bubble
       const div = document.createElement("div");
-      div.classList.add("message");
-      div.classList.add(sender === "user" ? "user-msg" : "agent-msg");
+      div.classList.add("message", sender === "user" ? "user-msg" : "agent-msg");
       div.innerHTML = escapeAndFormatText(rawText);
       chatWindow.appendChild(div);
-      // auto-scroll
+
+      // 2) If agent message, detect links
+      if (sender === "agent") {
+        const foundLinks = findLinksInText(rawText);
+        foundLinks.forEach(link => {
+          // Create a line below the bubble 
+          const linkLine = document.createElement("div");
+          linkLine.className = "agent-link-line";
+          linkLine.textContent = `Open Link: ${link}`;
+          // On click => create a new card with an iframe
+          linkLine.addEventListener("click", () => {
+            createIframeCard(link);
+          });
+          chatWindow.appendChild(linkLine);
+        });
+      }
+
+      // 3) Auto-scroll
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    /**************************************************************
+     * Create an iframe card 
+     * - 600px tall, scrollable overflow, loads the given link
+     **************************************************************/
+    function createIframeCard(linkUrl) {
+      // A card container
+      const card = document.createElement("div");
+      card.classList.add("card-message", "iframe-card"); 
+      // height: 600px; overflow-y: auto in CSS
+      // We'll embed an iframe inside it
+      card.innerHTML = `
+        <iframe src="${linkUrl}" style="width: 100%; height: 600px; border: 0;"></iframe>
+      `;
+      chatWindow.appendChild(card);
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
@@ -328,7 +366,6 @@
         return response.text();
       })
       .then(result => {
-        console.log("Issue creation response:", result);
         let newId = null;
         try {
           const data = JSON.parse(result);
@@ -342,13 +379,12 @@
           showError("Could not retrieve issue ID. Chat may not function properly.");
           throw new Error("No issue ID returned");
         }
-        console.log("Issue created with ID:", newId);
         return newId;
       });
     }
 
     /**************************************************************
-     * Send message to an existing issue
+     * Send message to existing issue
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
@@ -370,7 +406,6 @@
         if (!response.ok) {
           throw new Error(`Send message failed. Status: ${response.status}`);
         }
-        console.log("Message sent:", text);
       });
     }
 
@@ -396,18 +431,18 @@
           const issueData = (data.issues && data.issues.length > 0) ? data.issues[0] : null;
           if (!issueData) return;
           const msgs = issueData.messages || [];
+
           for (let i = messagesDisplayed; i < msgs.length; i++) {
             const msg = msgs[i];
             const isUser = msg.author && msg.author.emails && msg.author.emails.includes(userEmail);
             if (!isUser) {
+              // Agent message => append, check for links
               appendMessage(msg.body, "agent");
             }
           }
           messagesDisplayed = msgs.length;
         })
-        .catch(err => {
-          console.error("Polling error:", err);
-        });
+        .catch(err => console.error("Polling error:", err));
       }, 1000);
     }
 
@@ -445,7 +480,7 @@
     }
 
     /**************************************************************
-     * Submit event: user typed and clicked "Send"
+     * Form submission: user typed & clicked Send
      **************************************************************/
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -467,6 +502,7 @@
   </script>
 </body>
 </html>
+
 
 
 
