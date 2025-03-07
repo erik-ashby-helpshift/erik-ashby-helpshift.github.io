@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GG - Golden Games Player Support (Links as Circle Buttons)</title>
+  <title>GG - Golden Games Player Support (Links as Pill Buttons)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    /* Base resets and flex layout */
+    /* Basic resets and flex layout */
     html, body {
-      margin: 0; 
-      padding: 0; 
+      margin: 0;
+      padding: 0;
       height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 15px;
@@ -95,34 +95,32 @@
       align-self: flex-end;
     }
 
-    /* 
-      The small circle buttons for each link
-      We'll display them in a row under the agent message
-    */
+    /* Container for the link “pill” buttons below agent messages */
     .agent-link-buttons {
       display: flex;
       gap: 8px; /* spacing between buttons */
       margin: 4px 0 8px 0;
       align-items: center;
     }
-    .circle-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #888;
-      display: flex;
-      justify-content: center;
+
+    /* The “pill” buttons for each link */
+    .pill-btn {
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      background: #888;
+      border-radius: 9999px;  /* large radius => pill shape */
       color: #fff;
       font-size: 0.7em;
       cursor: pointer;
       user-select: none;
     }
-    .circle-btn:hover {
+    .pill-btn:hover {
       background: #777;
     }
 
-    /* Quickstart card smaller font, hover effect on li, etc. */
+    /* Quickstart card, smaller font */
     #quickstartCard {
       font-size: 0.8em;
     }
@@ -264,10 +262,9 @@
           </li>
         </ul>
       </div>
-
     </div>
 
-    <!-- Form for user input -->
+    <!-- The chat input form -->
     <form id="chat-form">
       <input 
         type="text" 
@@ -280,7 +277,7 @@
     </form>
   </div>
 
-  <!-- Error message area -->
+  <!-- Error display -->
   <div id="error-message"></div>
 
   <script>
@@ -306,7 +303,7 @@
     const errorMessageDiv = document.getElementById("error-message");
 
     /**************************************************************
-     * Utility: Escape & convert line breaks
+     * Utility: Escape & convert newlines
      **************************************************************/
     function escapeAndFormatText(text) {
       const escaped = text
@@ -317,7 +314,7 @@
     }
 
     /**************************************************************
-     * Find all URLs in the text (simple regex)
+     * Link detection in text
      **************************************************************/
     function findLinks(text) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -325,51 +322,46 @@
     }
 
     /**************************************************************
-     * Remove URLs from text
-     * Return the "cleaned text" with URLs removed
+     * Remove found URLs from text
      **************************************************************/
     function removeLinksFromText(text) {
       return text.replace(/https?:\/\/[^\s]+/g, "");
     }
 
     /**************************************************************
-     * Append a message bubble to the chat
-     * If it's an agent message, 
-     *  - detect links 
-     *  - remove them from the displayed text
-     *  - create circle buttons below the bubble
+     * Append a message bubble
+     * - If agent has links, remove them from displayed text & 
+     *   create pill buttons below
      **************************************************************/
     function appendMessage(rawText, sender) {
       let displayText = rawText;
       let links = [];
 
       if (sender === "agent") {
-        // detect links
         links = findLinks(rawText);
-        // remove them from the displayed text
         displayText = removeLinksFromText(rawText).trim();
       }
 
-      // create bubble
+      // create the bubble
       const bubble = document.createElement("div");
       bubble.classList.add("message", sender === "agent" ? "agent-msg" : "user-msg");
       bubble.innerHTML = escapeAndFormatText(displayText);
       chatWindow.appendChild(bubble);
 
-      // if agent had links, show circle buttons below bubble
+      // if agent had links, create pill buttons
       if (sender === "agent" && links.length > 0) {
         const btnContainer = document.createElement("div");
         btnContainer.className = "agent-link-buttons";
 
         links.forEach((url, i) => {
           const index = i + 1;
-          const circle = document.createElement("div");
-          circle.className = "circle-btn";
-          circle.textContent = `(More ${index})`;
-          circle.addEventListener("click", () => {
+          const pill = document.createElement("div");
+          pill.className = "pill-btn";
+          pill.textContent = `(More ${index})`; // e.g. (More 1), (More 2)
+          pill.addEventListener("click", () => {
             openLinkOverlay(url);
           });
-          btnContainer.appendChild(circle);
+          btnContainer.appendChild(pill);
         });
 
         chatWindow.appendChild(btnContainer);
@@ -390,23 +382,23 @@
     }
 
     /**************************************************************
-     * Full-screen overlay for links
+     * Full-screen overlay for link
      **************************************************************/
     function openLinkOverlay(linkUrl) {
-      const overlay = document.createElement("div");
-      overlay.className = "overlay";
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
 
-      const modal = document.createElement("div");
-      modal.className = "modal";
+      const modal = document.createElement('div');
+      modal.className = 'modal'; // 90% wide, 80% high
 
-      const closeBtn = document.createElement("button");
-      closeBtn.className = "close-btn";
-      closeBtn.textContent = "Close";
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-btn';
+      closeBtn.textContent = 'Close';
       closeBtn.onclick = () => {
         document.body.removeChild(overlay);
       };
 
-      const iframe = document.createElement("iframe");
+      const iframe = document.createElement('iframe');
       iframe.src = linkUrl;
 
       modal.appendChild(iframe);
@@ -458,7 +450,7 @@
     }
 
     /**************************************************************
-     * Send message to existing issue
+     * Send user message to existing issue
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
@@ -575,6 +567,7 @@
   </script>
 </body>
 </html>
+
 
 
 
