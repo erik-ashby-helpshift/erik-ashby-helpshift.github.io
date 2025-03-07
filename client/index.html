@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GG - Golden Games Player Support (Full-Screen Overlay for Links)</title>
+  <title>GG - Golden Games Player Support (Full-Screen Overlay, Quickstart Hover Fix)</title>
 
-  <!-- Responsive meta to ensure good mobile scaling -->
+  <!-- Ensure responsive scaling on mobile -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    /* Basic resets */
+    /* Base styling */
     html, body {
       margin: 0;
       padding: 0;
@@ -32,15 +32,15 @@
       font-weight: bold;
     }
 
-    /* Main container (flex) */
+    /* Main container */
     #mainContainer {
       display: flex;
       flex-direction: column;
       height: calc(100% - 30px);
-      min-height: 0; /* enable scrolling in child if needed */
+      min-height: 0; /* so child can scroll */
     }
 
-    /* Chat window as flex column for agent vs. user alignment */
+    /* Chat window as a flex column for message alignment */
     #chat-window {
       flex: 1;
       min-height: 0;
@@ -52,7 +52,7 @@
       font-size: 0.9em;
     }
 
-    /* Input at bottom */
+    /* Input form */
     #chat-form {
       display: flex;
       padding: 10px;
@@ -71,7 +71,7 @@
       cursor: pointer;
     }
 
-    /* Error message area */
+    /* Error area */
     #error-message {
       color: red;
       font-weight: bold;
@@ -79,7 +79,7 @@
       font-size: 0.9em;
     }
 
-    /* Message bubbles with shadows */
+    /* Message bubbles */
     .message {
       margin: 8px 0;
       padding: 8px 12px;
@@ -98,17 +98,17 @@
       align-self: flex-end;
     }
 
-    /* “Open Link” line under agent messages */
+    /* “Open Link” line (below agent messages if link found) */
     .agent-link-line {
       text-align: center;
       margin: 4px 0;
-      color: #007bff; /* link color; adjust as needed */
+      color: #007bff; /* link color */
       cursor: pointer;
       font-size: 0.85em;
       text-decoration: underline;
     }
 
-    /* Quickstart card smaller font, etc. */
+    /* Quickstart card, smaller font */
     #quickstartCard {
       font-size: 0.8em;
     }
@@ -127,8 +127,28 @@
       font-size: 1em;
       margin-bottom: 8px;
     }
+    /* 
+      Restore the highlight on hover 
+      (hover effect for quickstart items)
+    */
+    .card-questions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .card-questions li {
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-bottom: 5px;
+      background: #f9f9f9;
+      transition: background 0.2s;
+    }
+    .card-questions li:hover {
+      background: #eee;
+    }
 
-    /* Fullscreen overlay for iframe browsing */
+    /* Fullscreen overlay for link, 90% wide / 80% tall modal */
     .overlay {
       position: fixed;
       top: 0; left: 0;
@@ -142,8 +162,8 @@
     }
     .overlay .modal {
       background: #fff;
-      width: 80%;
-      height: 80%;
+      width: 90%;     /* was 80%; now 90% for more side-to-side room */
+      height: 80%;    /* keep 80% height as requested */
       position: relative;
       border-radius: 8px;
       overflow: hidden;
@@ -170,7 +190,7 @@
       z-index: 1;
     }
 
-    /* Example “Welcome” image in a card */
+    /* Example welcome image / text */
     .welcome-image {
       width: 100%;
       max-width: 300px; 
@@ -249,12 +269,12 @@
     </form>
   </div>
 
-  <!-- Error area -->
+  <!-- Error message area -->
   <div id="error-message"></div>
 
   <script>
     /**************************************************************
-     * Config for Helpshift
+     * Config (Helpshift)
      **************************************************************/
     const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
     const HELPSHIFT_DOMAIN = "ashbys";
@@ -295,7 +315,7 @@
 
     /**************************************************************
      * Append a message bubble
-     * If agent, look for links, show "Open Link" lines
+     * If agent, detect link => add "Open Link" line
      **************************************************************/
     function appendMessage(rawText, sender) {
       const bubble = document.createElement("div");
@@ -320,7 +340,7 @@
     }
 
     /**************************************************************
-     * Show / clear errors
+     * Show / clear error
      **************************************************************/
     function showError(msg) {
       errorMessageDiv.textContent = msg;
@@ -331,6 +351,7 @@
 
     /**************************************************************
      * Full-screen overlay approach for link
+     * Now 90% wide, 80% tall
      **************************************************************/
     function openLinkOverlay(linkUrl) {
       // Create overlay
@@ -339,7 +360,7 @@
 
       // Modal box
       const modal = document.createElement('div');
-      modal.className = 'modal';
+      modal.className = 'modal'; // 90% width, 80% height
 
       // Close button
       const closeBtn = document.createElement('button');
@@ -520,6 +541,7 @@
   </script>
 </body>
 </html>
+
 
 
 
