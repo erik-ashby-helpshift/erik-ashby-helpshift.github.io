@@ -35,10 +35,16 @@
       min-height: 0; /* ensure child can scroll */
     }
 
-    /* Scrollable chat window */
+    /*
+      #chat-window as a flex column.
+      We'll use flex-direction: column so each new .message is placed top to bottom.
+      Then we can align agent vs user with align-self: flex-start or flex-end.
+    */
     #chat-window {
       flex: 1;
-      min-height: 0; /* necessary for nested flex scrolling */
+      min-height: 0; 
+      display: flex;             /* flex container */
+      flex-direction: column;    /* top-to-bottom stacking */
       overflow-y: auto;
       background: #f9f9f9;
       padding: 10px;
@@ -73,7 +79,6 @@
 
     /* MESSAGE BUBBLES (agent / user) with shadows */
     .message {
-      display: inline-block;
       margin: 8px 0;
       padding: 8px 12px;
       border-radius: 6px;
@@ -81,16 +86,17 @@
       word-wrap: break-word;
       font-size: 0.9em;
       box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+
+      /* Because #chat-window is a flex container,
+         each .message can align itself using align-self. */
     }
     .agent-msg {
       background: #f1f1f1;
-      margin-right: auto;
-      margin-left: 0;     /* keep on the left */
+      align-self: flex-start; /* pinned to left */
     }
     .user-msg {
       background: #DCF8C6;
-      margin-left: auto;  /* push to the right */
-      margin-right: 0;
+      align-self: flex-end;   /* pinned to right */
     }
 
     /* A generic card-message style (like the quickstart or welcome) */
@@ -102,6 +108,7 @@
       margin: 8px 0;
       width: 100%;
       box-sizing: border-box;
+      align-self: stretch; /* so it spans the width if desired */
     }
     .card-title {
       font-weight: bold;
@@ -130,7 +137,7 @@
     /* Image styling in welcome card (optional) */
     .welcome-image {
       width: 100%;
-      max-width: 300px; /* adjust as needed */
+      max-width: 300px; 
       display: block;
       margin: 0 auto;
     }
@@ -203,8 +210,7 @@
     /**************************************************************
      * Configuration (edit these for your Helpshift domain/API)
      **************************************************************/
-    // Base64-encoded Basic auth
-    const authHeaderValue = "Basic " + "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6";
+    const authHeaderValue = "Basic " + "<YOUR_HELP_SHIFT_AUTH>";
     const HELPSHIFT_DOMAIN = "ashbys";
 
     // For createIssue
@@ -242,6 +248,9 @@
 
     /**************************************************************
      * Append a message bubble
+     * - sender is 'user' or 'agent'
+     * - #chat-window is a flex container with flex-direction: column
+     *   so we can use align-self to push user messages to the right
      **************************************************************/
     function appendMessage(rawText, sender) {
       const div = document.createElement("div");
@@ -253,9 +262,6 @@
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
-    /**************************************************************
-     * Show / clear error
-     **************************************************************/
     function showError(msg) {
       errorMessageDiv.textContent = msg;
     }
@@ -264,7 +270,7 @@
     }
 
     /**************************************************************
-     * Create Helpshift issue w/ user's first message
+     * Create Helpshift issue (first message)
      **************************************************************/
     function createIssueWithMessage(firstMsg) {
       const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/chat/issues`;
@@ -310,7 +316,7 @@
     }
 
     /**************************************************************
-     * Send user message to existing issue
+     * Send message to an existing issue
      **************************************************************/
     function sendMessageToIssue(text) {
       if (!issueId) {
@@ -374,21 +380,20 @@
     }
 
     /**************************************************************
-     * Core: postMessageFlow
-     *   - If no issue, create it with this message
-     *   - If existing issue, send to it
-     *   - Then show user's bubble in UI
+     * postMessageFlow: user sends a message
+     *  - If no issue, create it with this text
+     *  - Otherwise, send to existing issue
      **************************************************************/
     function postMessageFlow(text) {
       clearError();
       const cleaned = text.trim();
       if (!cleaned) return;
 
-      // Immediately show user bubble
+      // Show the user message bubble on the right
       appendMessage(cleaned, "user");
 
       if (!issueId) {
-        // first message -> create issue
+        // first message -> create new issue
         createIssueWithMessage(cleaned)
           .then(newId => {
             issueId = newId;
@@ -400,7 +405,7 @@
             showError("Could not create chat session. Please try again.");
           });
       } else {
-        // subsequent message
+        // subsequent message -> send to existing
         sendMessageToIssue(cleaned)
           .catch(err => {
             console.error("Failed to send message:", err);
@@ -410,7 +415,7 @@
     }
 
     /**************************************************************
-     * Submit event: user manually types & sends
+     * Submit event: user typed and clicked "Send"
      **************************************************************/
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -425,7 +430,7 @@
     document.querySelectorAll(".card-questions li").forEach(li => {
       li.addEventListener("click", () => {
         const q = li.getAttribute("data-question");
-        
+
         // Hide the quickstart card
         quickstartCard.style.display = "none";
 
@@ -436,6 +441,7 @@
   </script>
 </body>
 </html>
+
 
 
 
