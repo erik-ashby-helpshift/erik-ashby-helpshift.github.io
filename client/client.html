@@ -536,14 +536,14 @@
       
       function updateAgentNames(issueData) {
         if (!issueData || !issueData.custom_fields || !issueData.custom_fields.ai_state) {
-          agentNamesEl.textContent = "🟢 Scopely AI Agent";
+          agentNamesEl.textContent = "🤖 Scopely AI Agent";
           return;
         }
         const aiStateVal = issueData.custom_fields.ai_state.value;
         if (aiStateVal === "help") {
-          agentNamesEl.textContent = "🟢 Scopely AI Agent, 🟢 Erik Ashby";
+          agentNamesEl.textContent = "🤖 Scopely AI Agent, 🧑‍💻 Erik Ashby";
         } else {
-          agentNamesEl.textContent = "🟢 Scopely AI Agent";
+          agentNamesEl.textContent = "🤖 Scopely AI Agent";
         }
       }
       
