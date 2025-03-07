@@ -136,6 +136,12 @@
       box-sizing: border-box;
       align-self: stretch;
     }
+    
+    /* Welcome card special styling to remove padding */
+    .welcome-card {
+      padding: 0 !important; /* Override the padding */
+    }
+    
     .card-title {
       font-weight: bold;
       font-size: 1em;
@@ -146,8 +152,8 @@
       position: relative;
       border-radius: 4px;
       overflow: hidden;
-      margin-bottom: 8px;
-      height: 300px; /* Fixed height for the container */
+      margin-bottom: 0; /* Remove bottom margin */
+      height: 200px; /* Reduced from 300px to 200px */
     }
     .card-image {
       width: 100%;
@@ -328,6 +334,7 @@
         
         switch(cardType) {
           case "welcome":
+            card.classList.add("welcome-card"); // Add special class for welcome card
             card.innerHTML = `
               <div class="card-image-container">
                 <img src="${cardData.imageUrl}" alt="${cardData.altText || 'Card image'}" class="card-image" onerror="this.src='/api/placeholder/600/300'; this.onerror=null;">
