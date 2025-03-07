@@ -119,41 +119,13 @@
       border-bottom-left-radius: 0;
     }
     .user-msg {
-      background: #DCF8C6;
+      background: #000000;
+      color: #ffffff;
       align-self: flex-end;
       border-bottom-right-radius: 0;
     }
     
-    /* Welcome card with image and overlay */
-    .welcome-card {
-      position: relative;
-      width: 100%;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .welcome-image {
-      width: 100%;
-      display: block;
-    }
-    .welcome-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      padding: 16px 8px 8px;
-    }
-    .welcome-text {
-      color: white;
-      text-align: center;
-      font-size: 1.1em;
-      font-weight: bold;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    }
-
-    /* Quickstart card */
+    /* Welcome card as part of standard card design */
     .card-message {
       background: #fff;
       border-radius: 8px;
@@ -168,6 +140,32 @@
       font-weight: bold;
       font-size: 1em;
       margin-bottom: 8px;
+    }
+    .card-image-container {
+      width: 100%;
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .card-image {
+      width: 100%;
+      display: block;
+    }
+    .card-image-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      padding: 16px 8px 8px;
+    }
+    .card-image-text {
+      color: white;
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     }
     .card-questions {
       list-style: none;
@@ -324,15 +322,12 @@
      * Add welcome card and initial messages
      **************************************************************/
     function addWelcomeElements() {
-      // Add welcome card with image and overlay text
-      const welcomeCard = document.createElement("div");
-      welcomeCard.className = "welcome-card";
-      welcomeCard.innerHTML = `
-        <img src="https://erik-ashby-helpshift.github.io/client/gold-digger.png" alt="Gold Digger" class="welcome-image" onerror="this.src='/api/placeholder/600/300'; this.onerror=null;">
-        <div class="welcome-overlay">
-          <div class="welcome-text">Welcome to Golden Games Player Support</div>
-        </div>
-      `;
+      // Add welcome card as a standard card element
+      const welcomeCard = renderCard("welcome", {
+        imageUrl: "https://erik-ashby-helpshift.github.io/client/gold-digger.png",
+        title: "Welcome to Golden Games Player Support",
+        altText: "Gold Digger Game"
+      });
       chatWindow.appendChild(welcomeCard);
 
       // Add initial agent message
@@ -342,48 +337,41 @@
       chatWindow.appendChild(initialMessage);
 
       // Add quickstart card
-      const quickstartCard = document.createElement("div");
-      quickstartCard.id = "quickstartCard";
-      quickstartCard.className = "card-message";
-      quickstartCard.innerHTML = `
-        <div class="card-title">Quickstart</div>
-        <ul class="card-questions">
-          <li data-question="I need to recover my account">
-            I need to recover my account
-          </li>
-          <li data-question="What is war room?">
-            What is war room?
-          </li>
-          <li data-question="How do I purchase new ships?">
-            How do I purchase new ships?
-          </li>
-        </ul>
-      `;
-      chatWindow.appendChild(quickstartCard);
-
-      // Add event listeners to quickstart options
-      quickstartCard.querySelectorAll(".card-questions li").forEach(li => {
-        li.addEventListener("click", () => {
-          const question = li.getAttribute("data-question");
-          quickstartCard.remove(); // Remove the quickstart card
-          messageInput.focus(); // Focus on input after selection
-          postMessageFlow(question);
-        });
+      const quickstartCard = renderCard("quickstart", {
+        title: "Quickstart",
+        options: [
+          "I need to recover my account",
+          "What is war room?",
+          "How do I purchase new ships?"
+        ],
+        removeSelfOnClick: true
       });
+      quickstartCard.id = "quickstartCard";
+      chatWindow.appendChild(quickstartCard);
 
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
     
-    // Add error handling for the welcome image
+    // Add error handling for card images
     window.addEventListener('error', function(e) {
-      // Check if it's the welcome image that failed
-      if (e.target.tagName === 'IMG' && e.target.className === 'welcome-image') {
+      // Check if it's a card image that failed
+      if (e.target.tagName === 'IMG' && e.target.className === 'card-image') {
         e.target.src = '/api/placeholder/600/300';
       }
     }, true); // Capture phase to catch the error before it bubbles
 
-    // Add welcome elements immediately when page loads
-    addWelcomeElements();
+    // Add error handling for card images
+    window.addEventListener('error', function(e) {
+      // Check if it's a card image that failed
+      if (e.target.tagName === 'IMG' && e.target.className === 'card-image') {
+        e.target.src = '/api/placeholder/600/300';
+      }
+    }, true); // Capture phase to catch the error before it bubbles
+    
+    // Initialize chat elements AFTER all functions are defined
+    document.addEventListener('DOMContentLoaded', function() {
+      addWelcomeElements();
+    });
 
     /**************************************************************
      * Show/hide typing indicator
