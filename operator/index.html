@@ -911,6 +911,7 @@
         }
         
         // Event listeners for navigation
+        // Ensure navigation works properly
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -924,10 +925,18 @@
                 document.querySelectorAll('.home-section, .players-section').forEach(s => s.classList.remove('active'));
                 document.querySelector(`.${section}-section`).classList.add('active');
                 
+                // Update URL hash
+                window.location.hash = section;
+                
                 // If players section, display players
                 if (section === 'players') {
+                    console.log("Switching to players section");
                     currentPage = 1;
-                    displayPlayers(currentPage);
+                    // Force redraw of players list
+                    setTimeout(() => {
+                        displayPlayers(currentPage);
+                        console.log("Players should be displayed now");
+                    }, 0);
                 }
             });
         });
@@ -943,5 +952,18 @@
             displayPlayers(currentPage, filterPlayers());
         });
         
-        // Initialize with home section
-        displayPlayers(currentPage);
+        // Initialize the players data but don't display it yet
+        // Only display players when switching to the players section
+        
+        // Check if URL has #players hash to show players section immediately
+        if(window.location.hash === '#players') {
+            // Show players section
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelector('.nav-link[data-section="players"]').classList.add('active');
+            
+            document.querySelectorAll('.home-section, .players-section').forEach(s => s.classList.remove('active'));
+            document.querySelector('.players-section').classList.add('active');
+            
+            // Display players
+            displayPlayers(currentPage);
+        }
