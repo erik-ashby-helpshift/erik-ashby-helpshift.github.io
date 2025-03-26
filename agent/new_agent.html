@@ -148,21 +148,130 @@
             width: 40%;
             height: 100%;
             overflow-y: auto;
-            padding: 20px;
-            background-color: white;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
         }
         
-        .issue-details-header {
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-            font-size: 18px;
-            font-weight: bold;
+        .issue-details-empty {
+            padding: 20px;
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            margin-top: 40%;
         }
         
         .issue-details-content {
-            color: #7f8c8d;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .issue-header {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        
+        .issue-header-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .issue-number {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .issue-customer-name {
+            font-size: 16px;
+            text-align: right;
+        }
+        
+        .issue-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .issue-divider {
+            height: 2px;
+            background-color: #3498db;
+            margin: 10px 0;
+        }
+        
+        .issue-conversation {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .user-message {
+            align-self: flex-start;
+            background-color: #e2e2e2;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .agent-message {
+            align-self: flex-end;
+            background-color: #b0b0b0;
+            border-bottom-right-radius: 5px;
+            color: #000;
+        }
+        
+        .system-note {
+            align-self: center;
+            color: #999;
+            font-size: 13px;
+            margin: 10px 0;
             font-style: italic;
+        }
+        
+        .issue-response-area {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        
+        .ai-instructions-label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .ai-instructions-input {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+        
+        .submit-button {
+            padding: 8px 30px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        .submit-button:hover {
+            background-color: #34495e;
         }
 
         /* Search bar */
@@ -198,8 +307,32 @@
     
     <!-- Right Issue Details -->
     <div class="issue-details">
-        <div class="issue-details-header">Issue Details</div>
-        <div class="issue-details-content">Select an issue to view details.</div>
+        <div class="issue-details-empty">Select an issue to view details.</div>
+        <div class="issue-details-content" style="display: none;">
+            <!-- Header section -->
+            <div class="issue-header">
+                <div class="issue-header-row">
+                    <div class="issue-number">Issue #<span id="issue-id"></span></div>
+                    <div class="issue-status"><span id="issue-status-badge"></span></div>
+                    <div class="issue-customer-name"><span id="issue-customer"></span></div>
+                </div>
+                <div class="issue-title" id="issue-title"></div>
+                <div class="issue-divider"></div>
+            </div>
+            
+            <!-- Conversation area -->
+            <div class="issue-conversation" id="issue-conversation">
+                <!-- Messages will be populated here -->
+            </div>
+            
+            <!-- Agent response area -->
+            <div class="issue-response-area">
+                <div class="issue-divider"></div>
+                <div class="ai-instructions-label">AI Instructions</div>
+                <textarea class="ai-instructions-input" placeholder="Enter instructions for AI assistance..."></textarea>
+                <button class="submit-button">Submit</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -320,11 +453,9 @@
                     // Add selected class to clicked item
                     this.classList.add('selected');
                     
-                    // Update issue details (would be implemented in next iteration)
-                    // For now, we'll just show the ID
+                    // Show issue details
                     const issueId = this.getAttribute('data-issue-id');
-                    document.querySelector('.issue-details-content').textContent = 
-                        `Details for issue ${issueId} will be displayed here.`;
+                    showIssueDetails(issueId);
                 });
                 
                 issueListElement.appendChild(listItem);
@@ -337,8 +468,80 @@
             return new Date(dateString).toLocaleDateString('en-US', options);
         }
 
+        // Sample conversation data for each issue
+        const issueConversations = {
+            'ISS-1001': [
+                { type: 'user', text: 'I cannot log into my account after resetting my password. It says my credentials are invalid.' },
+                { type: 'agent', text: 'I understand how frustrating that can be. Let me check your account status. Could you confirm the email address associated with your account?' },
+                { type: 'user', text: 'My email is john.smith@example.com' },
+                { type: 'system', text: 'Agent verified user identity' },
+                { type: 'agent', text: 'Thank you for confirming. I can see that there was an issue with the password reset process. I've manually reset your password. You should receive an email with instructions shortly.' }
+            ],
+            'ISS-1002': [
+                { type: 'user', text: 'I noticed an extra charge of $49.99 on my March statement that I don\'t recognize.' },
+                { type: 'agent', text: 'I apologize for the confusion. Let me look into that charge for you right away.' },
+                { type: 'system', text: 'Agent reviewed account billing history' },
+                { type: 'agent', text: 'I\'ve identified the charge. It appears to be for the premium service upgrade that was applied on March 15th. Would you like me to provide more details about this service?' }
+            ],
+            // Add conversations for other issues as needed
+        };
+
+        // Function to show issue details
+        function showIssueDetails(issueId) {
+            // Find the issue
+            const issue = issues.find(i => i.id === issueId);
+            if (!issue) return;
+            
+            // Hide the empty state and show content
+            document.querySelector('.issue-details-empty').style.display = 'none';
+            document.querySelector('.issue-details-content').style.display = 'flex';
+            
+            // Update header information
+            document.getElementById('issue-id').textContent = issue.id;
+            document.getElementById('issue-customer').textContent = issue.customer;
+            document.getElementById('issue-title').textContent = issue.description;
+            
+            // Set status badge
+            const statusBadge = document.getElementById('issue-status-badge');
+            statusBadge.textContent = issue.status.toUpperCase();
+            statusBadge.className = `status status-${issue.status}`;
+            
+            // Clear previous conversation
+            const conversationContainer = document.getElementById('issue-conversation');
+            conversationContainer.innerHTML = '';
+            
+            // Add conversation messages if available
+            const conversation = issueConversations[issueId] || [];
+            conversation.forEach(message => {
+                const messageElement = document.createElement('div');
+                
+                if (message.type === 'system') {
+                    messageElement.className = 'system-note';
+                    messageElement.textContent = message.text;
+                } else {
+                    messageElement.className = `message ${message.type}-message`;
+                    messageElement.textContent = message.text;
+                }
+                
+                conversationContainer.appendChild(messageElement);
+            });
+            
+            // If no conversation, add a placeholder
+            if (conversation.length === 0) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'system-note';
+                placeholder.textContent = 'No conversation history available.';
+                conversationContainer.appendChild(placeholder);
+            }
+        }
+        
         // Initialize the issue list
         generateIssueList();
+        
+        // Show first issue details by default
+        if (issues.length > 0) {
+            showIssueDetails(issues[0].id);
+        }
 
         // Add click handlers for navigation
         document.querySelectorAll('.nav-item').forEach(item => {
