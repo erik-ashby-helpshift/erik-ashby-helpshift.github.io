@@ -45,6 +45,20 @@
         .nav-item:hover, .nav-item.active {
             background-color: #34495e;
         }
+
+        .focus-switch-container {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            border-top: 1px solid #34495e;
+        }
+
+        .focus-switch-label {
+            margin-left: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
         
         /* Middle Issue List */
         .issue-list-container {
@@ -53,6 +67,8 @@
             height: 100%;
             overflow-y: auto;
             background-color: #f5f7f9;
+            display: flex;
+            flex-direction: column;
         }
         
         .issue-list-header {
@@ -67,6 +83,8 @@
         
         .issue-list {
             list-style-type: none;
+            flex-grow: 1;
+            overflow-y: auto;
         }
         
         .issue-item {
@@ -80,26 +98,14 @@
             background-color: #e8f4fc;
         }
         
-        .issue-item.selected {
+        .selected-issue {
             background-color: #d4e9f7;
             border-left: 4px solid #3498db;
         }
         
-        .issue-id {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 5px;
-        }
-        
-        .issue-customer {
+        .issue-title {
             font-weight: bold;
             margin-bottom: 5px;
-        }
-        
-        .issue-description {
-            color: #34495e;
-            margin-bottom: 10px;
-            font-size: 14px;
         }
         
         .issue-meta {
@@ -109,38 +115,31 @@
             color: #7f8c8d;
         }
         
-        .status {
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
-        
-        .status-open {
-            background-color: #e74c3c;
-            color: white;
-        }
-        
-        .status-in-progress {
-            background-color: #f39c12;
-            color: white;
-        }
-        
         .status-resolved {
-            background-color: #2ecc71;
-            color: white;
-        }
-        
-        .priority-high {
-            color: #e74c3c;
-        }
-        
-        .priority-medium {
-            color: #f39c12;
-        }
-        
-        .priority-low {
             color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .ai-help-issue {
+            background-color: #fff8e1;
+        }
+        
+        .search-bar {
+            padding: 10px 20px;
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            outline: none;
+            font-size: 14px;
+        }
+
+        #loadingMessage, #errorMessage {
+            padding: 20px;
+            text-align: center;
+        }
+
+        #errorMessage {
+            color: #e74c3c;
         }
         
         /* Right Issue Details */
@@ -161,46 +160,21 @@
             margin-top: 40%;
         }
         
-        .issue-details-content {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        
-        .issue-header {
+        #issueHeader {
             padding: 20px;
             background-color: #f9f9f9;
+            border-bottom: 1px solid #ddd;
         }
         
-        .issue-header-row {
-            display: flex;
-            justify-content: space-between;
+        #issueHeader h2 {
             margin-bottom: 10px;
         }
         
-        .issue-number {
-            font-size: 16px;
-            font-weight: 500;
+        #issueHeader p {
+            margin-bottom: 5px;
         }
         
-        .issue-customer-name {
-            font-size: 16px;
-            text-align: right;
-        }
-        
-        .issue-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .issue-divider {
-            height: 2px;
-            background-color: #3498db;
-            margin: 10px 0;
-        }
-        
-        .issue-conversation {
+        #conversationArea {
             flex-grow: 1;
             padding: 20px;
             overflow-y: auto;
@@ -208,38 +182,41 @@
             flex-direction: column;
         }
         
-        .message {
+        .message-left, .message-right {
             max-width: 80%;
             padding: 12px 16px;
             border-radius: 18px;
             margin-bottom: 15px;
-            position: relative;
         }
         
-        .user-message {
+        .message-left {
             align-self: flex-start;
             background-color: #e2e2e2;
             border-bottom-left-radius: 5px;
         }
         
-        .agent-message {
+        .message-right {
             align-self: flex-end;
             background-color: #b0b0b0;
             border-bottom-right-radius: 5px;
-            color: #000;
         }
         
-        .system-note {
+        .private-note {
             align-self: center;
             color: #999;
             font-size: 13px;
             margin: 10px 0;
             font-style: italic;
+            background-color: #fffde7;
+            padding: 8px 12px;
+            border-radius: 12px;
+            max-width: 90%;
         }
         
         .issue-response-area {
             padding: 20px;
             background-color: #f9f9f9;
+            border-top: 1px solid #ddd;
         }
         
         .ai-instructions-label {
@@ -259,29 +236,44 @@
             font-family: inherit;
         }
         
-        .submit-button {
-            padding: 8px 30px;
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-button {
+            padding: 8px 15px;
             background-color: #2c3e50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: background-color 0.2s;
         }
         
-        .submit-button:hover {
+        .action-button:hover {
             background-color: #34495e;
         }
 
-        /* Search bar */
-        .search-bar {
-            padding: 10px 20px;
-            width: 100%;
-            border: none;
-            border-bottom: 1px solid #ddd;
-            outline: none;
-            font-size: 14px;
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-actions button {
+            padding: 6px 12px;
+            background-color: #ecf0f1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .quick-actions button:hover {
+            background-color: #e2e2e2;
         }
     </style>
 </head>
@@ -291,272 +283,414 @@
         <div class="nav-header">Agent Portal</div>
         <div class="nav-item active">My Issues</div>
         <div class="nav-item">All Issues</div>
+        <div class="focus-switch-container">
+            <input type="checkbox" id="focusSwitch">
+            <label for="focusSwitch" class="focus-switch-label">Focus Mode</label>
+        </div>
     </div>
     
     <!-- Middle Issue List -->
     <div class="issue-list-container">
         <div class="issue-list-header">
             Issues
-            <span id="issue-count">10 issues</span>
+            <span id="issue-count">Loading...</span>
         </div>
         <input type="text" class="search-bar" placeholder="Search issues...">
-        <ul class="issue-list" id="issueList">
-            <!-- Sample issues will be generated here by JavaScript -->
-        </ul>
+        <div id="loadingMessage">Loading issues...</div>
+        <div id="errorMessage"></div>
+        <ul class="issue-list" id="issuesList"></ul>
     </div>
     
     <!-- Right Issue Details -->
     <div class="issue-details">
         <div class="issue-details-empty">Select an issue to view details.</div>
-        <div class="issue-details-content" style="display: none;">
-            <!-- Header section -->
-            <div class="issue-header">
-                <div class="issue-header-row">
-                    <div class="issue-number">Issue #<span id="issue-id"></span></div>
-                    <div class="issue-status"><span id="issue-status-badge"></span></div>
-                    <div class="issue-customer-name"><span id="issue-customer"></span></div>
-                </div>
-                <div class="issue-title" id="issue-title"></div>
-                <div class="issue-divider"></div>
+        <div id="issueHeader" style="display: none;"></div>
+        <div id="conversationArea" style="display: none;"></div>
+        <div class="issue-response-area" style="display: none;">
+            <div class="quick-actions">
+                <button data-ai="Please summarize this conversation.">Summarize</button>
+                <button data-ai="What should I do next to help this customer?">Next Steps</button>
+                <button data-ai="Draft a response to the customer's last message.">Draft Response</button>
+                <button data-ai="Is there any important information missing from this conversation?">Missing Info</button>
             </div>
-            
-            <!-- Conversation area -->
-            <div class="issue-conversation" id="issue-conversation">
-                <!-- Messages will be populated here -->
-            </div>
-            
-            <!-- Agent response area -->
-            <div class="issue-response-area">
-                <div class="issue-divider"></div>
-                <div class="ai-instructions-label">AI Instructions</div>
-                <textarea class="ai-instructions-input" placeholder="Enter instructions for AI assistance..."></textarea>
-                <button class="submit-button">Submit</button>
+            <div class="ai-instructions-label">AI Instructions</div>
+            <textarea id="aiInstructions" class="ai-instructions-input" placeholder="Enter instructions for AI assistance..."></textarea>
+            <div class="button-group">
+                <button id="submitInstructionsBtn" class="action-button">Submit</button>
+                <button id="submitAndClearBtn" class="action-button">Submit & Clear Alert</button>
+                <button id="clearAlertBtn" class="action-button">Clear Alert</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Sample data for issues
-        const issues = [
-            {
-                id: 'ISS-1001',
-                customer: 'John Smith',
-                description: 'Unable to access account after password reset',
-                status: 'open',
-                priority: 'high',
-                date: '2025-03-20'
-            },
-            {
-                id: 'ISS-1002',
-                customer: 'Sarah Johnson',
-                description: 'Billing discrepancy on March statement',
-                status: 'in-progress',
-                priority: 'medium',
-                date: '2025-03-21'
-            },
-            {
-                id: 'ISS-1003',
-                customer: 'Michael Chen',
-                description: 'Product arrived damaged, requesting replacement',
-                status: 'open',
-                priority: 'high',
-                date: '2025-03-22'
-            },
-            {
-                id: 'ISS-1004',
-                customer: 'Emily Rodriguez',
-                description: 'Subscription renewal failed multiple times',
-                status: 'in-progress',
-                priority: 'medium',
-                date: '2025-03-22'
-            },
-            {
-                id: 'ISS-1005',
-                customer: 'David Wilson',
-                description: 'Request for refund on cancelled service',
-                status: 'resolved',
-                priority: 'low',
-                date: '2025-03-23'
-            },
-            {
-                id: 'ISS-1006',
-                customer: 'Jessica Brown',
-                description: 'Mobile app crashes during checkout process',
-                status: 'open',
-                priority: 'high',
-                date: '2025-03-23'
-            },
-            {
-                id: 'ISS-1007',
-                customer: 'Robert Taylor',
-                description: 'Missing loyalty points from recent purchase',
-                status: 'in-progress',
-                priority: 'low',
-                date: '2025-03-24'
-            },
-            {
-                id: 'ISS-1008',
-                customer: 'Lisa Anderson',
-                description: 'Promotional code not applying to cart',
-                status: 'resolved',
-                priority: 'medium',
-                date: '2025-03-24'
-            },
-            {
-                id: 'ISS-1009',
-                customer: 'Kevin Martinez',
-                description: 'Question about product compatibility',
-                status: 'open',
-                priority: 'medium',
-                date: '2025-03-25'
-            },
-            {
-                id: 'ISS-1010',
-                customer: 'Amanda White',
-                description: 'Account locked after multiple login attempts',
-                status: 'in-progress',
-                priority: 'high',
-                date: '2025-03-25'
-            }
-        ];
+        const HELPSHIFT_DOMAIN = "ashbys";         
+        const HELPSHIFT_API_KEY = "YOUR_API_KEY";       
+        
+        // Add the ?includes param to fetch private_notes
+        const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
+        const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
 
-        // Function to generate issue list items
-        function generateIssueList() {
-            const issueListElement = document.getElementById('issueList');
-            issues.forEach((issue, index) => {
-                const listItem = document.createElement('li');
-                listItem.className = 'issue-item';
-                listItem.setAttribute('data-issue-id', issue.id);
-                
-                // Add selected class to first item by default
-                if (index === 0) {
-                    listItem.classList.add('selected');
+        let issuesData = [];
+        let selectedIssueId = null;
+        let focusModeOn = false; // "Focus" switch
+
+        window.addEventListener("DOMContentLoaded", () => {
+            fetchIssues();
+            setInterval(fetchIssues, 5000); // auto-refresh
+
+            // Hook up the 3 existing instruction buttons
+            document.getElementById("submitInstructionsBtn")
+                    .addEventListener("click", () => handleAiInstructions("submit"));
+            document.getElementById("submitAndClearBtn")
+                    .addEventListener("click", () => handleAiInstructions("submitAndClear"));
+            document.getElementById("clearAlertBtn")
+                    .addEventListener("click", () => handleAiInstructions("clear"));
+
+            // Pressing Enter => "submit" instructions
+            const aiBox = document.getElementById("aiInstructions");
+            aiBox.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAiInstructions("submit");
                 }
-                
-                listItem.innerHTML = `
-                    <div class="issue-id">${issue.id}</div>
-                    <div class="issue-customer">${issue.customer}</div>
-                    <div class="issue-description">${issue.description}</div>
-                    <div class="issue-meta">
-                        <span class="status status-${issue.status}">${issue.status}</span>
-                        <span class="priority priority-${issue.priority}">Priority: ${issue.priority}</span>
-                        <span class="date">${formatDate(issue.date)}</span>
-                    </div>
-                `;
-                
-                listItem.addEventListener('click', function() {
-                    // Remove selected class from all items
-                    document.querySelectorAll('.issue-item').forEach(item => {
-                        item.classList.remove('selected');
+            });
+
+            // Focus switch
+            const focusSwitch = document.getElementById("focusSwitch");
+            focusSwitch.addEventListener("change", () => {
+                focusModeOn = focusSwitch.checked;
+                buildIssueList();
+            });
+
+            // Quick action buttons => prepopulate aiInstructions
+            const quickButtons = document.querySelectorAll('.quick-actions button');
+            quickButtons.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const text = btn.getAttribute("data-ai") || "";
+                    aiBox.value = text;
+                });
+            });
+
+            // Navigation items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-item').forEach(navItem => {
+                        navItem.classList.remove('active');
                     });
-                    
-                    // Add selected class to clicked item
-                    this.classList.add('selected');
-                    
-                    // Show issue details
-                    const issueId = this.getAttribute('data-issue-id');
-                    showIssueDetails(issueId);
+                    this.classList.add('active');
                 });
-                
-                issueListElement.appendChild(listItem);
-            });
-        }
-
-        // Format date function
-        function formatDate(dateString) {
-            const options = { month: 'short', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('en-US', options);
-        }
-
-        // Sample conversation data for each issue
-        const issueConversations = {
-            'ISS-1001': [
-                { type: 'user', text: 'I cannot log into my account after resetting my password. It says my credentials are invalid.' },
-                { type: 'agent', text: 'I understand how frustrating that can be. Let me check your account status. Could you confirm the email address associated with your account?' },
-                { type: 'user', text: 'My email is john.smith@example.com' },
-                { type: 'system', text: 'Agent verified user identity' },
-                { type: 'agent', text: 'Thank you for confirming. I can see that there was an issue with the password reset process. Ive manually reset your password. You should receive an email with instructions shortly.' }
-            ],
-            'ISS-1002': [
-                { type: 'user', text: 'I noticed an extra charge of $49.99 on my March statement that I don\'t recognize.' },
-                { type: 'agent', text: 'I apologize for the confusion. Let me look into that charge for you right away.' },
-                { type: 'system', text: 'Agent reviewed account billing history' },
-                { type: 'agent', text: 'I\'ve identified the charge. It appears to be for the premium service upgrade that was applied on March 15th. Would you like me to provide more details about this service?' }
-            ],
-            // Add conversations for other issues as needed
-        };
-
-        // Function to show issue details
-        function showIssueDetails(issueId) {
-            // Find the issue
-            const issue = issues.find(i => i.id === issueId);
-            if (!issue) return;
-            
-            // Hide the empty state and show content
-            document.querySelector('.issue-details-empty').style.display = 'none';
-            document.querySelector('.issue-details-content').style.display = 'flex';
-            
-            // Update header information
-            document.getElementById('issue-id').textContent = issue.id;
-            document.getElementById('issue-customer').textContent = issue.customer;
-            document.getElementById('issue-title').textContent = issue.description;
-            
-            // Set status badge
-            const statusBadge = document.getElementById('issue-status-badge');
-            statusBadge.textContent = issue.status.toUpperCase();
-            statusBadge.className = `status status-${issue.status}`;
-            
-            // Clear previous conversation
-            const conversationContainer = document.getElementById('issue-conversation');
-            conversationContainer.innerHTML = '';
-            
-            // Add conversation messages if available
-            const conversation = issueConversations[issueId] || [];
-            conversation.forEach(message => {
-                const messageElement = document.createElement('div');
-                
-                if (message.type === 'system') {
-                    messageElement.className = 'system-note';
-                    messageElement.textContent = message.text;
-                } else {
-                    messageElement.className = `message ${message.type}-message`;
-                    messageElement.textContent = message.text;
-                }
-                
-                conversationContainer.appendChild(messageElement);
-            });
-            
-            // If no conversation, add a placeholder
-            if (conversation.length === 0) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'system-note';
-                placeholder.textContent = 'No conversation history available.';
-                conversationContainer.appendChild(placeholder);
-            }
-        }
-        
-        // Initialize the issue list
-        generateIssueList();
-        
-        // Show first issue details by default
-        if (issues.length > 0) {
-            showIssueDetails(issues[0].id);
-        }
-
-        // Add click handlers for navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(navItem => {
-                    navItem.classList.remove('active');
-                });
-                this.classList.add('active');
-                
-                // Would update the issue list based on selection (My Issues/All Issues)
-                // For now, we just update the header
-                document.querySelector('.issue-list-header').textContent = this.textContent;
-                document.getElementById('issue-count').textContent = '10 issues';
             });
         });
+
+        /**
+         * GET issues
+         */
+        async function fetchIssues() {
+            try {
+                const response = await fetch(HELPSHIFT_URL, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Basic ${authString}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                document.getElementById("loadingMessage").style.display = 'none';
+                document.getElementById("errorMessage").textContent = "";
+
+                issuesData = data.issues || [];
+                document.getElementById("issue-count").textContent = `${issuesData.length} issues`;
+                buildIssueList();
+
+                if (selectedIssueId !== null) {
+                    const updatedIssue = issuesData.find(i => i.id === selectedIssueId);
+                    if (updatedIssue) {
+                        showIssueDetail(updatedIssue);
+                    }
+                }
+            } catch (error) {
+                document.getElementById("loadingMessage").style.display = 'none';
+                document.getElementById("errorMessage").innerText =
+                "Failed to load issues: " + error.message;
+            }
+        }
+
+        function buildIssueList() {
+            const issuesList = document.getElementById("issuesList");
+            issuesList.innerHTML = "";
+
+            if (issuesData.length === 0) {
+                issuesList.innerHTML = "<li class='issue-item'>No open issues found.</li>";
+                return;
+            }
+
+            issuesData.forEach(issue => {
+                const issueState = issue.state_data?.state || "";
+                // Focus filter => hide resolved or rejected
+                if (focusModeOn && (issueState === "resolved" || issueState === "rejected")) {
+                    return;
+                }
+
+                const li = document.createElement("li");
+                li.className = "issue-item";
+
+                if (issue.id === selectedIssueId) {
+                    li.classList.add("selected-issue");
+                }
+
+                let statusText = issueState;
+                if (issueState === "resolved") {
+                    li.classList.add("resolved-issue");
+                    statusText = `<span class="status-resolved">resolved</span>`;
+                }
+
+                const aiStateValue = issue.custom_fields?.ai_state?.value || "";
+                let warningEmoji = "";
+                if (aiStateValue === "help") {
+                    li.classList.add("ai-help-issue");
+                    warningEmoji = "⚠️ ";
+                }
+
+                li.innerHTML = `
+                    <div class="issue-title">
+                        ${warningEmoji}${issue.title}
+                    </div>
+                    <div class="issue-meta">
+                        <span>Issue #${issue.id}</span>
+                        <span>${statusText}</span>
+                    </div>
+                `;
+
+                li.addEventListener("click", () => {
+                    selectedIssueId = issue.id;
+                    
+                    // Update selected state in UI
+                    document.querySelectorAll('.issue-item').forEach(item => {
+                        item.classList.remove('selected-issue');
+                    });
+                    li.classList.add('selected-issue');
+                    
+                    showIssueDetail(issue);
+                });
+                issuesList.appendChild(li);
+            });
+        }
+
+        function showIssueDetail(issue) {
+            // Hide empty state and show content
+            document.querySelector('.issue-details-empty').style.display = 'none';
+            document.getElementById('issueHeader').style.display = 'block';
+            document.getElementById('conversationArea').style.display = 'flex';
+            document.querySelector('.issue-response-area').style.display = 'block';
+            
+            // Update header
+            const issueHeader = document.getElementById("issueHeader");
+            issueHeader.innerHTML = `
+                <h2>Issue #${issue.id}</h2>
+                <p><strong>Title:</strong> ${issue.title}</p>
+                <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
+                <p><strong>Status:</strong> ${issue.state_data?.state || "New"}</p>
+            `;
+
+            // Process conversation
+            const conversationItems = [];
+
+            // Add messages
+            (issue.messages || []).forEach(msg => {
+                conversationItems.push({
+                    type: 'message',
+                    body: msg.body,
+                    origin: msg.origin,
+                    author: msg.author,
+                    timestamp: parseTimestamp(msg.created_at)
+                });
+            });
+
+            // Add private notes
+            (issue.private_notes || []).forEach(note => {
+                conversationItems.push({
+                    type: 'private_note',
+                    body: note.body,
+                    timestamp: parseTimestamp(note.created_at)
+                });
+            });
+
+            // Sort by timestamp
+            conversationItems.sort((a, b) => a.timestamp - b.timestamp);
+
+            // Display conversation
+            const conversationArea = document.getElementById("conversationArea");
+            conversationArea.innerHTML = "";
+
+            if (conversationItems.length === 0) {
+                const emptyNote = document.createElement("div");
+                emptyNote.className = "private-note";
+                emptyNote.textContent = "No conversation history available.";
+                conversationArea.appendChild(emptyNote);
+            } else {
+                conversationItems.forEach(item => {
+                    if (item.type === 'message') {
+                        const msgDiv = document.createElement("div");
+                        if (item.origin === "end-user") {
+                            msgDiv.classList.add("message-left");
+                        } else {
+                            msgDiv.classList.add("message-right");
+                        }
+
+                        const adjustedText = transformBotMessage(item);
+                        msgDiv.textContent = adjustedText;
+                        conversationArea.appendChild(msgDiv);
+                    } else {
+                        const noteDiv = document.createElement("div");
+                        noteDiv.classList.add("private-note");
+                        noteDiv.textContent = "Private Note: " + item.body;
+                        conversationArea.appendChild(noteDiv);
+                    }
+                });
+            }
+
+            // Auto-scroll
+            conversationArea.scrollTop = conversationArea.scrollHeight;
+        }
+
+        function transformBotMessage(msg) {
+            const isHelpshift = (msg.origin === "helpshift");
+            const firstEmail = msg.author?.emails?.[0] || "";
+            const isBotEmail = firstEmail.startsWith("bots-");
+
+            if (isHelpshift && isBotEmail) {
+                if (msg.body === "Bot Started") {
+                    return `Action Started: ${msg.author?.name || "Unknown Bot"}`;
+                } else if (msg.body === "Bot Ended") {
+                    return `Action Ended: ${msg.author?.name || "Unknown Bot"}`;
+                }
+            }
+            return msg.body;
+        }
+
+        function parseTimestamp(ts) {
+            if (typeof ts === "number") {
+                return ts;
+            } else if (typeof ts === "string") {
+                return new Date(ts).getTime();
+            } else {
+                return 0;
+            }
+        }
+
+        /**
+         * handleAiInstructions(actionType)
+         * actionType: "submit", "clear", or "submitAndClear"
+         */
+        async function handleAiInstructions(actionType) {
+            if (!selectedIssueId) {
+                alert("No issue is currently selected!");
+                return;
+            }
+
+            const aiBox = document.getElementById("aiInstructions");
+            const instructions = aiBox.value.trim();
+            const mustHaveInstructions = (actionType === "submit" || actionType === "submitAndClear");
+
+            if (mustHaveInstructions && !instructions) {
+                alert("Please enter AI instructions before submitting.");
+                return;
+            }
+
+            try {
+                // Step 1) If "submit" or "submitAndClear", update custom_fields.ml1
+                if (actionType === "submit" || actionType === "submitAndClear") {
+                    await putCustomFieldMl1(instructions);
+                }
+
+                // Step 2) If "clear" or "submitAndClear", set ai_state to 'none'
+                if (actionType === "clear" || actionType === "submitAndClear") {
+                    await putAiStateNone();
+                }
+
+                // Step 3) If "submit" or "submitAndClear", POST private note
+                if (actionType === "submit" || actionType === "submitAndClear") {
+                    await postPrivateNote(instructions);
+                }
+
+                // Clear the instructions if we did any "submit" action
+                if (actionType === "submit" || actionType === "submitAndClear") {
+                    aiBox.value = "";
+                }
+
+                // Refresh issues to show the change
+                await fetchIssues();
+
+            } catch (err) {
+                alert(`Failed to process AI instructions: ${err.message}`);
+            }
+        }
+
+        // Step 1: PUT ml1
+        async function putCustomFieldMl1(instructions) {
+            const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+            const formData = new FormData();
+            formData.append(
+                "custom_fields",
+                `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+            );
+
+            const response = await fetch(url, {
+                method: "PUT",
+                headers: { "Authorization": `Basic ${authString}` },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const resultText = await response.text();
+                throw new Error(`PUT ml1 failed: HTTP ${response.status} - ${response.statusText}\n${resultText}`);
+            }
+        }
+
+        // Step 2: PUT ai_state=none
+        async function putAiStateNone() {
+            const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}`;
+            const formData = new FormData();
+            formData.append(
+                "custom_fields",
+                `{"ai_state":{"type":"singleline","value":"none"}}`
+            );
+
+            const response = await fetch(url, {
+                method: "PUT",
+                headers: { "Authorization": `Basic ${authString}` },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const resultText = await response.text();
+                throw new Error(`PUT ai_state=none failed: HTTP ${response.status} - ${response.statusText}\n${resultText}`);
+            }
+        }
+
+        // Step 3: POST private note
+        async function postPrivateNote(instructions) {
+            const url = `https://api.helpshift.com/v1/ashbys/issues/${selectedIssueId}/private-notes`;
+            const formData = new FormData();
+            formData.append("note-text", `AI Instructions from Agent: ${instructions}`);
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Authorization": `Basic ${authString}` },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const resultText = await response.text();
+                throw new Error(`POST private note failed: HTTP ${response.status} - ${response.statusText}\n${resultText}`);
+            }
+        }
     </script>
 </body>
 </html>
