@@ -9,13 +9,13 @@
     #container { display: flex; height: 100vh; }
     #chat { flex: 1; border-right: 1px solid #ccc; display: flex; flex-direction: column; }
     #messages { flex: 1; overflow-y: auto; padding: 10px; }
-    .message { margin-bottom: 10px; padding: 5px; border-radius: 4px; }
+    .message { margin-bottom: 10px; padding: 5px; border-radius: 4px; white-space: pre-wrap; }
     .message.user { text-align: right; background: #e0f7fa; }
     .message.assistant { text-align: left; background: #f1f1f1; }
     #inputForm { display: flex; border-top: 1px solid #ccc; }
     #input { flex: 1; padding: 10px; border: none; }
     #send { padding: 0 20px; border: none; background: #007bff; color: white; cursor: pointer; }
-    #widget { flex: 1; padding: 20px; }
+    #widget { flex: 1; padding: 20px; overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -35,22 +35,16 @@
   <!-- Chart.js for plotting -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Prompt for API key at load time
     let apiKey = '';
     window.addEventListener('DOMContentLoaded', () => {
       apiKey = prompt('Please enter your OpenAI API key:');
-      if (!apiKey) {
-        alert('An API key is required to use this prototype.');
-      }
+      if (!apiKey) alert('An API key is required.');
     });
 
-    // Conversation history
     const messages = [
       {
         role: 'system',
-        content: `You are an AI assistant. When the user requests a visualization, respond with valid JSON matching this schema:\n
-{\n  "type": "chart",\n  "chartType": "line",\n  "title": "Chart Title (optional)",\n  "data": {\n    "labels": ["label1", "label2", ...],\n    "values": [123, 456, ...]\n  }\n}\n
-Otherwise, reply with plain text.`
+        content: `You are an AI assistant. When the user requests a visualization, respond with only valid JSON matching this schema (no extra text):\n{\n  "type": "chart",\n  "chartType": "line",\n  "title": "(optional title)",\n  "data": {\n    "labels": ["label1","label2",...],\n    "values": [num1,num2,...]\n  }\n}`
       }
     ];
 
@@ -61,34 +55,31 @@ Otherwise, reply with plain text.`
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      if (!apiKey) {
-        alert('Please provide an API key to proceed.');
-        return;
-      }
+      if (!apiKey) return alert('Please enter an API key.');
       const userText = input.value.trim();
       if (!userText) return;
       addMessage('user', userText);
       messages.push({ role: 'user', content: userText });
       input.value = '';
 
-      // Call OpenAI Chat API
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4',
-          messages: messages
-        })
-      });
-      const data = await response.json();
-      const assistantText = data.choices[0].message.content;
-      addMessage('assistant', assistantText);
-      messages.push({ role: 'assistant', content: assistantText });
-
-      renderWidget(assistantText);
+      try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({ model: 'gpt-4', messages })
+        });
+        const json = await res.json();
+        const assistantText = json.choices[0].message.content;
+        addMessage('assistant', assistantText);
+        messages.push({ role: 'assistant', content: assistantText });
+        renderWidget(assistantText);
+      } catch (err) {
+        console.error(err);
+        alert('Error contacting API.');
+      }
     });
 
     function addMessage(who, text) {
@@ -101,29 +92,25 @@ Otherwise, reply with plain text.`
 
     function renderWidget(text) {
       widgetDiv.innerHTML = '';
+      // Extract JSON object from any wrapper (code fences, text)
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) return;
       try {
-        const obj = JSON.parse(text);
+        const obj = JSON.parse(match[0]);
         if (obj.type === 'chart' && obj.chartType === 'line') {
           const canvas = document.createElement('canvas');
           widgetDiv.appendChild(canvas);
           new Chart(canvas.getContext('2d'), {
             type: 'line',
-            data: {
-              labels: obj.data.labels,
-              datasets: [{
-                label: obj.title || 'Dataset',
-                data: obj.data.values,
-                fill: false,
-                tension: 0.1
-              }]
-            },
+            data: { labels: obj.data.labels, datasets: [{ label: obj.title || '', data: obj.data.values, fill: false, tension: 0.1 }] },
             options: { responsive: true }
           });
         }
       } catch (e) {
-        // Not JSON or invalid schema; no widget
+        console.warn('Invalid JSON for widget', e);
       }
     }
   </script>
 </body>
 </html>
+
