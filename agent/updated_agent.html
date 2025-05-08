@@ -25,16 +25,22 @@
       display: flex;
       flex-direction: column;
       flex: 1;
+      height: 100vh;
     }
 
-    /* ─── Top Nav (full-width tabs) ───────────────────────────────────────────── */
+    /* ─── Top Nav (full-width tabs + focus) ─────────────────────────────────── */
     .top-nav {
+      display: flex;
+      align-items: center;
       background-color: #bdc3c7;
       border-bottom: 1px solid #2c3e50;
+      height: 40px;
+      padding: 0 8px;
     }
     .tab-bar {
       display: flex;
-      height: 40px;
+      flex: 1;
+      height: 100%;
     }
     .tab {
       padding: 10px 16px;
@@ -51,11 +57,25 @@
       background-color: #2c3e50;
       color: #fff;
     }
+    .focus-switch-container {
+      display: flex;
+      align-items: center;
+      padding-left: 16px;
+    }
+    .focus-switch-container input {
+      margin-right: 6px;
+    }
+    .focus-switch-container label {
+      font-size: 14px;
+      color: #2c3e50;
+      cursor: pointer;
+    }
 
-    /* ─── Main three-column area ─────────────────────────────────────────────── */
+    /* ─── Main three-column area (fills rest of screen) ─────────────────────── */
     .main-content {
       display: flex;
       flex: 1;
+      overflow: hidden;
     }
 
     /* Column 1: Issue List */
@@ -73,6 +93,7 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #ddd;
+      flex: 0 0 auto;
     }
     .search-bar {
       padding: 8px 12px;
@@ -80,6 +101,7 @@
       border-bottom: 1px solid #ddd;
       font-size: 14px;
       outline: none;
+      flex: 0 0 auto;
     }
     .issue-list {
       flex: 1;
@@ -114,6 +136,7 @@
       background-color: #fff;
       font-style: italic;
       color: #7f8c8d;
+      flex: 0 0 auto;
     }
     #conversationArea {
       flex: 1;
@@ -159,6 +182,7 @@
       border-bottom: 1px solid #ddd;
       background-color: #fff;
       font-weight: bold;
+      flex: 0 0 auto;
     }
     .quick-actions {
       display: flex;
@@ -166,6 +190,7 @@
       gap: 8px;
       padding: 12px 16px;
       border-bottom: 1px solid #ddd;
+      flex: 0 0 auto;
     }
     .quick-actions button {
       padding: 6px 12px;
@@ -216,7 +241,7 @@
   <div class="side-bar"></div>
   <div class="right-container">
 
-    <!-- Full-width Tabs -->
+    <!-- Full-width Tabs + Focus -->
     <div class="top-nav">
       <div class="tab-bar">
         <div class="tab active" data-filter="all">All Issues</div>
@@ -224,11 +249,16 @@
         <div class="tab" data-filter="mentions">My Mentions</div>
         <div class="tab" data-filter="closed">My Closed</div>
       </div>
+      <div class="focus-switch-container">
+        <input type="checkbox" id="focusSwitch">
+        <label for="focusSwitch">Focus Mode</label>
+      </div>
     </div>
 
+    <!-- Main three-column area -->
     <div class="main-content">
 
-      <!-- Issue List -->
+      <!-- Column 1: Issue List -->
       <div class="issue-list-col">
         <div class="issue-list-header">
           Issues <span id="issue-count">Loading…</span>
@@ -237,23 +267,26 @@
         <ul class="issue-list" id="issuesList"></ul>
       </div>
 
-      <!-- Conversation -->
+      <!-- Column 2: Conversation -->
       <div class="conversation-col">
-        <!-- single header we update in JS -->
         <div id="convHeader" class="conv-header">
           Select an issue to view conversation
         </div>
         <div id="conversationArea"></div>
       </div>
 
-      <!-- AI Pane -->
+      <!-- Column 3: AI Pane -->
       <div class="ai-col">
         <div class="ai-pane-header">AI Instructions</div>
         <div class="quick-actions">
           <button data-ai="Please summarize this conversation.">Summarize</button>
           <button data-ai="What should I do next to help this customer?">Next Steps</button>
-          <button data-ai="Draft a response to the customer's last message.">Draft Response</button>
-          <button data-ai="Is there any important information missing from this conversation?">Missing Info</button>
+          <button data-ai="Draft a response to the customer's last message.">
+            Draft Response
+          </button>
+          <button data-ai="Is there any important information missing from this conversation?">
+            Missing Info
+          </button>
         </div>
         <div class="ai-spacer"></div>
         <div class="ai-controls">
@@ -274,22 +307,24 @@
   </div>
 
   <script>
-    // ─── Config & State ────────────────────────────────────────────────────────
+    // ─── Config & State ─────────────────────────────────────────────────────
     const HELPSHIFT_DOMAIN = "ashbys";
     const authString = "<YOUR_BASE64_API_TOKEN>";
-    const HELPSHIFT_URL = 
+    const HELPSHIFT_URL =
       `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
 
     let issuesData = [];
     let selectedIssueId = null;
     let currentFilter = "all";
+    let focusModeOn = false;
 
-    // ─── Init ─────────────────────────────────────────────────────────────────
+    // ─── Initialization ───────────────────────────────────────────────────────
     window.addEventListener("DOMContentLoaded", () => {
+      // initial fetch + auto-refresh
       fetchIssues();
       setInterval(fetchIssues, 5000);
 
-      // Tabs
+      // Tab switching
       document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
           document.querySelector('.tab.active').classList.remove('active');
@@ -299,7 +334,13 @@
         });
       });
 
-      // Quick-actions → prefill
+      // Focus toggle
+      document.getElementById('focusSwitch').addEventListener('change', e => {
+        focusModeOn = e.target.checked;
+        buildIssueList();
+      });
+
+      // Quick-action buttons → prefill AI textarea
       const aiBox = document.getElementById("aiInstructions");
       document.querySelectorAll('.quick-actions button').forEach(btn => {
         btn.addEventListener("click", () => {
@@ -307,7 +348,7 @@
         });
       });
 
-      // AI buttons
+      // AI action buttons
       document.getElementById("submitInstructionsBtn")
         .addEventListener("click", () => handleAiInstructions("submit"));
       document.getElementById("submitAndClearBtn")
@@ -315,8 +356,8 @@
       document.getElementById("clearAlertBtn")
         .addEventListener("click", () => handleAiInstructions("clear"));
 
-      // Enter in textarea = submit
-      aiBox.addEventListener("keydown", e => {
+      // Enter key in AI box = submit
+      aiBox.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           handleAiInstructions("submit");
@@ -324,7 +365,7 @@
       });
     });
 
-    // ─── Fetch & List ─────────────────────────────────────────────────────────
+    // ─── Fetch & Render Issues ────────────────────────────────────────────────
     async function fetchIssues() {
       try {
         const res = await fetch(HELPSHIFT_URL, {
@@ -341,8 +382,8 @@
           .textContent = `${issuesData.length} issues`;
         buildIssueList();
         if (selectedIssueId) {
-          const updated = issuesData.find(i => i.id === selectedIssueId);
-          if (updated) showIssueDetail(updated);
+          const upd = issuesData.find(i => i.id === selectedIssueId);
+          if (upd) showIssueDetail(upd);
         }
       } catch (err) {
         document.getElementById("issuesList").innerHTML = `
@@ -361,9 +402,12 @@
       }
       issuesData.forEach(issue => {
         const state = issue.state_data?.state || "";
+        // Focus hides resolved/rejected
+        if (focusModeOn && (state==="resolved"||state==="rejected")) return;
+        // Tab filters
         if (currentFilter === "open" && (state==="resolved"||state==="rejected")) return;
         if (currentFilter === "closed" && !(state==="resolved"||state==="rejected")) return;
-        // add "mentions" logic here as needed
+        // "mentions" logic goes here if needed
 
         const li = document.createElement("li");
         li.className = "issue-item";
@@ -382,8 +426,8 @@
           <div class="issue-meta">
             <span>Issue #${issue.id}</span>
             <span>${statusHTML}</span>
-          </div>
-        `;
+          </div>`;
+
         li.addEventListener("click", () => {
           selectedIssueId = issue.id;
           document.querySelectorAll('.issue-item')
@@ -391,13 +435,14 @@
           li.classList.add("selected-issue");
           showIssueDetail(issue);
         });
+
         list.appendChild(li);
       });
     }
 
-    // ─── Show Detail (fixed) ───────────────────────────────────────────────────
+    // ─── Show Issue Detail ─────────────────────────────────────────────────────
     function showIssueDetail(issue) {
-      // 1) Update the single header element
+      // Update static header
       const headerEl = document.getElementById('convHeader');
       headerEl.innerHTML = `
         <h2>Issue #${issue.id}</h2>
@@ -406,10 +451,9 @@
         <p><strong>Status:</strong> ${issue.state_data?.state || 'New'}</p>
       `;
 
-      // 2) Clear and rebuild conversationArea
+      // Rebuild conversation
       const convArea = document.getElementById('conversationArea');
       convArea.innerHTML = '';
-
       const items = [];
       (issue.messages || []).forEach(m => {
         items.push({
@@ -451,7 +495,6 @@
       convArea.scrollTop = convArea.scrollHeight;
     }
 
-    // ─── Helpers & AI Workflow ─────────────────────────────────────────────────
     function transformBotMessage(msg) {
       const isBot = msg.origin === "helpshift"
         && msg.author?.emails?.[0]?.startsWith("bots-");
@@ -465,6 +508,7 @@
       return (typeof ts === "number") ? ts : new Date(ts).getTime();
     }
 
+    // ─── AI Instructions Workflow ──────────────────────────────────────────────
     async function handleAiInstructions(actionType) {
       if (!selectedIssueId) return alert("No issue selected!");
       const aiBox = document.getElementById("aiInstructions");
@@ -474,7 +518,7 @@
 
       try {
         if (needText)          await putCustomFieldMl1(text);
-        if (actionType !== "submit") await putAiStateNone(); 
+        if (actionType !== "submit") await putAiStateNone();
         if (needText) {
           await postPrivateNote(text);
           aiBox.value = "";
@@ -487,9 +531,7 @@
     async function putCustomFieldMl1(val) {
       const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues/${selectedIssueId}`;
       const fd = new FormData();
-      fd.append("custom_fields",
-        `{"ml1":{"type":"multiline","value":"${val}"}}`
-      );
+      fd.append("custom_fields", `{"ml1":{"type":"multiline","value":"${val}"}}`);
       const res = await fetch(url, {
         method: "PUT",
         headers: { "Authorization": `Basic ${authString}` },
@@ -522,5 +564,6 @@
   </script>
 </body>
 </html>
+
 
 
