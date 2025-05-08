@@ -35,7 +35,7 @@
       flex-direction: column;
       border-right: 1px solid #2c3e50;
     }
-    /* Tab bar at top of issue list */
+    /* Tab bar */
     .tab-bar {
       display: flex;
       background-color: #bdc3c7;
@@ -103,6 +103,8 @@
       padding: 12px 16px;
       border-bottom: 1px solid #ddd;
       background-color: #fff;
+      font-style: italic;
+      color: #7f8c8d;
     }
     #conversationArea {
       flex: 1;
@@ -212,13 +214,13 @@
       </div>
       <input type="text" class="search-bar" placeholder="Search issues…" />
       <ul class="issue-list" id="issuesList">
-        <li id="loadingMessage" class="issue-item">Loading issues…</li>
+        <!-- Will be populated dynamically -->
       </ul>
     </div>
 
     <!-- Column 2: Conversation -->
     <div class="conversation-col">
-      <div class="conv-header" id="convHeader">Select an issue to view conversation</div>
+      <div id="convHeader" class="conv-header">Select an issue to view conversation</div>
       <div id="conversationArea"></div>
     </div>
 
@@ -242,18 +244,277 @@
   </div>
 
   <script>
-    // (Your existing JavaScript still applies – 
-    //  just wire up the new tab-buttons and keep fetch/build logic the same.)
-    // Example: Tab switching filter stub:
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelector('.tab.active').classList.remove('active');
-        tab.classList.add('active');
-        const filter = tab.dataset.filter;
-        // TODO: apply your JS filter logic (all|open|mentions|closed)
-        buildIssueList(); 
+    // ─── Configuration ─────────────────────────────────────────────────────────
+    const HELPSHIFT_DOMAIN = "ashbys";
+    const authString = "YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6"; 
+    const HELPSHIFT_URL = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
+
+    // ─── State ───────────────────────────────────────────────────────────────────
+    let issuesData = [];
+    let selectedIssueId = null;
+    let currentFilter = "all";
+
+    // ─── Initialization ─────────────────────────────────────────────────────────
+    window.addEventListener("DOMContentLoaded", () => {
+      fetchIssues();
+      setInterval(fetchIssues, 5000);
+
+      // Tab switching
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelector('.tab.active').classList.remove('active');
+          tab.classList.add('active');
+          currentFilter = tab.dataset.filter;
+          buildIssueList();
+        });
+      });
+
+      // Quick-action buttons → prefill AI textbox
+      const aiBox = document.getElementById("aiInstructions");
+      document.querySelectorAll('.quick-actions button').forEach(btn => {
+        btn.addEventListener("click", () => {
+          aiBox.value = btn.getAttribute("data-ai") || "";
+        });
+      });
+
+      // AI action buttons
+      document.getElementById("submitInstructionsBtn")
+        .addEventListener("click", () => handleAiInstructions("submit"));
+      document.getElementById("submitAndClearBtn")
+        .addEventListener("click", () => handleAiInstructions("submitAndClear"));
+      document.getElementById("clearAlertBtn")
+        .addEventListener("click", () => handleAiInstructions("clear"));
+
+      // Enter key in AI box = submit
+      aiBox.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleAiInstructions("submit");
+        }
       });
     });
+
+    // ─── Fetch & Refresh ────────────────────────────────────────────────────────
+    async function fetchIssues() {
+      try {
+        const res = await fetch(HELPSHIFT_URL, {
+          method: "GET",
+          headers: {
+            "Authorization": `Basic ${authString}`,
+            "Content-Type": "application/json"
+          }
+        });
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const data = await res.json();
+        issuesData = data.issues || [];
+        document.getElementById("issue-count").textContent = `${issuesData.length} issues`;
+        buildIssueList();
+        // if one is open, refresh its detail pane
+        if (selectedIssueId) {
+          const issue = issuesData.find(i => i.id === selectedIssueId);
+          if (issue) showIssueDetail(issue);
+        }
+      } catch (err) {
+        const list = document.getElementById("issuesList");
+        list.innerHTML = `<li class="issue-item" style="color:#e74c3c">
+          Failed to load issues: ${err.message}
+        </li>`;
+      }
+    }
+
+    // ─── Build Issue List ───────────────────────────────────────────────────────
+    function buildIssueList() {
+      const list = document.getElementById("issuesList");
+      list.innerHTML = "";
+
+      if (!issuesData.length) {
+        list.innerHTML = `<li class="issue-item">No issues found.</li>`;
+        return;
+      }
+
+      issuesData.forEach(issue => {
+        const state = issue.state_data?.state || "";
+        // apply tab filters
+        if (currentFilter === "open" && (state === "resolved" || state === "rejected")) return;
+        if (currentFilter === "closed" && !(state === "resolved" || state === "rejected")) return;
+        // "mentions" filter logic depends on your data; currently shows all
+        // if (currentFilter==="mentions"){ ... }
+
+        const li = document.createElement("li");
+        li.className = "issue-item";
+        if (issue.id === selectedIssueId) li.classList.add("selected-issue");
+
+        let statusHTML = state;
+        if (state === "resolved") {
+          statusHTML = `<span class="status-resolved">resolved</span>`;
+        }
+
+        const aiState = issue.custom_fields?.ai_state?.value;
+        const warning = aiState === "help" ? "⚠️ " : "";
+        if (aiState === "help") li.classList.add("ai-help-issue");
+
+        li.innerHTML = `
+          <div class="issue-title">${warning}${issue.title}</div>
+          <div class="issue-meta">
+            <span>Issue #${issue.id}</span>
+            <span>${statusHTML}</span>
+          </div>
+        `;
+        li.addEventListener("click", () => {
+          selectedIssueId = issue.id;
+          document.querySelectorAll('.issue-item')
+                  .forEach(item => item.classList.remove('selected-issue'));
+          li.classList.add("selected-issue");
+          showIssueDetail(issue);
+        });
+
+        list.appendChild(li);
+      });
+    }
+
+    // ─── Show Issue Detail ──────────────────────────────────────────────────────
+    function showIssueDetail(issue) {
+      document.getElementById("convHeader").style.display = "none";
+
+      const convArea = document.getElementById("conversationArea");
+      convArea.innerHTML = "";
+
+      // header
+      const headerHTML = `
+        <h2>Issue #${issue.id}</h2>
+        <p><strong>Title:</strong> ${issue.title}</p>
+        <p><strong>Assignee:</strong> ${issue.assignee_name || "Unassigned"}</p>
+        <p><strong>Status:</strong> ${issue.state_data?.state || "New"}</p>
+      `;
+      convArea.insertAdjacentHTML('beforebegin', `<div class="conv-header">${headerHTML}</div>`);
+
+      // collect messages & notes
+      const items = [];
+      (issue.messages || []).forEach(m => {
+        items.push({
+          type: 'message',
+          body: m.body,
+          origin: m.origin,
+          author: m.author,
+          ts: parseTimestamp(m.created_at)
+        });
+      });
+      (issue.private_notes || []).forEach(n => {
+        items.push({ type: 'private_note', body: n.body, ts: parseTimestamp(n.created_at) });
+      });
+      items.sort((a, b) => a.ts - b.ts);
+
+      // render
+      if (!items.length) {
+        convArea.innerHTML = `<div class="private-note">
+          No conversation history available.
+        </div>`;
+      } else {
+        items.forEach(item => {
+          let div = document.createElement('div');
+          if (item.type === 'message') {
+            const text = transformBotMessage(item);
+            div.textContent = text;
+            div.classList.add(item.origin === 'end-user' ? 'message-left' : 'message-right');
+          } else {
+            div.textContent = "Private Note: " + item.body;
+            div.classList.add('private-note');
+          }
+          convArea.appendChild(div);
+        });
+      }
+      convArea.scrollTop = convArea.scrollHeight;
+    }
+
+    // ─── Helpers ────────────────────────────────────────────────────────────────
+    function transformBotMessage(msg) {
+      const isBot = msg.origin === "helpshift" 
+        && msg.author?.emails?.[0]?.startsWith("bots-");
+      if (isBot) {
+        if (msg.body === "Bot Started")  return `Action Started: ${msg.author.name}`;
+        if (msg.body === "Bot Ended")    return `Action Ended: ${msg.author.name}`;
+      }
+      return msg.body;
+    }
+    function parseTimestamp(ts) {
+      return (typeof ts === "number") 
+        ? ts 
+        : (new Date(ts)).getTime();
+    }
+
+    // ─── AI Instructions Workflow ──────────────────────────────────────────────
+    async function handleAiInstructions(actionType) {
+      if (!selectedIssueId) {
+        return alert("No issue selected!");
+      }
+      const aiBox = document.getElementById("aiInstructions");
+      const text = aiBox.value.trim();
+      const needText = actionType === "submit" || actionType === "submitAndClear";
+      if (needText && !text) {
+        return alert("Please enter AI instructions.");
+      }
+
+      try {
+        if (needText) await putCustomFieldMl1(text);
+        if (actionType === "clear" || actionType === "submitAndClear") {
+          await putAiStateNone();
+        }
+        if (needText) {
+          await postPrivateNote(text);
+          aiBox.value = "";
+        }
+        await fetchIssues();
+      } catch (e) {
+        alert(`Failed: ${e.message}`);
+      }
+    }
+
+    async function putCustomFieldMl1(instructions) {
+      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues/${selectedIssueId}`;
+      const fd = new FormData();
+      fd.append("custom_fields", 
+        `{"ml1":{"type":"multiline","value":"${instructions}"}}`
+      );
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: { "Authorization": `Basic ${authString}` },
+        body: fd
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`PUT ml1 failed: ${res.status} – ${txt}`);
+      }
+    }
+
+    async function putAiStateNone() {
+      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues/${selectedIssueId}`;
+      const fd = new FormData();
+      fd.append("custom_fields", `{"ai_state":{"type":"singleline","value":"none"}}`);
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: { "Authorization": `Basic ${authString}` },
+        body: fd
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`PUT ai_state failed: ${res.status} – ${txt}`);
+      }
+    }
+
+    async function postPrivateNote(instructions) {
+      const url = `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues/${selectedIssueId}/private-notes`;
+      const fd = new FormData();
+      fd.append("note-text", `AI Instructions from Agent: ${instructions}`);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Authorization": `Basic ${authString}` },
+        body: fd
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`POST note failed: ${res.status} – ${txt}`);
+      }
+    }
   </script>
 </body>
 </html>
