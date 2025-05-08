@@ -119,9 +119,10 @@
       border-radius: 12px;
     }
 
-    /* Column 3 */
+    /* Column 3: AI Copilot */
     .ai-col {
-      flex: 1; display: flex; flex-direction: column;
+      flex: 0 0 340px;            /* ~80px wider than before */
+      display: flex; flex-direction: column;
       background-color: #f9f9f9;
     }
     .ai-pane-header {
@@ -129,11 +130,20 @@
       padding: 12px 16px; background-color: #fff;
       border-bottom: 1px solid #ddd; font-weight: bold;
     }
-    .ai-spacer { flex: 1; }
+    /* Placeholder area */
+    .ai-placeholder {
+      flex: 1;
+      padding: 16px;
+      color: #7f8c8d;
+      font-style: italic;
+      overflow-y: auto;
+    }
     .ai-controls {
-      flex: 0 0 25%; display: flex;
-      flex-direction: column; justify-content: flex-end;
-      padding: 12px 16px; background-color: #fff;
+      flex: 0 0 25%;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 12px 16px;
+      background-color: #fff;
       border-top: 1px solid #ddd;
     }
     .quick-actions {
@@ -183,6 +193,7 @@
 
     <!-- Main Content -->
     <div class="main-content">
+
       <!-- Issues Column -->
       <div class="issue-list-col">
         <div class="issue-list-header">
@@ -200,21 +211,25 @@
         <div id="conversationArea"></div>
       </div>
 
-      <!-- AI Pane Column -->
+      <!-- AI Copilot Column -->
       <div class="ai-col">
-        <div class="ai-pane-header">AI Instructions</div>
-        <div class="ai-spacer"></div>
+        <div class="ai-pane-header">AI Copilot</div>
+        <div class="ai-placeholder">
+          This place will display an AI chat for the Agent AI Copilot
+        </div>
         <div class="ai-controls">
           <div class="quick-actions">
-            <button data-ai="Please summarize this conversation.">Summarize</button>
-            <button data-ai="What should I do next to help this customer?">Next Steps</button>
-            <button data-ai="Draft a response to the customer's last message.">Draft Response</button>
-            <button data-ai="Is there any important information missing from this conversation?">Missing Info</button>
+            <button data-ai="Yes, this is approved, please proceed">Approve</button>
+            <button data-ai="No this is not approved, inform the player that you cannot proceed with this request.">Decline</button>
+            <button data-ai="This is a malicious conversation or a hacker, stop the conversation and immediately close this issue">Block/Hacker</button>
+            <button data-ai="Tell the player that you are working with me, and that we are still looking into this.  We will provide additional information as soon as possible, and thank them for their patience">Provide Update</button>
+            <button data-ai="Please close this issue">Close</button>
           </div>
-          <textarea id="aiInstructions"
-                    class="ai-instructions-input"
-                    rows="3"
-                    placeholder="Enter instructions…"></textarea>
+          <textarea
+            id="aiInstructions"
+            class="ai-instructions-input"
+            rows="3"
+            placeholder="Enter instructions…"></textarea>
           <div class="button-group">
             <button id="submitInstructionsBtn" class="action-button">Submit</button>
             <button id="submitAndClearBtn" class="action-button">Submit & Clear</button>
@@ -222,13 +237,14 @@
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
   <script>
     // ─── Config & State ─────────────────────────────────────────────────────
     const HELPSHIFT_DOMAIN = "ashbys";
-    const authString = 'YXNoYnlzX2FwaV8yMDE3MDYyMTE4MjM1MzQ2MS1kZDRmMDExYTAzM2JiNzc6';
+    const authString = "<YOUR_BASE64_API_TOKEN>";
     const HELPSHIFT_URL =
       `https://api.helpshift.com/v1/${HELPSHIFT_DOMAIN}/issues?includes=%5B%22private_notes%22%2C%22custom_fields%22%5D`;
 
@@ -455,6 +471,7 @@
   </script>
 </body>
 </html>
+
 
 
 
